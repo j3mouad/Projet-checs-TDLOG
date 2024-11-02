@@ -12,3 +12,6 @@ This project implements a chess game with graphical screens using Python.
 
 3. **End Screen**  
    The final screen shows the winner of the match and includes a button to propose a rematch.
+
+We want to develop an A.I. algorithm that allows to play with the machine. The code will be implemented in C++ with min-max algorithm.
+This should be done in another by branch by another group. 
