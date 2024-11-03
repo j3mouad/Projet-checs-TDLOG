@@ -1,4 +1,6 @@
 file(REMOVE_RECURSE
+  "CMakeFiles/Projet-echecs-TDLOG.dir/board.cpp.obj"
+  "CMakeFiles/Projet-echecs-TDLOG.dir/board.cpp.obj.d"
   "CMakeFiles/Projet-echecs-TDLOG.dir/main.cpp.obj"
   "CMakeFiles/Projet-echecs-TDLOG.dir/main.cpp.obj.d"
   "Projet-echecs-TDLOG.exe"

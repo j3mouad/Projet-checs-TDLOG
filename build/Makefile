@@ -128,6 +128,30 @@ Projet-echecs-TDLOG/fast:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles\Projet-echecs-TDLOG.dir\build.make CMakeFiles/Projet-echecs-TDLOG.dir/build
 .PHONY : Projet-echecs-TDLOG/fast
 
+board.obj: board.cpp.obj
+.PHONY : board.obj
+
+# target to build an object file
+board.cpp.obj:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\Projet-echecs-TDLOG.dir\build.make CMakeFiles/Projet-echecs-TDLOG.dir/board.cpp.obj
+.PHONY : board.cpp.obj
+
+board.i: board.cpp.i
+.PHONY : board.i
+
+# target to preprocess a source file
+board.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\Projet-echecs-TDLOG.dir\build.make CMakeFiles/Projet-echecs-TDLOG.dir/board.cpp.i
+.PHONY : board.cpp.i
+
+board.s: board.cpp.s
+.PHONY : board.s
+
+# target to generate assembly for a file
+board.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\Projet-echecs-TDLOG.dir\build.make CMakeFiles/Projet-echecs-TDLOG.dir/board.cpp.s
+.PHONY : board.cpp.s
+
 main.obj: main.cpp.obj
 .PHONY : main.obj
 
@@ -161,6 +185,9 @@ help:
 	@echo ... edit_cache
 	@echo ... rebuild_cache
 	@echo ... Projet-echecs-TDLOG
+	@echo ... board.obj
+	@echo ... board.i
+	@echo ... board.s
 	@echo ... main.obj
 	@echo ... main.i
 	@echo ... main.s
