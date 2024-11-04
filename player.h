@@ -1,14 +1,14 @@
 #include "pieces.h"
 
-class player{
+class Player{
     private:
         /*white or black*/
         string color;
         /*human or a type of ai*/
         string type;
     public:
-        player(string color, string type) : color(color), type(type){}
-        player() = default;
+        Player(string color, string type) : color(color), type(type){}
+        Player() = default;
         string getColor() const {return color;}
         string getType() const {return type;}
 };

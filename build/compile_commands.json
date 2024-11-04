@@ -8,5 +8,10 @@
   "directory": "C:/Users/jmoua/OneDrive/Documents/GitHub/Projet-checs-TDLOG/build",
   "command": "C:\\ENPC\\Tools\\mingw810_64\\bin\\g++.exe   -g -o CMakeFiles\\Projet-echecs-TDLOG.dir\\board.cpp.obj -c C:\\Users\\jmoua\\OneDrive\\Documents\\GitHub\\Projet-checs-TDLOG\\board.cpp",
   "file": "C:/Users/jmoua/OneDrive/Documents/GitHub/Projet-checs-TDLOG/board.cpp"
+},
+{
+  "directory": "C:/Users/jmoua/OneDrive/Documents/GitHub/Projet-checs-TDLOG/build",
+  "command": "C:\\ENPC\\Tools\\mingw810_64\\bin\\g++.exe   -g -o CMakeFiles\\Projet-echecs-TDLOG.dir\\pieces.cpp.obj -c C:\\Users\\jmoua\\OneDrive\\Documents\\GitHub\\Projet-checs-TDLOG\\pieces.cpp",
+  "file": "C:/Users/jmoua/OneDrive/Documents/GitHub/Projet-checs-TDLOG/pieces.cpp"
 }
 ]

@@ -1,4 +1,5 @@
 #include "pieces.h"
+#include <vector>
 
 class Board{
     private:
@@ -11,10 +12,14 @@ class Board{
         Board() = default;
         void changeTurn();
         /* position will be given in chess notations*/
-        Point* getPossibleMoves(Point position);
-        // this function does not verify if the move is correct that is verified elsewhere
-        void movePiece(Point Position1, Point Position2);
+        vector<Point> getPossibleMoves(Point position);
+        /* this function does not verify if the move is correct that is verified elsewhere
+           returns true if the king is killed*/
+        bool movePiece(Point Position1, Point Position2);
+        void show(); /* temporary */
        
 
 };
+
+extern Board initial_board;
 

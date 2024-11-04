@@ -10,6 +10,7 @@ set(CMAKE_DEPENDS_LANGUAGES
 set(CMAKE_DEPENDS_DEPENDENCY_FILES
   "C:/Users/jmoua/OneDrive/Documents/GitHub/Projet-checs-TDLOG/board.cpp" "CMakeFiles/Projet-echecs-TDLOG.dir/board.cpp.obj" "gcc" "CMakeFiles/Projet-echecs-TDLOG.dir/board.cpp.obj.d"
   "C:/Users/jmoua/OneDrive/Documents/GitHub/Projet-checs-TDLOG/main.cpp" "CMakeFiles/Projet-echecs-TDLOG.dir/main.cpp.obj" "gcc" "CMakeFiles/Projet-echecs-TDLOG.dir/main.cpp.obj.d"
+  "C:/Users/jmoua/OneDrive/Documents/GitHub/Projet-checs-TDLOG/pieces.cpp" "CMakeFiles/Projet-echecs-TDLOG.dir/pieces.cpp.obj" "gcc" "CMakeFiles/Projet-echecs-TDLOG.dir/pieces.cpp.obj.d"
   )
 
 # Targets to which this target links.

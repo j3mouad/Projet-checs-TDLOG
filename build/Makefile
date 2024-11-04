@@ -176,6 +176,30 @@ main.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles\Projet-echecs-TDLOG.dir\build.make CMakeFiles/Projet-echecs-TDLOG.dir/main.cpp.s
 .PHONY : main.cpp.s
 
+pieces.obj: pieces.cpp.obj
+.PHONY : pieces.obj
+
+# target to build an object file
+pieces.cpp.obj:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\Projet-echecs-TDLOG.dir\build.make CMakeFiles/Projet-echecs-TDLOG.dir/pieces.cpp.obj
+.PHONY : pieces.cpp.obj
+
+pieces.i: pieces.cpp.i
+.PHONY : pieces.i
+
+# target to preprocess a source file
+pieces.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\Projet-echecs-TDLOG.dir\build.make CMakeFiles/Projet-echecs-TDLOG.dir/pieces.cpp.i
+.PHONY : pieces.cpp.i
+
+pieces.s: pieces.cpp.s
+.PHONY : pieces.s
+
+# target to generate assembly for a file
+pieces.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\Projet-echecs-TDLOG.dir\build.make CMakeFiles/Projet-echecs-TDLOG.dir/pieces.cpp.s
+.PHONY : pieces.cpp.s
+
 # Help Target
 help:
 	@echo The following are some of the valid targets for this Makefile:
@@ -191,6 +215,9 @@ help:
 	@echo ... main.obj
 	@echo ... main.i
 	@echo ... main.s
+	@echo ... pieces.obj
+	@echo ... pieces.i
+	@echo ... pieces.s
 .PHONY : help
 
 

@@ -1,40 +1,26 @@
 #include "board.h"
 
-Board::Board(Piece* initial_board,string Turn){
+Board::Board(Piece* initial__board,string Turn){
     turn = Turn;
-    for (int idxX= 0; idxX<8; idxX++){
-        for (int idxY=0; idxY<8; idxY++){
-            board[idxX][idxY] = initial_board[idxX + 8*idxY];
+    for (int idxY= 0; idxY<8; idxY++){
+        for (int idxX=0; idxX<8; idxX++){
+            board[idxY][idxX] = initial__board[idxX + 8*idxY];
         }
     }
-    delete initial_board;
 }
 
-// lengthwise 
-Piece initialBoard[64] = {
-    WhiteRook,WhiteKnight,WhiteBishop,WhiteQueen,WhiteKing,WhiteBishop,WhiteKnight,WhiteRook,
-    WhitePawn,WhitePawn,WhitePawn,WhitePawn,WhitePawn,WhitePawn,WhitePawn,WhitePawn,
-    Empty,Empty,Empty,Empty,Empty,Empty,Empty,Empty,
-    Empty,Empty,Empty,Empty,Empty,Empty,Empty,Empty,
-    Empty,Empty,Empty,Empty,Empty,Empty,Empty,Empty,
-    Empty,Empty,Empty,Empty,Empty,Empty,Empty,Empty,
-    BlackRook,BlackKnight,BlackBishop,BlackQueen,BlackKing,BlackBishop,BlackKnight,BlackRook,
-    BlackPawn,BlackPawn,BlackPawn,BlackPawn,BlackPawn,BlackPawn,BlackPawn,BlackPawn
-};
-
-Board initial_board(initialBoard,"white");
 
 void Board::changeTurn(){
     if (turn == "white"){ turn = "black";}
     else {turn = "white";}
 }
 
-Point* Board::getPossibleMoves(Point position){
+vector<Point> Board::getPossibleMoves(Point position){
     int movex,movey;
     int piecePositionX,piecePositionY;
     int currPosX,currPosY;
     int multiplier;
-    int idx_list = 0;
+    vector<Point> VectOfMoves;
     piecePositionX = position.getX();
     piecePositionY = position.getY();
     Piece piece = board[piecePositionX][piecePositionY];
@@ -45,15 +31,14 @@ Point* Board::getPossibleMoves(Point position){
         movey = elemMoves[idx].getY();
         multiplier = 1;
         while(true){
-            if (multiplier == 2 && piece.hasInfiniteMoves()){
+            if (multiplier == 2 && piece.hasInfiniteMoves() == false){
                 break;
             }
             currPosX = piecePositionX + multiplier*movex;
             currPosY = piecePositionY + multiplier*movey;
-            if (currPosX>=0 && currPosX<8 && currPosY>=0 && currPosY<8 ){
+            if (currPosX>=0 && currPosX<8 && currPosY>=0 && currPosY<8 && board[currPosX][currPosY].getColor()!= turn){
                 multiplier++;
-                ListOfPoints[idx_list] = Point(currPosX,currPosY);
-                idx_list ++;
+                VectOfMoves.push_back(Point(currPosX,currPosY));
                 if(board[currPosX][currPosY].getName() != "EmptyPlace"){
                     break;
                 }
@@ -63,12 +48,40 @@ Point* Board::getPossibleMoves(Point position){
             }
         }
     }
-    ListOfPoints[idx_list] = Point(-1,-1); // to know the last element;
-    return ListOfPoints;
+    return VectOfMoves;
 }
 
-void Board::movePiece(Point Position1, Point Position2){
-    Piece piece = board[Position1.getX()][Position2.getY()];
+bool Board::movePiece(Point Position1, Point Position2){
+    bool winningTheGame = false;
+    Piece piece = board[Position1.getX()][Position1.getY()];
     board[Position1.getX()][Position1.getY()] = Empty;
+    if (board[Position2.getX()][Position2.getY()].getName()== "King"){
+        winningTheGame = true;
+    }
     board[Position2.getX()][Position2.getY()] = piece;
+    return winningTheGame;
 }
+
+void Board::show(){
+    for (int idxY = 7; idxY >= 0; idxY-- ){
+        for (int idxX = 0; idxX < 8; idxX++ ){
+            cout << board[idxY][idxX].getName() << ":" << board[idxY][idxX].getColor()[0] << "    ";
+        }
+        cout << endl;
+    }
+}
+
+
+// lengthwise 
+Piece initialBoard[64] = {
+    WhiteRook,WhiteKnight,WhiteBishop,WhiteQueen,WhiteKing,WhiteBishop,WhiteKnight,WhiteRook,
+    WhitePawn,WhitePawn,WhitePawn,WhitePawn,WhitePawn,WhitePawn,WhitePawn,WhitePawn,
+    Empty,Empty,Empty,Empty,Empty,Empty,Empty,Empty,
+    Empty,Empty,Empty,Empty,Empty,Empty,Empty,Empty,
+    Empty,Empty,Empty,Empty,Empty,Empty,Empty,Empty,
+    Empty,Empty,Empty,Empty,Empty,Empty,Empty,Empty,
+    BlackPawn,BlackPawn,BlackPawn,BlackPawn,BlackPawn,BlackPawn,BlackPawn,BlackPawn,
+    BlackRook,BlackKnight,BlackBishop,BlackQueen,BlackKing,BlackBishop,BlackKnight,BlackRook
+};
+
+Board initial_board(initialBoard,"white");

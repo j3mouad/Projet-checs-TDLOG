@@ -7,4 +7,5 @@ add_executable(Projet-echecs-TDLOG
             board.h
             board.cpp 
             player.h
-            pieces.h)
+            pieces.h
+            pieces.cpp)
