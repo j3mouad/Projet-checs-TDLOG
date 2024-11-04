@@ -80,8 +80,6 @@ class ChessGame:
         self.turn = 'white'
         self.white_time = 6  # 10 minutes en secondes
         self.black_time = 6
-=======
-        
         self.initial_board = deepcopy(self.chess_board)
         self.turn = 'white'
         self.player='white'
