@@ -40,24 +40,29 @@ pieces_images = {
 
 if __name__ == "__main__":
     game = ChessGame()
+    t = pygame.time.get_ticks()
     white_time,black_time=game.choose_game()  # Initialize game mode selection
-    game.white_time=white_time
-    game.black_time=black_time
+    
     screen = pygame.display.set_mode((screen_width + added_screen_width, screen_height))
-
-    if game.player == 'black' :
-        game.flip_board()
+    print(white_time)
+    print(black_time)
+    
     pygame.time.delay(100)
     game_running = True
     game.draw_board()
-
+    print(t)
     # Initialize click tracking variables
     number_of_time_same_piece_clicked = 0
     x_square_clicked = None
     y_square_clicked = None
-
+    game.white_time=white_time
+    game.black_time=black_time
+    t = pygame.time.get_ticks()
+    print(t)
+    game.time_reg(white_time,black_time)
+    print(game.white_time-white_time)
     while game_running:
-        game.update_timers(1)
+
         game.draw_board()  # Draw the board
         
         # Draw the timer and add time button
@@ -99,8 +104,12 @@ if __name__ == "__main__":
                         # Highlight the newly selected square
                         number_of_time_same_piece_clicked = 1  # Increment click count
                         x_square_clicked, y_square_clicked = x_square, y_square# Update clicked position
+                        game.x_square_clicked=x_square_clicked
+                        game.y_square_clicked=y_square_clicked
                         clcik_sound_chess.play()
                         game.selected_piece(x, y)
+        game.update_timers(click=False)
+
         game.show_winner()
 
     pygame.quit()
