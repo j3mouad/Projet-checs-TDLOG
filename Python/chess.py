@@ -1,7 +1,7 @@
 import pygame
 import sys
 from copy import deepcopy
-
+import math
 # Initialisation de Pygame
 pygame.init()
 
@@ -22,7 +22,10 @@ selected_piece=None
 
 # Taille de la case
 square_size = screen_width // 8
-
+class coords:
+    def __init__(self,x,y):
+        self.x=x
+        self.y=y
 # Charger les images des pièces
 pieces_images = {
     'bR': pygame.image.load('black_rook.png'),
@@ -62,14 +65,14 @@ class ChessGame:
         self.running = True
         self.x_square_clicked=None
         self.y_square_clicked=None
-        self.number_of_time_same_piece_clicked= 0
+        self.number_of_time_same_piece_clicked = 0
 
     def draw_board(self):
         for row in range(8):
             for col in range(8):
                 color = light_brown if (row + col) % 2 == 0 else brown
                 pygame.draw.rect(self.screen, color, pygame.Rect(col * square_size, row * square_size, square_size, square_size))
-
+    
     def draw_pieces(self):
         for row in range(8):
             for col in range(8):
@@ -243,7 +246,38 @@ class ChessGame:
 
         pygame.quit()
         sys.exit()
-"""
+    def from_float_to_int_coordinates(self, float_coords:coords ):
+        x_square = math.floor(float_coords.x / square_size) 
+        y_square = 7-math.floor(float_coords.y / square_size) 
+        return coords(x_square,y_square)
+    def get_point_in_topleft_square(self, int_coords:coords):
+        x_coordinates = int_coords.x*square_size
+        y_coordinates = (7-int_coords.y)*square_size
+        return coords(x_coordinates,y_coordinates)
+    def translation1(self ,initial_coords: coords, final_coords:coords, steps:int):
+        initial_square = self.get_point_in_topleft_square(initial_coords)
+        final_square = self.get_point_in_topleft_square(final_coords)
+        piece = self.chess_board[7-initial_coords.y][initial_coords.x]
+        self.chess_board[7-initial_coords.y][initial_coords.x] = '--'
+        delta_x = (final_square.x-initial_square.x)/steps
+        delta_y = (final_square.y-initial_square.y)/steps
+        resized_piece = pygame.transform.scale(pieces_images[piece], (square_size, square_size))
+        for i in range(steps):
+            initial_square.x+=delta_x
+            initial_square.y+=delta_y
+            current_square = self.get_point_in_topleft_square(initial_square)
+            self.draw_board()
+            self.draw_pieces()
+            for i in range(-1,2):
+                for j in range(-1,2):
+                    color = light_brown if (i + j + current_square.x + current_square.y) % 2 == 1 else brown
+                    pygame.draw.rect(screen, color, (current_square.x+i, current_square.y+i, square_size, square_size))        
+                    self.screen.blit(resized_piece, pygame.Rect(initial_square.x, initial_square.y,square_size,square_size))
+                    pygame.display.flip()
+                    pygame.time.delay(1)
+        self.chess_board[7-final_coords.y][final_coords.x] = piece
+        pygame.display.flip()
+"""  
 if __name__ == "__main__":
     game = ChessGame()
     game.run()
@@ -274,7 +308,8 @@ if __name__ == "__main__":
                     x_square_clicked,y_square_clicked=x_square,y_square
                 
     pygame.quit()
-"""
+
+
 if __name__ == "__main__":
     game = ChessGame()
     game_running = True
@@ -290,3 +325,43 @@ if __name__ == "__main__":
                 game.selected_piece(x,y)
 
     pygame.quit()
+"""
+
+
+if __name__ == "__main__":
+    game = ChessGame()
+    game_running = True
+    game.draw_board()
+    initial_coords = coords(0,0)
+    final_coords = coords (7,7)
+    while game_running:
+        game.draw_pieces()
+        pygame.display.flip()
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                game_running = False
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                game.translation1(initial_coords,final_coords,25)
+
+    pygame.quit()
+
+"""
+if __name__ == "__main__":
+    game = ChessGame()
+    game_running = True
+    game.draw_board()
+    initial_coords = coords(0,0)
+    final_coords = coords(3,3)
+    while game_running:
+        game.draw_pieces()
+        pygame.display.flip()
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                game_running = False
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                A,B=game.List_of_squares(initial_coords,final_coords,False)
+                print(A)
+                print(B)
+
+    pygame.quit()
+"""
