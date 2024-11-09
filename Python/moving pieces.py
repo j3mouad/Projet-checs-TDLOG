@@ -1,4 +1,5 @@
 import pygame
+import sys
 
 # Constants
 WIDTH, HEIGHT = 800, 800
@@ -8,6 +9,7 @@ SQUARE_SIZE = WIDTH // 8
 WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
 GREEN = (0, 255, 0)  # Highlight color for possible moves
+YELLOW = (255, 255, 0)  # Highlight color for last move
 
 # Initialize Pygame
 pygame.init()
@@ -18,56 +20,60 @@ pygame.display.set_caption("Chess Move Generator")
 font = pygame.font.Font(None, 74)
 
 # Chess board setup with initial positions
-# Represent pieces with their initials
 board = [
-    ['r', 'n', 'b', 'q', 'k', 'b', 'n', 'r'],
+    ['r', 'n', 'b', 'k', 'q', 'b', 'n', 'r'],
     ['p', 'p', 'p', 'p', 'p', 'p', 'p', 'p'],
     [None, None, None, None, None, None, None, None],
     [None, None, None, None, None, None, None, None],
     [None, None, None, None, None, None, None, None],
     [None, None, None, None, None, None, None, None],
     ['P', 'P', 'P', 'P', 'P', 'P', 'P', 'P'],
-    ['R', 'N', 'B', 'Q', 'K', 'B', 'N', 'R'],
+    ['R', 'N', 'B', 'K', 'Q', 'B', 'N', 'R'],
 ]
 
-# Piece movement rules
+turn = 'white'  # Track whose turn it is
+last_move = None  # Track the last move for highlighting
+
+# Piece movement rules (improved with turn-based logic)
 def is_valid_move(board, piece, start, end):
     x, y = start
     mx, my = end
     target_piece = board[my][mx]
 
-    # Check if the move is to an occupied square
-    if target_piece is not None and target_piece[0] == piece[0]:
+    if (piece.isupper() and turn != 'white') or (piece.islower() and turn != 'black'):
+        return False  # Only allow moves for the correct player's turn
+
+    # Check if the move is to an occupied square by the same color
+    if target_piece is not None and target_piece.isupper() == piece.isupper():
         return False
 
-    if piece[1].lower() == 'p':  # Pawn
-        direction = -1 if piece.isupper() else 1  # Up for white, down for black
-        if mx == x and target_piece is None:  # Move forward
-            if (piece.isupper() and y == 6 and my == y + 2 and target_piece is None) or (my == y + direction):
+    # Pawn movement (simplified)
+    direction = -1 if piece.isupper() else 1  # Up for white, down for black
+    if piece.lower() == 'p':
+        if mx == x and board[my][mx] is None:  # Move forward
+            if (piece.isupper() and y == 6 and my == y + 2 and board[y + 1][x] is None) or (my == y + direction):
                 return True
         elif abs(mx - x) == 1 and my == y + direction and target_piece is not None:  # Capture
             return True
 
-    elif piece.lower() == 'r':  # Rook
-        if x == mx:  # Same column
-            step = 1 if my > y else -1
-            for i in range(y + step, my, step):
-                if board[i][x] is not None:
-                    return False
-            return True
-        elif y == my:  # Same row
-            step = 1 if mx > x else -1
-            for i in range(x + step, mx, step):
-                if board[y][i] is not None:
+    # Rook movement (horizontal and vertical)
+    elif piece.lower() == 'r':
+        if x == mx or y == my:
+            step_x = 1 if mx > x else -1 if mx < x else 0
+            step_y = 1 if my > y else -1 if my < y else 0
+            for i in range(1, max(abs(mx - x), abs(my - y))):
+                if board[y + i * step_y][x + i * step_x] is not None:
                     return False
             return True
 
-    elif piece.lower() == 'n':  # Knight
+    # Knight movement (L-shape)
+    elif piece.lower() == 'n':
         if (abs(mx - x) == 2 and abs(my - y) == 1) or (abs(mx - x) == 1 and abs(my - y) == 2):
             return True
 
-    elif piece.lower() == 'b':  # Bishop
-        if abs(mx - x) == abs(my - y):  # Diagonal move
+    # Bishop movement (diagonal)
+    elif piece.lower() == 'b':
+        if abs(mx - x) == abs(my - y):
             step_x = 1 if mx > x else -1
             step_y = 1 if my > y else -1
             for i in range(1, abs(mx - x)):
@@ -75,29 +81,19 @@ def is_valid_move(board, piece, start, end):
                     return False
             return True
 
-    elif piece.lower() == 'q':  # Queen
-        if abs(mx - x) == abs(my - y) or x == mx or y == my:  # Rook + Bishop
-            step_x = 1 if mx > x else -1
-            step_y = 1 if my > y else -1
-            if abs(mx - x) == abs(my - y):
-                for i in range(1, abs(mx - x)):
-                    if board[y + i * step_y][x + i * step_x] is not None:
-                        return False
-            else:
-                if x == mx:
-                    step = 1 if my > y else -1
-                    for i in range(y + step, my, step):
-                        if board[i][x] is not None:
-                            return False
-                else:
-                    step = 1 if mx > x else -1
-                    for i in range(x + step, mx, step):
-                        if board[y][i] is not None:
-                            return False
+    # Queen movement (rook + bishop)
+    elif piece.lower() == 'q':
+        if abs(mx - x) == abs(my - y) or x == mx or y == my:
+            step_x = 1 if mx > x else -1 if mx < x else 0
+            step_y = 1 if my > y else -1 if my < y else 0
+            for i in range(1, max(abs(mx - x), abs(my - y))):
+                if board[y + i * step_y][x + i * step_x] is not None:
+                    return False
             return True
 
-    elif piece.lower() == 'k':  # King
-        if max(abs(mx - x), abs(my - y)) == 1:  # One square in any direction
+    # King movement (one square in any direction)
+    elif piece.lower() == 'k':
+        if max(abs(mx - x), abs(my - y)) == 1:
             return True
 
     return False
@@ -121,35 +117,38 @@ while running:
         if event.type == pygame.QUIT:
             running = False
         elif event.type == pygame.MOUSEBUTTONDOWN:
-            # Get the mouse position
             mouse_x, mouse_y = event.pos
             x = mouse_x // SQUARE_SIZE
             y = mouse_y // SQUARE_SIZE
-            
-            # If a piece is selected
+
             if selected_piece is None:
-                # Select a piece if it's not empty
                 if board[y][x] is not None:
                     selected_piece = board[y][x]
                     selected_position = (x, y)
                     possible_moves = get_possible_moves(selected_piece, x, y)
             else:
-                # Move the piece if the move is valid
                 if (x, y) in possible_moves:
-                    board[y][x] = selected_piece  # Move piece
-                    board[selected_position[1]][selected_position[0]] = None  # Remove from original position
-                # Reset selection
+                    board[y][x] = selected_piece
+                    board[selected_position[1]][selected_position[0]] = None
+                    last_move = (selected_position, (x, y))  # Track the last move
+                    turn = 'black' if turn == 'white' else 'white'
                 selected_piece = None
                 selected_position = None
                 possible_moves = []
 
-    # Drawing the board
+    # Draw board
     for row in range(8):
         for col in range(8):
             color = WHITE if (row + col) % 2 == 0 else BLACK
             pygame.draw.rect(screen, color, (col * SQUARE_SIZE, row * SQUARE_SIZE, SQUARE_SIZE, SQUARE_SIZE))
             
-            # Draw the pieces using letters
+            # Draw last move highlight
+            if last_move:
+                start, end = last_move
+                if (col, row) == start or (col, row) == end:
+                    pygame.draw.rect(screen, YELLOW, (col * SQUARE_SIZE, row * SQUARE_SIZE, SQUARE_SIZE, SQUARE_SIZE))
+
+            # Draw pieces
             if board[row][col] is not None:
                 text_surface = font.render(board[row][col], True, (255, 0, 0) if board[row][col].isupper() else (0, 0, 255))
                 screen.blit(text_surface, (col * SQUARE_SIZE + SQUARE_SIZE // 4, row * SQUARE_SIZE))
@@ -158,8 +157,6 @@ while running:
     for mx, my in possible_moves:
         pygame.draw.rect(screen, GREEN, (mx * SQUARE_SIZE, my * SQUARE_SIZE, SQUARE_SIZE, SQUARE_SIZE))
 
-    # Refresh the display
     pygame.display.flip()
 
-# Quit Pygame
 pygame.quit()

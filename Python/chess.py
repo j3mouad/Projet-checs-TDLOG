@@ -3,26 +3,24 @@ import sys
 from copy import deepcopy
 import time
 from random import shuffle
-# Initialisation de Pygame
+# Initialization de Pygame
 pygame.init()
-click_sound_add_time_button = pygame.mixer.Sound("/home/hassenekallala/Desktop/projet/Projet-echecs-TDLOG/Python/chess_add_time_sound.wav")  # Ensure you have a click.wav file in the same directory
-clcik_sound_chess=pygame.mixer.Sound("/home/hassenekallala/Desktop/projet/Projet-echecs-TDLOG/Python/chess_move_soundf.mp3")
-# Taille de la fenêtre
+click_sound_add_time_button = pygame.mixer.Sound("chess_add_time_sound.wav")  # Ensure you have a click.wav file in the same directory
+click_sound_chess=pygame.mixer.Sound("chess_move_soundf.mp3")
 screen_width = 500
 screen_height = 500
 added_screen_width = 400
 screen = pygame.display.set_mode((screen_width + added_screen_width, screen_height))
 
-# Couleurs
+# Colors
 white = (255, 255, 255)
 grey=(128,128,128)
 red = (255,0,0)
 black = (0, 0, 0)
 brown = (118, 150, 86)
 light_brown = (238, 238, 210)
-button_color = (100, 200, 100)  # Couleur verte pour le bouton
-button_color = (100, 0, 100)  # Couleur verte pour le bouton
-button_hover_color = (150, 250, 150)  # Vert plus clair pour le survol
+button_color = (100, 200, 100)  #green
+button_hover_color = (150, 250, 150)  
 selected_piece=None
 
 # Taille de la case
@@ -30,18 +28,18 @@ square_size = screen_width // 8
 
 # Charger les images des pièces
 pieces_images = {
-    'bR': pygame.image.load('/home/hassenekallala/Desktop/projet/Projet-echecs-TDLOG/Python/black_rook.png'),
-    'bN': pygame.image.load('/home/hassenekallala/Desktop/projet/Projet-echecs-TDLOG/Python/black_knight.png'),
-    'bB': pygame.image.load('/home/hassenekallala/Desktop/projet/Projet-echecs-TDLOG/Python/black_bishop.png'),
-    'bQ': pygame.image.load('/home/hassenekallala/Desktop/projet/Projet-echecs-TDLOG/Python/black_queen.png'),
-    'bK': pygame.image.load('/home/hassenekallala/Desktop/projet/Projet-echecs-TDLOG/Python/black_king.png'),
-    'bP': pygame.image.load('/home/hassenekallala/Desktop/projet/Projet-echecs-TDLOG/Python/black_pawn.png'),
-    'wR': pygame.image.load('/home/hassenekallala/Desktop/projet/Projet-echecs-TDLOG/Python/white_rook.png'),
-    'wN': pygame.image.load('/home/hassenekallala/Desktop/projet/Projet-echecs-TDLOG/Python/white_knight.png'),
-    'wB': pygame.image.load('/home/hassenekallala/Desktop/projet/Projet-echecs-TDLOG/Python/white_bishop.png'),
-    'wQ': pygame.image.load('/home/hassenekallala/Desktop/projet/Projet-echecs-TDLOG/Python/white_queen.png'),
-    'wK': pygame.image.load('/home/hassenekallala/Desktop/projet/Projet-echecs-TDLOG/Python/white_king.png'),
-    'wP': pygame.image.load('/home/hassenekallala/Desktop/projet/Projet-echecs-TDLOG/Python/white_pawn.png')
+    'bR': pygame.image.load('black_rook.png'),
+    'bN': pygame.image.load('black_knight.png'),
+    'bB': pygame.image.load('black_bishop.png'),
+    'bQ': pygame.image.load('black_queen.png'),
+    'bK': pygame.image.load('black_king.png'),
+    'bP': pygame.image.load('black_pawn.png'),
+    'wR': pygame.image.load('white_rook.png'),
+    'wN': pygame.image.load('white_knight.png'),
+    'wB': pygame.image.load('white_bishop.png'),
+    'wQ': pygame.image.load('white_queen.png'),
+    'wK': pygame.image.load('white_king.png'),
+    'wP': pygame.image.load('white_pawn.png')
 }
 
 class ChessGame:
@@ -61,8 +59,9 @@ class ChessGame:
         self.initial_board = deepcopy(self.chess_board)
         self.turn = 'white'
         self.player='white'
+        self.last_move=[]
         self.winner = None
-        self.cooldown=0.5
+        self.cooldown=0.2
         self.white_time = -1  # 10 minutes en secondes
         self.black_time = -1
         self.initial_white_time = self.white_time
@@ -73,6 +72,7 @@ class ChessGame:
         self.y_square_clicked=None
         self.number_of_time_same_piece_clicked= 0
         self.last_click_time=0
+        self.king_check=False
     def time_reg(self,white_time,black_time):
         self.white_time=white_time
         self.black_time=black_time
@@ -124,6 +124,8 @@ class ChessGame:
                     self.white_time += 5
 
     def show_winner(self, winner):
+        if ((self.running)) :
+            return
         winner_window = pygame.display.set_mode((300, 150))
         winner_window.fill(white)
         font = pygame.font.Font(None, 48)
@@ -157,45 +159,6 @@ class ChessGame:
         self.rematch_button_rect = pygame.Rect(button_x, button_y, button_width, button_height)
         button_color_current = white if not self.rematch_button_rect.collidepoint(pygame.mouse.get_pos()) else button_hover_color
         pygame.draw.rect(window, button_color_current, self.rematch_button_rect)
-
-    def selected_piece(self, x, y):
-        
-
-        # Calculate the current square based on the clicked position
-        x_square = (x // square_size) * square_size
-        y_square = (y // square_size) * square_size
-        
-    # Toggle selection based on the number of times the same piece is clicked
-        if self.number_of_time_same_piece_clicked == 1:
-        # Color the previously selected square
-            color = brown if ((self.x_square_clicked // square_size) + (self.y_square_clicked // square_size)) % 2 == 1 else light_brown
-            pygame.draw.rect(self.screen, color, pygame.Rect(self.x_square_clicked, self.y_square_clicked, square_size, square_size))
-
-        # Reset click count after coloring the previous square
-            self.number_of_time_same_piece_clicked = 0
-        else:
-        # Highlight the newly selected square
-            pygame.draw.rect(self.screen, (240, 240, 0), pygame.Rect(x_square, y_square, square_size, square_size))
-
-        # Update clicked position and increment click count
-            self.number_of_time_same_piece_clicked = 1
-            self.x_square_clicked, self.y_square_clicked = x_square, y_square
-
-
-    def selected_piece_coloring(self, x_square, y_square, color):
-        """
-    Color a selected piece's square on the chessboard.
-    
-    Args:
-        x_square (int): The x-coordinate of the square to be colored.
-        y_square (int): The y-coordinate of the square to be colored.
-        color (tuple): The RGB color value for the square.
-    """
-    # Draw the square with the specified color
-        
-        pygame.draw.rect(self.screen, color, pygame.Rect(x_square, y_square, square_size, square_size))
-
-    
 
     def handle_add_time_button(self):
         current_time = time.time()  # Get the current time
@@ -291,20 +254,33 @@ class ChessGame:
         button_height = 50
         button_x = screen_width + 150
         button_y = 300
-        self.button_rect = pygame.Rect(button_x, button_y, button_width, button_height)
+        mouse_pos = pygame.mouse.get_pos()
+        button_rect = pygame.Rect(button_x, button_y, button_width, button_height)
+    
+    # Draw button with hover effect
+        pygame.draw.rect(self.screen, black if not button_rect.collidepoint(mouse_pos) else button_hover_color, button_rect)
+    
+    # Render text on button
+        font = pygame.font.Font(None, 24)  # Choose font size and style
+        text = font.render("Back", True, white)  # Render text with black color
+        text_rect = text.get_rect(center=button_rect.center)  # Center text on button
+        self.screen.blit(text, text_rect)
+    
+    # Handle click on button
+        if button_rect.collidepoint(mouse_pos) and pygame.mouse.get_pressed()[0]:
+            self.handle_back_button_click()
 
-    # Darker outline color for a button effect
-
-  
     def handle_back_button_click(self):
-        # Logic for what happens when the button is clicked
+    # Logic for what happens when the button is clicked
         print("Back button clicked!")
-        # Add your back action here
+    # Add your back action here
+
+
     def choose_game(self):
         window = pygame.display.set_mode((screen_width + added_screen_width, screen_height))
         pygame.display.set_caption("Let's play Chess!")
         font = pygame.font.Font(None, 28)
-        text = font.render("Choisissez une partie: Un couleur et un temps de jeu ", True, black)
+        text = font.render("Choose color and time ", True, black)
         window.blit(text, (50, 50))
         
         button_width = 250
@@ -315,10 +291,8 @@ class ChessGame:
 
         button_black = pygame.Rect(button_x, button_y, button_width, button_height)
         button_white = pygame.Rect(button_x, button_y + button_height + button_margin, button_width, button_height)
-
-        
+        button_2v2 = pygame.Rect(button_x+button_width+20, button_y +  (button_height + button_margin), button_width, button_height)
         button_random=pygame.Rect(button_x, button_y+4*button_height, button_width, button_height)
-        button_black = pygame.Rect(button_x, button_y, button_width, button_height)
         button_white = pygame.Rect(button_x, button_y + button_height + button_margin, button_width, button_height)
         button_rapid = pygame.Rect(button_x, button_y + 2 * (button_height + button_margin), button_width / 2, button_height)
         button_classic = pygame.Rect(button_x + button_width / 2 + button_margin, button_y + 2 * (button_height + button_margin), button_width / 2, button_height)
@@ -328,7 +302,6 @@ class ChessGame:
         white_time=0
         black_time=0
         while first_choosing or second_choosing:
-            print('bla bla')
             mouse_pos = pygame.mouse.get_pos()
             window.fill(white)
             window.blit(text, (50, 50))
@@ -336,12 +309,12 @@ class ChessGame:
             pygame.draw.rect(window, white if not button_black.collidepoint(mouse_pos) else button_hover_color, button_black)
             pygame.draw.rect(window, white if not button_white.collidepoint(mouse_pos) else button_hover_color, button_white)
 
-            black_text = font.render("Jouer avec Noirs", True, black)
-            white_text = font.render("Jouer avec Blancs", True, black)
+            black_text = font.render("Black pieces", True, black)
+            white_text = font.render("White pieces", True, black)
             window.blit(black_text, (button_x + 10, button_y + 10))
             window.blit(white_text, (button_x + 10, button_y + button_height + button_margin + 10))
 
-
+            pygame.draw.rect(window, grey if not button_2v2.collidepoint(mouse_pos) else button_hover_color, button_2v2)
             pygame.draw.rect(window, grey if not button_black.collidepoint(mouse_pos) else button_hover_color, button_black)
             pygame.draw.rect(window, grey if not button_white.collidepoint(mouse_pos) else button_hover_color, button_white)
             pygame.draw.rect(window, grey if not button_rapid.collidepoint(mouse_pos) else button_hover_color, button_rapid)
@@ -355,6 +328,7 @@ class ChessGame:
             classic_text = font.render("Jeu classic",True,black) 
             blitz_text = font.render("Jeu blitz",True,black)
             rapid_text= font.render("Jeu rapid",True,black)
+            twovtwo_text = font.render("Jeu 2v2",True,black)
             random_text=font.render("Jeu de Fisher",True,black)
             window.blit(black_text, (button_x + 10, button_y + (button_height - black_text.get_height()) // 2))
             window.blit(white_text, (button_x + 10, button_y + button_height + button_margin + (button_height - white_text.get_height()) // 2))
@@ -362,6 +336,7 @@ class ChessGame:
             window.blit(rapid_text, (button_x +10 , button_y + 2 * (button_height + button_margin) + (button_height - rapid_text.get_height()) // 2))
             window.blit(blitz_text, (button_x + 50+button_width, button_y + 2 * (button_height + button_margin) + (button_height - rapid_text.get_height()) // 2))
             window.blit(random_text, (button_x +50, button_y + 4 * (button_height) + (button_height - random_text.get_height()) // 2))
+            window.blit(twovtwo_text, (button_x+button_width+30, button_y +  (button_height + button_margin) + (button_height - random_text.get_height()) // 2))
 
             pygame.display.flip()
             
@@ -396,14 +371,19 @@ class ChessGame:
                     elif button_random.collidepoint(event.pos) :
                         shuffle(self.chess_board[0])
                         shuffle(self.chess_board[7])
-                        
+                    elif  button_2v2.collidepoint(event.pos) : 
+                        first_choosing = False
+                        self.player = 'white'
         return (white_time,black_time)    
 
-   
+    def change_player(self) :
+        if (self.turn=='white') :
+            self.turn='black'
+        else :
+            self.turn='white'
 
-    def update_timers(self,click):
-        if (click):
-            return 
+    def update_timers(self):
+
         current_time = pygame.time.get_ticks()
         elapsed_time = (current_time - self.last_time_update) // 1000
 
@@ -416,7 +396,106 @@ class ChessGame:
 
         if self.white_time <= 0 or self.black_time <= 0:
             self.winner = "black" if self.white_time <= 0 else "white"
-        
+    def is_valid_move(self, start, end):
+        x, y = start
+        mx, my = end
+        start_piece = self.chess_board[y][x]
+        end_piece = self.chess_board[my][mx]
+
+    # Check if piece belongs to the current player and destination is not occupied by own piece
+        if start_piece[0] != self.turn[0] or (end_piece != '--' and end_piece[0] == self.turn[0]):
+            return False
+
+        piece_type = start_piece[1]
+
+    # Pawn moves
+        if piece_type == 'P':
+            direction = -1 if start_piece[0] == 'w' else 1  # White pawns move up (-1), black pawns move down (+1)
+            if mx == x:  # Moving straight
+                if my == y + direction and end_piece == '--':  # Single step forward
+                    return True
+                if (y == 1 or y == 6) and my == y + 2 * direction and end_piece == '--' and \
+                    self.chess_board[y + direction][x] == '--':  # Double step from start row
+                        return True
+            elif abs(mx - x) == 1 and my == y + direction and end_piece != '--':  # Capture move
+                return True
+
+    # Rook moves
+        elif piece_type == 'R':
+            if x == mx or y == my:  # Horizontal or vertical move
+                step_x = 1 if mx > x else -1 if mx < x else 0
+                step_y = 1 if my > y else -1 if my < y else 0
+                for i in range(1, max(abs(mx - x), abs(my - y))):
+                    if self.chess_board[y + i * step_y][x + i * step_x] != '--':
+                        return False
+                return True
+
+    # Knight moves
+        elif piece_type == 'N':
+            if (abs(mx - x) == 2 and abs(my - y) == 1) or (abs(mx - x) == 1 and abs(my - y) == 2):
+                return True
+
+    # Bishop moves
+        elif piece_type == 'B':
+            if abs(mx - x) == abs(my - y):  # Diagonal move
+                step_x = 1 if mx > x else -1
+                step_y = 1 if my > y else -1
+                for i in range(1, abs(mx - x)):
+                    if self.chess_board[y + i * step_y][x + i * step_x] != '--':
+                        return False
+                return True
+
+    # King moves (excluding castling)
+        elif piece_type == 'K':
+            if max(abs(mx - x), abs(my - y)) == 1:  # One square in any direction
+                return True
+
+    # Queen moves
+        elif piece_type == 'Q':
+            if abs(mx - x) == abs(my - y) or x == mx or y == my:  # Diagonal, horizontal, or vertical move
+                step_x = 1 if mx > x else -1 if mx < x else 0
+                step_y = 1 if my > y else -1 if my < y else 0
+                for i in range(1, max(abs(mx - x), abs(my - y))):
+                    if self.chess_board[y + i * step_y][x + i * step_x] != '--':
+                        return False
+                return True
+
+        return False
 
 
-    
+    def get_possible_moves(self, x, y):
+        moves = []
+        if not (self.king_check) :
+            for my in range(8):
+                for mx in range(8):
+                    if self.is_valid_move((x, y), (mx, my)):
+                        moves.append((mx, my))
+        #TODO
+        #Should verify the fact that the king w'ont be in check after i move my pieces again.
+        else :
+            for my in range(8):
+                for mx in range(8):
+                    if self.is_valid_move((x, y), (mx, my)):
+                        turn = 'white' if self.turn=='black' else 'black'
+                        self.move_piece
+        return moves
+    def move_piece(self,selected_piece,x,y) : 
+        mx,my=selected_piece
+        self.chess_board[y][x],self.chess_board[my][mx] = self.chess_board[my][mx],'--'
+        click_sound_chess.play()
+    def remove_piece(self,selected_piece,x,y) : 
+        mx,my=selected_piece
+        self.chess_board[y][x],self.chess_board[my][mx] = self.chess_board[my][mx],'--'
+    def check(self,x_square,y_square) :
+        moves=self.get_possible_moves(x_square,y_square)
+        player_king = ('b' if self.turn[0] == 'w' else 'w') + 'K'
+        pieces = [self.chess_board[m[1]][m[0]] for m in moves]    
+        if player_king in pieces:
+            for mx in range(8) :
+                for my in range(8) : 
+                    if (self.chess_board[my][mx]==player_king) :
+                        self.king_check=True
+                        return [mx,my]
+                    
+        self.king_check=False
+        return [-1,-1]
