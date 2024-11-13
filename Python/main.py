@@ -1,120 +1,122 @@
 from chess import ChessGame
 import pygame
-
+from copy import deepcopy
 pygame.init()
-click_sound_add_time_button = pygame.mixer.Sound("chess_add_time_sound.wav")  # Ensure you have a click.wav file in the same directory
-click_sound_chess=pygame.mixer.Sound("chess_move_soundf.mp3")
+
+# Load sounds
+click_sound_add_time_button = pygame.mixer.Sound("chess_add_time_sound.wav")
+click_sound_chess = pygame.mixer.Sound("chess_move_soundf.mp3")
 
 # Screen and colors setup
-screen_width = 500
-screen_height = 500
-added_screen_width = 400
+screen_width, screen_height, added_screen_width = 500, 500, 400
 screen = pygame.display.set_mode((screen_width + added_screen_width, screen_height))
 
-white = (255, 255, 255)
-grey = (128, 128, 128)
-red = (255, 0, 0)
-black = (0, 0, 0)
-brown = (118, 150, 86)
-light_brown = (238, 238, 210)
-highlight_color = (200, 200, 0)  # Color for highlighting possible moves
-
+# Define colors
+white, grey, red = (255, 255, 255), (128, 128, 128), (255, 0, 0)
+brown, light_brown, highlight_color = (118, 150, 86), (238, 238, 210), (200, 200, 0)
 square_size = screen_width // 8
 
 # Load piece images
-pieces_images = {
-    'bR': pygame.image.load('black_rook.png'),
-    'bN': pygame.image.load('black_knight.png'),
-    'bB': pygame.image.load('black_bishop.png'),
-    'bQ': pygame.image.load('black_queen.png'),
-    'bK': pygame.image.load('black_king.png'),
-    'bP': pygame.image.load('black_pawn.png'),
-    'wR': pygame.image.load('white_rook.png'),
-    'wN': pygame.image.load('white_knight.png'),
-    'wB': pygame.image.load('white_bishop.png'),
-    'wQ': pygame.image.load('white_queen.png'),
-    'wK': pygame.image.load('white_king.png'),
-    'wP': pygame.image.load('white_pawn.png')
-}
+pieces_images = {piece: pygame.image.load(f'{color}_{name}.png') 
+                 for color, name, piece in [('black', 'rook', 'bR'), ('black', 'knight', 'bN'), 
+                                            ('black', 'bishop', 'bB'), ('black', 'queen', 'bQ'), 
+                                            ('black', 'king', 'bK'), ('black', 'pawn', 'bP'),
+                                            ('white', 'rook', 'wR'), ('white', 'knight', 'wN'),
+                                            ('white', 'bishop', 'wB'), ('white', 'queen', 'wQ'),
+                                            ('white', 'king', 'wK'), ('white', 'pawn', 'wP')]}
+
+
+
+# Main function
 if __name__ == "__main__":
     game = ChessGame()
-    last_move = []
-    t = pygame.time.get_ticks()
+    last_move, selected_piece, possible_moves = [], None, []
     white_time, black_time = game.choose_game()  # Initialize game mode selection
-    k = 0
     screen = pygame.display.set_mode((screen_width + added_screen_width, screen_height))
-
-    pygame.time.delay(100)
     game.time_reg(white_time, black_time)
-
-    selected_piece = None
-    x_king = -1 
-    y_king  = -1 
+    pygame.time.delay(100)
+    game.list_of_boards.append(game.chess_board)
+    game.list_of_times.append((game.white_time, game.black_time))
+    x_king, y_king = -1, -1  # Initialize king's position in check
+    k = 0
+    
     while game.running:
-        # Draw board and highlight moves
-        game.draw_board()  # Draw the board
-        if len(game.last_move)>1  :
-            x,y=game.last_move[0]
-            mx,my=game.last_move[1]
-            pygame.draw.rect(screen, highlight_color, pygame.Rect(x * square_size, y * square_size, square_size, square_size))
-            pygame.draw.rect(screen, highlight_color, pygame.Rect(mx * square_size, my * square_size, square_size, square_size))
-            
-        if selected_piece:
-            x,y=selected_piece
-            if (game.turn[0]==game.chess_board[y][x][0]):
-                pygame.draw.rect(screen, grey, pygame.Rect(x * square_size, y * square_size, square_size, square_size))
-                print(possible_moves)
-                for mx, my in possible_moves:
-                    pygame.draw.rect(screen, grey, pygame.Rect(mx * square_size, my * square_size, square_size, square_size))
-        
-        if (x_king>-1 and y_king>-1) :
-            pygame.draw.rect(screen, red, pygame.Rect(x_king * square_size, y_king * square_size, square_size, square_size))
-
-        game.draw_pieces()  # Draw pieces on top of highlighted squares
         game.draw_timer()
         game.draw_add_time_button()
         game.handle_add_time_button()
         game.draw_move_back_button()
+        game.draw_board()  # Draw the board
+        l = game.len_list_of_boards
+
+        # Ensure the list_of_boards contains independent deep copies of the board (3D list)
+        if game.list_of_boards[l-1] != game.chess_board:
+            game.list_of_boards[l] = deepcopy(game.chess_board)
+            game.list_of_times[l] = [game.white_time, game.black_time]
+            print("Board updated. Total boards:", l)
+            game.len_list_of_boards += 1
         
-            
-        
+        # Highlight last move
+        if len(game.last_move) > 1:
+            x, y = game.last_move[0]
+            mx, my = game.last_move[1]
+            pygame.draw.rect(screen, highlight_color, pygame.Rect(x * square_size, y * square_size, square_size, square_size))
+            pygame.draw.rect(screen, highlight_color, pygame.Rect(mx * square_size, my * square_size, square_size, square_size))
+
+        # Highlight king if in check
+        if (x_king, y_king) != (-1, -1):
+            pygame.draw.rect(screen, red, pygame.Rect(x_king * square_size, y_king * square_size, square_size, square_size))
+
+        # Highlight possible moves for selected piece
+        if game.selected_piece:
+            x, y = game.selected_piece
+            if game.turn[0] == game.chess_board[y][x][0]:  # Ensure selected piece belongs to current player
+                pygame.draw.rect(screen, grey, pygame.Rect(x * square_size, y * square_size, square_size, square_size))
+                for mx, my in possible_moves:
+                    pygame.draw.rect(screen, grey, pygame.Rect(mx * square_size, my * square_size, square_size, square_size))
+
+        # Draw pieces, timer, and additional buttons
+        game.draw_pieces()
+
+        # Event handling
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 game.running = False
-            if event.type == pygame.MOUSEBUTTONDOWN:
-                left_clicked = pygame.mouse.get_pressed()[0]
-                if not left_clicked:
-                    continue
-                
-                x, y = event.pos
-                x_square = x // square_size
-                y_square = y // square_size
-                
-                if 0 <= x_square < 8 and 0 <= y_square < 8:  # Check if within board bounds
-                    if selected_piece is not None: # Deselect if same piece clicked
-                        if ((x_square,y_square) in possible_moves) :
-                            game.move_piece(selected_piece,x_square, y_square)
-                            game.last_move=[]
-                            game.last_move.append([selected_piece[0],selected_piece[1]])
-                            game.last_move.append([x_square,y_square])
-                            x_king,y_king=game.check(x_square,y_square)
+            elif event.type == pygame.MOUSEBUTTONDOWN:
+                if pygame.mouse.get_pressed()[0]:  # Check if left click
+                    x, y = event.pos
+                    x_square, y_square = x // square_size, y // square_size
+                    
+                    # Ensure within board bounds
+                    if 0 <= x_square < 8 and 0 <= y_square < 8:
+                        if game.selected_piece and (x_square, y_square) in possible_moves:
+                            game.move_piece(game.selected_piece, x_square, y_square)
+                            click_sound_chess.play()
+                            game.last_move = [[game.selected_piece[0], game.selected_piece[1]], [x_square, y_square]]
+                            
+                            # Check if the move results in a check
+                            x_king, y_king = -1, -1  # Reset king position
+                            for i in range(8):
+                                for j in range(8):
+                                    check_pos = game.check(i, j)
+                                    if check_pos != [-1, -1]:  # Update if a check is found
+                                        x_king, y_king = check_pos
+                                        break
+                                if x_king != -1:
+                                    break
+
                             game.change_player()
-                        selected_piece = None
-                        possible_moves = []
-                    else:
-                        
-                        selected_piece = (x_square, y_square)  # Select the new piece
-                        #click_sound_chess.play()
-                        
-                        # Retrieve possible moves for the selected piece
-                        possible_moves = game.get_possible_moves(x_square, y_square)
-        
+                            game.selected_piece, possible_moves = None, []
+                        else:
+                            game.selected_piece = (x_square, y_square)
+                            possible_moves = game.get_valid_moves(x_square, y_square)  # Only get valid moves
+
         pygame.display.flip()
+    
         game.update_timers()
         if k == 0:
             game.time_reg(white_time, black_time)
-            k = 1
-
+            k += 1
+            pygame.time.delay(100)
         game.show_winner()
 
     pygame.quit()
