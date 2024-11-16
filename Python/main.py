@@ -97,15 +97,17 @@ if __name__ == "__main__":
                             for i in range(8):
                                 for j in range(8):
                                     check_pos = game.check(i, j)
-                                    if check_pos != [-1, -1]:  # Update if a check is found
-                                        x_king, y_king = check_pos
-                                        break
+                                   #"" if check_pos != [-1, -1]:  # Update if a check is found
+                                    x_king, y_king = check_pos
+                                    if (x_king !=-1) : 
+                                        break 
                                 if x_king != -1:
                                     break
-
+                            
+                            
                             game.change_player()
                             game.selected_piece, possible_moves = None, []
-                        else:
+                        elif game.chess_board[y_square][x_square][0]==game.turn[0]:
                             game.selected_piece = (x_square, y_square)
                             possible_moves = game.get_valid_moves(x_square, y_square)  # Only get valid moves
                             #print(possible_moves)

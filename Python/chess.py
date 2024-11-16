@@ -412,83 +412,78 @@ class ChessGame:
             self.winner = "black" if self.white_time <= 0 else "white"
 
     def is_valid_move(self, start, end):
-            x, y = start
-            mx, my = end
-            start_piece = self.chess_board[y][x]
-            end_piece = self.chess_board[my][mx]
-            # Check if piece belongs to the current player and destination is not occupied by own piece
-            if start_piece == '--' or (end_piece[0] == start_piece[0]):
-                return False
+        x, y = start
+        mx, my = end
+        start_piece = self.chess_board[y][x]
+        end_piece = self.chess_board[my][mx]
 
-            piece_type = start_piece[1]
-
-            # Pawn moves
-            if piece_type == 'P':
-                direction = -1 if start_piece[0] == 'w' else 1  # White pawns move up (-1), black pawns move down (+1)
-                if mx == x:  # Moving straight
-                    if my == y + direction and end_piece == '--':  # Single step forward
-                        return True
-                    if (y == 1 or y == 6) and my == y + 2 * direction and end_piece == '--' and \
-                            self.chess_board[y + direction][x] == '--':  # Double step from start row
-                        return True
-                elif abs(mx - x) == 1 and my == y + direction:
-                    if end_piece != '--':  # Capture move
-                        return True
-                    # En passant capture
-                    elif (y == 3 and start_piece[0] == 'w') or (y == 4 and start_piece[0] == 'b'):
-                        last_move = self.last_move  # Store last move as (start, end) coordinates
-                        
-                        if last_move and self.chess_board[last_move[1][1]][last_move[1][0]][1] == 'P':
-                            
-                            if abs(last_move[1][0] - mx) == 0 and last_move[1][1] == y and \
-                                    self.chess_board[last_move[1][1]][last_move[1][0]]=='bP' :
-                                self.pion_passant=True
-                                return True
-
-            # Rook moves
-            elif piece_type == 'R':
-                if x == mx or y == my:  # Horizontal or vertical move
-                    step_x = 1 if mx > x else -1 if mx < x else 0
-                    step_y = 1 if my > y else -1 if my < y else 0
-                    for i in range(1, max(abs(mx - x), abs(my - y))):
-                        if self.chess_board[y + i * step_y][x + i * step_x] != '--':
-                            return False
-                    return True
-
-            # Knight moves
-            elif piece_type == 'N':
-                if (abs(mx - x) == 2 and abs(my - y) == 1) or (abs(mx - x) == 1 and abs(my - y) == 2):
-                    return True
-
-            # Bishop moves
-            elif piece_type == 'B':
-                if abs(mx - x) == abs(my - y):  # Diagonal move
-                    step_x = 1 if mx > x else -1
-                    step_y = 1 if my > y else -1
-                    for i in range(1, abs(mx - x)):
-                        if self.chess_board[y + i * step_y][x + i * step_x] != '--':
-                            return False
-                    return True
-
-            # King moves (including castling)
-            elif piece_type == 'K':
-                if max(abs(mx - x), abs(my - y)) == 1:  # One square in any direction
-                    return True
-                
-                # Castling move
-                
-
-            # Queen moves
-            elif piece_type == 'Q':
-                if abs(mx - x) == abs(my - y) or x == mx or y == my:  # Diagonal, horizontal, or vertical move
-                    step_x = 1 if mx > x else -1 if mx < x else 0
-                    step_y = 1 if my > y else -1 if my < y else 0
-                    for i in range(1, max(abs(mx - x), abs(my - y))):
-                        if self.chess_board[y + i * step_y][x + i * step_x] != '--':
-                            return False
-                    return True
-
+        # Ensure the piece belongs to the current player and the destination is valid
+        if start_piece == '--' or end_piece[0] == start_piece[0]:
             return False
+
+        piece_type = start_piece[1]
+
+        # Pawn moves
+        if piece_type == 'P':
+            direction = -1 if start_piece[0] == 'w' else 1  # White moves up, black moves down
+            if mx == x:  # Moving straight
+                if my == y + direction and end_piece == '--':  # Single step
+                    return True
+                if (y == 1 or y == 6) and my == y + 2 * direction and end_piece == '--' and \
+                        self.chess_board[y + direction][x] == '--':  # Double step
+                    return True
+            elif abs(mx - x) == 1 and my == y + direction:
+                # Capture move
+                if end_piece != '--':
+                    return True
+                # En passant capture
+                last_move = self.last_move  # Store last move as (start, end)
+                if last_move and self.chess_board[last_move[1][1]][last_move[1][0]][1] == 'P':
+                    if last_move[1] == (mx, my - direction) and self.chess_board[my - direction][mx] == opponent_color + 'P':
+                        self.pion_passant = True
+                        return True
+
+        # Rook moves
+        elif piece_type == 'R':
+            if x == mx or y == my:  # Horizontal or vertical move
+                step_x = 1 if mx > x else -1 if mx < x else 0
+                step_y = 1 if my > y else -1 if my < y else 0
+                for i in range(1, max(abs(mx - x), abs(my - y))):
+                    if self.chess_board[y + i * step_y][x + i * step_x] != '--':
+                        return False
+                return True
+
+        # Knight moves
+        elif piece_type == 'N':
+            if (abs(mx - x) == 2 and abs(my - y) == 1) or (abs(mx - x) == 1 and abs(my - y) == 2):
+                return True
+
+        # Bishop moves
+        elif piece_type == 'B':
+            if abs(mx - x) == abs(my - y):  # Diagonal move
+                step_x = 1 if mx > x else -1
+                step_y = 1 if my > y else -1
+                for i in range(1, abs(mx - x)):
+                    if self.chess_board[y + i * step_y][x + i * step_x] != '--':
+                        return False
+                return True
+
+        # King moves
+        elif piece_type == 'K':
+            if max(abs(mx - x), abs(my - y)) == 1:  # One square in any direction
+                return True
+
+        # Queen moves
+        elif piece_type == 'Q':
+            if abs(mx - x) == abs(my - y) or x == mx or y == my:  # Diagonal, horizontal, or vertical
+                step_x = 1 if mx > x else -1 if mx < x else 0
+                step_y = 1 if my > y else -1 if my < y else 0
+                for i in range(1, max(abs(mx - x), abs(my - y))):
+                    if self.chess_board[y + i * step_y][x + i * step_x] != '--':
+                        return False
+                return True
+
+        return False
 
     def get_possible_moves(self, x, y):
         """Returns moves for the piece at (x, y) that don't put its king in check."""
@@ -551,10 +546,9 @@ class ChessGame:
             for x in range(8):
                 piece = self.chess_board[y][x]
                 if piece[0] == opponent_color :
-                    self.turn
+                    
                     if self.is_valid_move((x, y), (x_king, y_king)):
                         print('in_check')
-                        self.turn='black' if self.turn=='white' else 'black'
                         return True
 
         return False
@@ -582,17 +576,7 @@ class ChessGame:
         valid_moves = [move for move in possible_moves if self.simulate_move_and_check((x_square, y_square), move)]
         return valid_moves
 
-    def check(self, x_square, y_square):
-        """Checks if the move puts the opponent's king in check."""
-        moves = self.get_valid_moves(x_square, y_square)
-        opponent_color = 'b' if self.turn[0] == 'w' else 'w'
-        opponent_king = opponent_color + 'K'
-
-        for move in moves:
-            if self.chess_board[move[1]][move[0]] == opponent_king:
-                return move  # Returns the position of the king in check
-
-        return [-1, -1]
+    
     def get_king_position(self):
         """Finds and returns the position of the king of the given color."""
         color = self.turn[0]
@@ -603,3 +587,18 @@ class ChessGame:
                 if self.chess_board[y][x] == king:
                     return (x, y)
         return None
+    
+    def check(self, x_square, y_square):
+        """Checks if the move puts the opponent's king in check."""
+        if (self.chess_board[y_square][x_square]=='--') :
+            return (-1,-1)
+        moves = self.get_valid_moves(x_square, y_square)
+        color = 'b' if self.turn[0] == 'w' else 'w'
+        king = color + 'K'
+
+        for move in moves:
+            if self.chess_board[move[1]][move[0]] == king:
+                print(king)
+                return move  # Returns the position of the king in check
+
+        return (-1, -1)
