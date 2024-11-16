@@ -1,5 +1,8 @@
-CMakeFiles/Projet-echecs-TDLOG.dir/main.cpp.obj: \
- C:\Users\jmoua\OneDrive\Documents\GitHub\Projet-checs-TDLOG\main.cpp \
+CMakeFiles/Projet-echecs-TDLOG.dir/game.cpp.obj: \
+ C:\Users\jmoua\OneDrive\Documents\GitHub\Projet-checs-TDLOG\game.cpp \
+ C:\Users\jmoua\OneDrive\Documents\GitHub\Projet-checs-TDLOG\game.h \
+ C:\Users\jmoua\OneDrive\Documents\GitHub\Projet-checs-TDLOG\board.h \
+ C:\Users\jmoua\OneDrive\Documents\GitHub\Projet-checs-TDLOG\pieces.h \
  C:/ENPC/Tools/mingw810_64/lib/gcc/x86_64-w64-mingw32/8.1.0/include/c++/iostream \
  C:/ENPC/Tools/mingw810_64/lib/gcc/x86_64-w64-mingw32/8.1.0/include/c++/x86_64-w64-mingw32/bits/c++config.h \
  C:/ENPC/Tools/mingw810_64/lib/gcc/x86_64-w64-mingw32/8.1.0/include/c++/x86_64-w64-mingw32/bits/os_defines.h \
@@ -126,9 +129,6 @@ CMakeFiles/Projet-echecs-TDLOG.dir/main.cpp.obj: \
  C:/ENPC/Tools/mingw810_64/lib/gcc/x86_64-w64-mingw32/8.1.0/include/c++/bits/ostream.tcc \
  C:/ENPC/Tools/mingw810_64/lib/gcc/x86_64-w64-mingw32/8.1.0/include/c++/istream \
  C:/ENPC/Tools/mingw810_64/lib/gcc/x86_64-w64-mingw32/8.1.0/include/c++/bits/istream.tcc \
- C:\Users\jmoua\OneDrive\Documents\GitHub\Projet-checs-TDLOG\game.h \
- C:\Users\jmoua\OneDrive\Documents\GitHub\Projet-checs-TDLOG\board.h \
- C:\Users\jmoua\OneDrive\Documents\GitHub\Projet-checs-TDLOG\pieces.h \
  C:\Users\jmoua\OneDrive\Documents\GitHub\Projet-checs-TDLOG\utils.h \
  C:/ENPC/Tools/mingw810_64/lib/gcc/x86_64-w64-mingw32/8.1.0/include/c++/vector \
  C:/ENPC/Tools/mingw810_64/lib/gcc/x86_64-w64-mingw32/8.1.0/include/c++/bits/stl_construct.h \

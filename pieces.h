@@ -19,24 +19,27 @@ private:
     const Point* attackMoveSet;
     const Point* elemMoveSet; 
     int numOfMoves;
+    int numOfAttackMoves;
 
 public:
     // Constructors
     Piece(string name, string color, bool infiniteMoves, const Point* elemMoveSet, int numOfMoves)
         : name(name),color(color), infiniteMoves(infiniteMoves), elemMoveSet(elemMoveSet), numOfMoves(numOfMoves) {}
-    Piece(string name, string(color), bool infiniteMoves, const Point* elemMoveSet, const Point* attackMoveSet, int numOfMoves)
-        : name(name), color(color), infiniteMoves(infiniteMoves), elemMoveSet(elemMoveSet),moveSetisAttackMoveSet(false), attackMoveSet(attackMoveSet), numOfMoves(numOfMoves)  {}
+    Piece(string name, string(color), bool infiniteMoves, const Point* elemMoveSet, const Point* attackMoveSet, int numOfMoves, int numOfAttackMoves)
+        : name(name), color(color), infiniteMoves(infiniteMoves), elemMoveSet(elemMoveSet),moveSetisAttackMoveSet(false), attackMoveSet(attackMoveSet), numOfMoves(numOfMoves), numOfAttackMoves(numOfAttackMoves) {}
     // Copy Constructor;
-    Piece(const Piece &other) : name(other.name), color(other.color), infiniteMoves(other.infiniteMoves), elemMoveSet(other.elemMoveSet), numOfMoves(other.numOfMoves), attackMoveSet(other.attackMoveSet), moveSetisAttackMoveSet(other.moveSetisAttackMoveSet) {}
+    Piece(const Piece &other) : name(other.name), color(other.color), infiniteMoves(other.infiniteMoves), elemMoveSet(other.elemMoveSet), numOfMoves(other.numOfMoves), attackMoveSet(other.attackMoveSet), moveSetisAttackMoveSet(other.moveSetisAttackMoveSet), numOfAttackMoves(other.numOfAttackMoves) {}
     // Default Constructor;
     Piece() = default;
     // Getter functions
-    string getName() const { return name; }
-    string getColor() const {return color; }
-    bool hasInfiniteMoves() const { return infiniteMoves; }
+    string getName() const {return name;}
+    string getColor() const {return color;}
+    bool hasInfiniteMoves() const {return infiniteMoves;}
+    bool isMoveSetAttackMoveSet() const {return moveSetisAttackMoveSet;}
+    int numberOfAttackMoves() const {return numOfAttackMoves;}
     int numberOfElemMoves() const {return numOfMoves;}
-    const Point* getElemMoveSet() const { return elemMoveSet; }
-    const Point* getAttackMoveSet() const { return attackMoveSet; }
+    const Point* getElemMoveSet() const {return elemMoveSet;}
+    const Point* getAttackMoveSet() const {return attackMoveSet;}
 };
 
 

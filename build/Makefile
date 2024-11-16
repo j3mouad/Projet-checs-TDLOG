@@ -152,6 +152,30 @@ board.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles\Projet-echecs-TDLOG.dir\build.make CMakeFiles/Projet-echecs-TDLOG.dir/board.cpp.s
 .PHONY : board.cpp.s
 
+game.obj: game.cpp.obj
+.PHONY : game.obj
+
+# target to build an object file
+game.cpp.obj:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\Projet-echecs-TDLOG.dir\build.make CMakeFiles/Projet-echecs-TDLOG.dir/game.cpp.obj
+.PHONY : game.cpp.obj
+
+game.i: game.cpp.i
+.PHONY : game.i
+
+# target to preprocess a source file
+game.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\Projet-echecs-TDLOG.dir\build.make CMakeFiles/Projet-echecs-TDLOG.dir/game.cpp.i
+.PHONY : game.cpp.i
+
+game.s: game.cpp.s
+.PHONY : game.s
+
+# target to generate assembly for a file
+game.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\Projet-echecs-TDLOG.dir\build.make CMakeFiles/Projet-echecs-TDLOG.dir/game.cpp.s
+.PHONY : game.cpp.s
+
 main.obj: main.cpp.obj
 .PHONY : main.obj
 
@@ -212,6 +236,9 @@ help:
 	@echo ... board.obj
 	@echo ... board.i
 	@echo ... board.s
+	@echo ... game.obj
+	@echo ... game.i
+	@echo ... game.s
 	@echo ... main.obj
 	@echo ... main.i
 	@echo ... main.s

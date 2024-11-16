@@ -10,6 +10,9 @@ class Board{
     public:
         Board(Piece* board,string turn);
         Board() = default;
+        // getter functions
+        Piece getPiece(int x, int y);
+        string getTurn() const {return turn;}
         void changeTurn();
         /* position will be given in chess notations*/
         vector<Point> getPossibleMoves(Point position);
