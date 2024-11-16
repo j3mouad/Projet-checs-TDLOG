@@ -14,18 +14,17 @@ added_screen_width = 400
 screen = pygame.display.set_mode((screen_width + added_screen_width, screen_height))
 pygame.display.set_caption("Chess")
 # Colors
-white = (255, 255, 255)
-grey=(128,128,128)
-red = (255,0,0)
+# Define colors
+white, grey, red = (255, 255, 255), (128, 128, 128), (255, 0, 0)
+brown, light_brown, highlight_color = (118, 150, 86), (238, 238, 210), (200, 200, 0)
+square_size = screen_width // 8
 black = (0, 0, 0)
 brown = (118, 150, 86)
 light_brown = (238, 238, 210)
 button_color = (100, 200, 100)  #green
 button_hover_color = (150, 250, 150)  
-selected_piece=None
 
-# Taille de la case
-square_size = screen_width // 8
+
 
 # Charger les images des pièces
 pieces_images = {
@@ -73,8 +72,9 @@ class ChessGame:
         self.turn = 'white'
         self.player='white'
         self.last_move=[]
+        self.possible_moves=[]
         self.winner = None
-        self.cooldown=0.2
+        self.cooldown=0.5
         self.white_time = -1  # 10 minutes en secondes
         self.black_time = -1
         self.white_king_moved=False
@@ -94,6 +94,8 @@ class ChessGame:
         self.selected_piece=[]
         self.pion_passant=False
         self.last_time_back_clicked=0
+        self.x_king, self.y_king = -1, -1
+
     def time_reg(self,white_time,black_time):
         self.white_time=white_time
         self.black_time=black_time
@@ -572,8 +574,8 @@ class ChessGame:
 
     def get_valid_moves(self, x_square, y_square):
         """Returns a list of valid moves that do not put the player's own king in check."""
-        possible_moves = self.get_possible_moves(x_square, y_square)
-        valid_moves = [move for move in possible_moves if self.simulate_move_and_check((x_square, y_square), move)]
+        self.possible_moves = self.get_possible_moves(x_square, y_square)
+        valid_moves = [move for move in self.possible_moves if self.simulate_move_and_check((x_square, y_square), move)]
         return valid_moves
 
     
@@ -602,3 +604,70 @@ class ChessGame:
                 return move  # Returns the position of the king in check
 
         return (-1, -1)
+    
+    
+    def update_list_of_boards(self) : 
+        l = self.len_list_of_boards
+        # Ensure the list_of_boards contains independent deep copies of the board (3D list)
+        if self.list_of_boards[l-1] != self.chess_board:
+            self.list_of_boards[l] = deepcopy(self.chess_board)
+            self.list_of_times[l] = [self.white_time, self.black_time]
+            self.len_list_of_boards += 1
+            
+    def draw_king_in_check(self) :
+        x_king,y_king=self.x_king,self.y_king
+        
+        if (x_king, y_king) != (-1, -1):
+            print('rgrger')
+            pygame.draw.rect(screen, red, pygame.Rect(x_king * square_size, y_king * square_size, square_size, square_size))
+    def draw_selected_piece(self) : 
+        if self.selected_piece:
+            x, y = self.selected_piece
+            if self.turn[0] == self.chess_board[y][x][0]:  # Ensure selected piece belongs to current player
+                pygame.draw.rect(screen, grey, pygame.Rect(x * square_size, y * square_size, square_size, square_size))
+                for mx, my in self.possible_moves:
+                    pygame.draw.rect(screen, grey, pygame.Rect(mx * square_size, my * square_size, square_size, square_size))
+    def draw_last_move(self) :
+        if len(self.last_move) > 1:
+            x, y = self.last_move[0]
+            mx, my = self.last_move[1]
+            pygame.draw.rect(screen, highlight_color, pygame.Rect(x * square_size, y * square_size, square_size, square_size))
+            pygame.draw.rect(screen, highlight_color, pygame.Rect(mx * square_size, my * square_size, square_size, square_size))
+    def run(self) :
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                self.running = False
+            elif event.type == pygame.MOUSEBUTTONDOWN:
+                if pygame.mouse.get_pressed()[0]:  # Check if left click
+                    x, y = event.pos
+                    x_square, y_square = x // square_size, y // square_size
+                    
+                    # Ensure within board bounds
+                    if 0 <= x_square < 8 and 0 <= y_square < 8:
+                        if self.selected_piece and (x_square, y_square) in self.possible_moves:
+                            self.is_king_in_check()
+                            self.move_piece(self.selected_piece, x_square, y_square)
+                            click_sound_chess.play()
+                            self.last_move = [[self.selected_piece[0], self.selected_piece[1]], [x_square, y_square]]
+                            
+                            # Check if the move results in a check
+                            self.x_king, self.y_king = -1, -1  # Reset king position
+                            for i in range(8):
+                                for j in range(8):
+                                    check_pos = self.check(i, j)
+                                   #"" if check_pos != [-1, -1]:  # Update if a check is found
+                                    self.x_king, self.y_king = check_pos
+                                    if (self.x_king !=-1) : 
+                                        break 
+                                if self.x_king != -1:
+                                    break
+                            
+                            
+                            self.change_player()
+                            self.selected_piece, self.possible_moves = None, []
+                        elif self.chess_board[y_square][x_square][0]==self.turn[0]:
+                            self.selected_piece = (x_square, y_square)
+                            self.possible_moves = self.get_valid_moves(x_square, y_square)  # Only get valid moves
+                            #print(possible_moves)
+        pygame.display.flip()
+    
