@@ -30,9 +30,10 @@ pieces_images = {piece: pygame.image.load(f'{color}_{name}.png')
 # Main function
 if __name__ == "__main__":
     game = ChessGame()
-    last_move, selected_piece, possible_moves = [], None, []
+    game.last_move, selected_piece, possible_moves = [], None, []
     white_time, black_time = game.choose_game()  # Initialize game mode selection
-    screen = pygame.display.set_mode((screen_width + added_screen_width, screen_height))
+    screen = pygame.display.set_mode((screen_width + added_screen_width ,  screen_height))
+    
     game.time_reg(white_time, black_time)
     pygame.time.delay(100)
     game.list_of_boards.append(game.chess_board)
@@ -47,12 +48,10 @@ if __name__ == "__main__":
         game.draw_move_back_button()
         game.draw_board()  # Draw the board
         l = game.len_list_of_boards
-
         # Ensure the list_of_boards contains independent deep copies of the board (3D list)
         if game.list_of_boards[l-1] != game.chess_board:
             game.list_of_boards[l] = deepcopy(game.chess_board)
             game.list_of_times[l] = [game.white_time, game.black_time]
-            print("Board updated. Total boards:", l)
             game.len_list_of_boards += 1
         
         # Highlight last move
@@ -61,7 +60,7 @@ if __name__ == "__main__":
             mx, my = game.last_move[1]
             pygame.draw.rect(screen, highlight_color, pygame.Rect(x * square_size, y * square_size, square_size, square_size))
             pygame.draw.rect(screen, highlight_color, pygame.Rect(mx * square_size, my * square_size, square_size, square_size))
-
+            
         # Highlight king if in check
         if (x_king, y_king) != (-1, -1):
             pygame.draw.rect(screen, red, pygame.Rect(x_king * square_size, y_king * square_size, square_size, square_size))
@@ -76,7 +75,6 @@ if __name__ == "__main__":
 
         # Draw pieces, timer, and additional buttons
         game.draw_pieces()
-
         # Event handling
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -89,6 +87,7 @@ if __name__ == "__main__":
                     # Ensure within board bounds
                     if 0 <= x_square < 8 and 0 <= y_square < 8:
                         if game.selected_piece and (x_square, y_square) in possible_moves:
+                            game.is_king_in_check()
                             game.move_piece(game.selected_piece, x_square, y_square)
                             click_sound_chess.play()
                             game.last_move = [[game.selected_piece[0], game.selected_piece[1]], [x_square, y_square]]
@@ -109,7 +108,7 @@ if __name__ == "__main__":
                         else:
                             game.selected_piece = (x_square, y_square)
                             possible_moves = game.get_valid_moves(x_square, y_square)  # Only get valid moves
-
+                            #print(possible_moves)
         pygame.display.flip()
     
         game.update_timers()
@@ -120,3 +119,7 @@ if __name__ == "__main__":
         game.show_winner()
 
     pygame.quit()
+      #################        color = 'b' if self.turn=='white' else 'w'
+#######
+      
+ 
