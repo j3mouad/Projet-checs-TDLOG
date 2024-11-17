@@ -1,6 +1,9 @@
+import os
+os.chdir("/home/hassenekallala/Desktop/projet/Projet-echecs-TDLOG/Python")
 from chess import ChessGame
 import pygame
 from chess import screen_width,screen_height,added_screen_width
+import sys
 pygame.init()
 
 # Main function
