@@ -26,7 +26,10 @@ if __name__ == "__main__":
         game.draw_selected_piece()
         game.draw_pieces()
         pygame.display.flip()
+        game.castling()
         game.run()
+        
+        print(game.castle)
         game.update_timers()
         if k == 0:
             game.time_reg(white_time, black_time)

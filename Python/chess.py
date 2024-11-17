@@ -98,7 +98,8 @@ class ChessGame:
         self.x_king, self.y_king = -1, -1
         self.white_moves={(-1,-1):[-1]}
         self.black_moves={(-1,-1):[-1]}
-
+        self.rook_moved=[0,0,0,0]
+        self.castle=[0,0,0,0]
     def time_reg(self,white_time,black_time):
         self.white_time=white_time
         self.black_time=black_time
@@ -176,12 +177,12 @@ class ChessGame:
     def game_ends(self):
         if (self.white_time<=0 ):
             self.winner = 'black'
+            self.running = False
             return True
         if (self.black_time<=0):
             self.winner = 'white'
+            self.running = False
             return True
-        
-        
         if (not has_non_empty_list(self.white_moves) and self.turn=='white') :
            if (self.white_king_check):
                self.winner = 'black'
@@ -304,19 +305,17 @@ class ChessGame:
         second_choosing = True
         white_time=0
         black_time=0
+        
         while first_choosing or second_choosing:
             mouse_pos = pygame.mouse.get_pos()
             window.fill(white)
             window.blit(text, (50, 50))
-
             pygame.draw.rect(window, white if not button_black.collidepoint(mouse_pos) else button_hover_color, button_black)
             pygame.draw.rect(window, white if not button_white.collidepoint(mouse_pos) else button_hover_color, button_white)
-
             black_text = font.render("Black pieces", True, black)
             white_text = font.render("White pieces", True, black)
             window.blit(black_text, (button_x + 10, button_y + 10))
             window.blit(white_text, (button_x + 10, button_y + button_height + button_margin + 10))
-
             pygame.draw.rect(window, grey if not button_2v2.collidepoint(mouse_pos) else button_hover_color, button_2v2)
             pygame.draw.rect(window, grey if not button_black.collidepoint(mouse_pos) else button_hover_color, button_black)
             pygame.draw.rect(window, grey if not button_white.collidepoint(mouse_pos) else button_hover_color, button_white)
@@ -324,8 +323,6 @@ class ChessGame:
             pygame.draw.rect(window, grey if not button_classic.collidepoint(mouse_pos) else button_hover_color, button_classic)
             pygame.draw.rect(window, grey if not button_blitz.collidepoint(mouse_pos) else button_hover_color, button_blitz) 
             pygame.draw.rect(window, grey if not button_random.collidepoint(mouse_pos) else button_hover_color, button_random)
-
-
             black_text = font.render("Jouer avec Noirs", True, black)
             white_text = font.render("Jouer avec Blancs", True, black)
             classic_text = font.render("Jeu classic",True,black) 
@@ -340,9 +337,7 @@ class ChessGame:
             window.blit(blitz_text, (button_x + 50+button_width, button_y + 2 * (button_height + button_margin) + (button_height - rapid_text.get_height()) // 2))
             window.blit(random_text, (button_x +50, button_y + 4 * (button_height) + (button_height - random_text.get_height()) // 2))
             window.blit(twovtwo_text, (button_x+button_width+30, button_y +  (button_height + button_margin) + (button_height - random_text.get_height()) // 2))
-
             pygame.display.flip()
-            
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     pygame.quit()
@@ -381,15 +376,12 @@ class ChessGame:
         self.list_of_boards[0]=[self.chess_board]
         self.len_list_of_boards+=1
         return (white_time,black_time)    
-
     def change_player(self) :
         if (self.turn=='white') :
             self.turn='black'
         else :
             self.turn='white'
-
     def update_timers(self):
-
         current_time = pygame.time.get_ticks()
         elapsed_time = (current_time - self.last_time_update) // 1000
 
@@ -402,7 +394,42 @@ class ChessGame:
 
         if self.white_time <= 0 or self.black_time <= 0:
             self.winner = "black" if self.white_time <= 0 else "white"
-
+    def castling(self) :
+        if not (self.classic) : 
+            return 
+        if  not (self.white_king_check) and not self.white_king_moved :
+            if (self.rook_moved[0]==0 and self.chess_board[7][5]=='--' and self.chess_board[7][6]=='--') :
+                b = False
+                for key in self.black_moves :
+                    b= (6,7) in self.black_moves[key] or (5,7) in self.black_moves[key] 
+                    if (b) :
+                        break
+                self.castle[0]=not b 
+            if (self.rook_moved[1]==0 and self.chess_board[7][1]=='--' and self.chess_board[7][2]=='--' and self.chess_board[7][3]=='--') :
+                b = False
+                for key in self.black_moves :
+                    
+                    b= (3,7) in self.black_moves[key] or (2,7) in self.black_moves[key] or (1,7) in self.black_moves[key] 
+                    if (b) :
+                        break
+                self.castle[1] = not b       
+         
+        if not (self.black_king_check) and not self.black_king_moved :
+            if (self.rook_moved[2]== 0 and self.chess_board[0][1]=='--' and self.chess_board[0][2]=='--' and self.chess_board[0][3]=='--') :
+                b = False
+                for key in self.white_moves :
+                    b= (1,0) in self.white_moves or (2,0) in self.white_moves or (3,0) in self.white_moves
+                    if (b):
+                        break
+                self.castle[2] =not  b
+            if (self.rook_moved[3]==0 and self.chess_board[0][6]=='--' and self.chess_board[0][5]=='--' ) :
+                b = False
+                for key in self.white_moves :
+                    b= (5,0) in self.white_moves[key] or (6,0) in self.white_moves[key]
+                    if (b):
+                        break
+                self.castle[3] = not b 
+                        
     def is_valid_move(self, start, end):
         x, y = start
         mx, my = end
@@ -429,7 +456,8 @@ class ChessGame:
                 if end_piece != '--':
                     return True
                 # En passant capture
-                last_move = self.last_move  # Store last move as (start, end)
+                last_move = self.last_move
+                print (last_move)# Store last move as (start, end)
                 if last_move and self.chess_board[last_move[1][1]][last_move[1][0]][1] == 'P' and abs(last_move[1][1]-last_move[0][1])==2:
                     print(last_move[1])
                     if last_move[1][0] == mx and last_move[1][1]+direction == my : 
@@ -465,7 +493,18 @@ class ChessGame:
         elif piece_type == 'K':
             if max(abs(mx - x), abs(my - y)) == 1:  # One square in any direction
                 return True
-
+            if (start_piece[0]=='w') :
+                if (mx==6 and my == 7  and self.castle[0]) :
+                    return True
+                if (mx==2 and my == 7  and self.castle[1]) :
+                    return True
+            if (start_piece[0]=='b') :
+                if (mx==2 and my == 0  and self.castle[2]) :
+                    print('ezrfzefze')
+                    return True
+                if (mx==6 and my == 0  and self.castle[3]) :
+                    print('fzefezeedf')
+                    return True
         # Queen moves
         elif piece_type == 'Q':
             if abs(mx - x) == abs(my - y) or x == mx or y == my:  # Diagonal, horizontal, or vertical
@@ -481,8 +520,6 @@ class ChessGame:
     def get_possible_moves(self, x, y):
         """Returns moves for the piece at (x, y) that don't put its king in check."""
         moves = []
-
-
         # Check all potential moves
         for my in range(8):
             for mx in range(8):
@@ -491,12 +528,12 @@ class ChessGame:
                     moves.append((mx, my))
         return moves
 
-    def castle(self) : 
-        return
+
     def move_piece(self, start, x, y): 
         """Moves the piece from start to (x, y). Handles en passant captures."""
         mx, my = start
         moving_piece = self.chess_board[my][mx]
+        direction = -1 if self.turn == 'black' else 1
         if (self.chess_board[my][mx][1]=='K') :
             color = self.chess_board[my][mx][0] 
             if (color=='w') :
@@ -504,13 +541,30 @@ class ChessGame:
             else :
                 self.black_king_moved=True
         # Move the piece from start to (x, y)
+        if (moving_piece[1]=='K' and abs(mx-x)==2 and self.classic):
+            self.chess_board[y][x]=moving_piece
+            self.chess_board[my][mx]='--'
+            direction = int((mx-x)/2)
+            if(x==6) :
+                 self.chess_board[my][7]='--'
+            else :
+                self.chess_board[my][0]='--'
+            rook = moving_piece[0] + 'R'
+            self.chess_board[y][mx-direction]=rook
+            
+            return
+            
         self.chess_board[y][x], self.chess_board[my][mx] = moving_piece, '--'
-
+        if ((y==0 or y==7) and  self.chess_board[y][x][1]=='P') :
+            self.chess_board[y][x] = self.chess_board[y][x][0] + 'Q'
+            
+                    
+            
         # Handle en passant capture
         if (self.pion_passant) :
             # Clear the square of the pawn captured via en passant
-            
-            self.chess_board[y+1][x] = '--'
+            print(x,' ',y+direction)
+            self.chess_board[y+direction][x] = '--'
             
         
             # Reset en passant if no double-step pawn move occurred
@@ -653,7 +707,6 @@ class ChessGame:
                 if pygame.mouse.get_pressed()[0]:  # Check if left click
                     x, y = event.pos
                     x_square, y_square = x // square_size, y // square_size
-                    
                     # Ensure within board bounds
                     if 0 <= x_square < 8 and 0 <= y_square < 8:
                         if self.selected_piece and (x_square, y_square) in self.possible_moves:
@@ -661,7 +714,6 @@ class ChessGame:
                             self.move_piece(self.selected_piece, x_square, y_square)
                             click_sound_chess.play()
                             self.last_move = [[self.selected_piece[0], self.selected_piece[1]], [x_square, y_square]]
-                            
                             # Check if the move results in a check
                             self.x_king, self.y_king = -1, -1  # Reset king position
                             for i in range(8):
@@ -673,14 +725,11 @@ class ChessGame:
                                         break 
                                 if self.x_king != -1:
                                     break
-                            
-                            
                             self.change_player()
                             self.selected_piece, self.possible_moves = None, []
                         elif self.chess_board[y_square][x_square][0]==self.turn[0]:
                             self.selected_piece = (x_square, y_square)
                             self.all_moves()
-                            
                             if (self.turn=='white') : 
                                 self.possible_moves = deepcopy(self.white_moves[(x_square, y_square)])  # Only get valid moves
                             else :
