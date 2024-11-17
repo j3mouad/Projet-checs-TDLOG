@@ -28,8 +28,6 @@ if __name__ == "__main__":
         pygame.display.flip()
         game.castling()
         game.run()
-        
-        print(game.castle)
         game.update_timers()
         if k == 0:
             game.time_reg(white_time, black_time)
