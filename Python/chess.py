@@ -3,7 +3,8 @@ import sys
 from copy import deepcopy
 import time
 from random import shuffle
-import pieces
+from utils import has_non_empty_list
+
 # Initialization de Pygame
 pygame.init()
 click_sound_add_time_button = pygame.mixer.Sound("chess_add_time_sound.wav")  # Ensure you have a click.wav file in the same directory
@@ -95,6 +96,8 @@ class ChessGame:
         self.pion_passant=False
         self.last_time_back_clicked=0
         self.x_king, self.y_king = -1, -1
+        self.white_moves={(-1,-1):[-1]}
+        self.black_moves={(-1,-1):[-1]}
 
     def time_reg(self,white_time,black_time):
         self.white_time=white_time
@@ -119,15 +122,6 @@ class ChessGame:
                     self.screen.blit(resized_piece, pygame.Rect(col * square_size, row * square_size, square_size, square_size))
                     
 
-    def draw_timer(self):
-        font = pygame.font.Font(None, 36)
-        white_timer_surface = font.render(f'White: {self.white_time // 60}:{self.white_time % 60:02}', True, black)
-        black_timer_surface = font.render(f'Black: {self.black_time // 60}:{self.black_time % 60:02}', True, black)
-
-        pygame.draw.rect(self.screen, white, (screen_width, 0, added_screen_width, screen_height))
-        self.screen.blit(white_timer_surface, (screen_width + 20, 450))
-        self.screen.blit(black_timer_surface, (screen_width + 20, 50))
-
     def draw_add_time_button(self):
         self.button_rect = pygame.Rect(screen_width + 20, 200, 250, 80)
         mouse_pos = pygame.mouse.get_pos()
@@ -140,22 +134,7 @@ class ChessGame:
         button_text = font.render('+ 5 seconds', True, white)
         text_rect = button_text.get_rect(center=self.button_rect.center)
         self.screen.blit(button_text, text_rect)
-
-    def handle_add_time_button(self):
-        mouse_pos = pygame.mouse.get_pos()
-        if pygame.mouse.get_pressed()[0]:
-            if self.button_rect.collidepoint(mouse_pos):
-                if self.turn == 'white':
-                    self.black_time += 5
-                else:
-                    self.white_time += 5
-
-    
-    def display_rematch_button(self, window, font, button_x=50, button_y=100, button_width=200, button_height=50):
-        self.rematch_button_rect = pygame.Rect(button_x, button_y, button_width, button_height)
-        button_color_current = white if not self.rematch_button_rect.collidepoint(pygame.mouse.get_pos()) else button_hover_color
-        pygame.draw.rect(window, button_color_current, self.rematch_button_rect)
-
+   
     def handle_add_time_button(self):
         current_time = time.time()  # Get the current time
         
@@ -172,10 +151,8 @@ class ChessGame:
 
                     if  self.turn== 'white':
                         self.black_time += 5  # Add 5 seconds to black's time
-                        print("Added 5 seconds to black's time.")
                     else:
                         self.white_time += 5  # Add 5 seconds to white's time
-                        print("Added 5 seconds to white's time.")
 
                     self.last_click_time = current_time  # Update the last click time fix this code so it gets to add time in the left mouse click
 
@@ -198,52 +175,66 @@ class ChessGame:
             self.screen.blit(white_timer_surface, (screen_width + 20, 50))
     def game_ends(self):
         if (self.white_time<=0 ):
-            self.running=False
             self.winner = 'black'
             return True
         if (self.black_time<=0):
-            self.running = False
             self.winner = 'white'
             return True
-        return False
+        
+        
+        if (not has_non_empty_list(self.white_moves) and self.turn=='white') :
+           if (self.white_king_check):
+               self.winner = 'black'
+               self.running=False
+               return True
+           else :
+               self.winner = 'Stalemate'
+               self.running=False
+               return False
+        if (not has_non_empty_list(self.black_moves) and self.turn=='black'):
+            if (self.black_king_check):
+                self.winner = 'white'
+                self.running=False
+                return True
+            else :
+                self.winner = 'Stalemate'
+                self.running=False
+                return False
+        
+        
     def flip_board(self):
         L= [[self.chess_board[i][j] for j in range(8)] for i in range(7,-1,-1)]
         self.chess_board=deepcopy(L)
     def show_winner(self):
-        self.game_ends()
-        if (self.running):
-            return 
+        # Reinitialize Pygame in case it was previously quit
+        pygame.init()
+        # Set up the new screen
         screen = pygame.display.set_mode((screen_width + added_screen_width, screen_height))
-        winner = self.winner
+        pygame.display.set_caption("Winner Announcement")
         screen.fill(white)
-        font = pygame.font.Font(None, 48)
-        winner_text = font.render(f'{winner} a gagné!', True, black)
-        screen.blit(winner_text, (50, 50))
-        self.display_rematch_button(screen, font)
-        pygame.display.flip()
 
+        # Render the winner text
+        font = pygame.font.Font(None, 72)  # Larger font for visibility
+        winner = "No one" if self.winner is None else self.winner
+        winner_text = font.render(f'{winner} won!', True, black)
+        text_rect = winner_text.get_rect(center=(screen.get_width() // 2, screen.get_height() // 2))
+        screen.blit(winner_text, text_rect)
+        # Update the display
+        pygame.display.flip()
+        # Event loop to keep the window open
         waiting = True
         while waiting:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
-                    waiting = False
-                if event.type == pygame.MOUSEBUTTONDOWN:
-                    if self.rematch_button_rect.collidepoint(event.pos):
-                        self.reset_game()
-                        waiting = False
-                        return
+                    pygame.quit()
+                    exit()  # Exit the program gracefully
+                elif event.type == pygame.KEYDOWN or event.type == pygame.MOUSEBUTTONDOWN:
+                    waiting = False  # Close the winner screen on any key or mouse press
+
         pygame.quit()
-        sys.exit()
 
-    def display_rematch_button(self, window, font, button_x=50, button_y=100, button_width=200, button_height=400):
-        self.rematch_button_rect = pygame.Rect(button_x, button_y, button_width, button_height)
-        button_color_current = white if not self.rematch_button_rect.collidepoint(pygame.mouse.get_pos()) else button_hover_color
-        pygame.draw.rect(window, button_color_current, self.rematch_button_rect)
 
-        rematch_text = font.render("Rejouer", True, black)
-        text_x = button_x + (button_width - rematch_text.get_width()) // 2
-        text_y = button_y + (button_height - rematch_text.get_height()) // 2
-        window.blit(rematch_text, (text_x, text_y))
+   
     def draw_move_back_button(self):
         # Define button properties
         button_width = 60
@@ -274,13 +265,12 @@ class ChessGame:
             return
         if (self.len_list_of_boards == 0):
             return
-        print("Back button clicked!")
         self.last_time_back_clicked = time
         self.len_list_of_boards-=1
         l=self.len_list_of_boards
         self.white_time, self.black_time = self.list_of_times[l - 1]
         self.chess_board = deepcopy(self.list_of_boards[l - 1])
-        #self.selected_piece=[]
+        self.selected_piece=[]
         self.draw_board()
         self.draw_pieces()
         self.last_move=[]
@@ -418,13 +408,13 @@ class ChessGame:
         mx, my = end
         start_piece = self.chess_board[y][x]
         end_piece = self.chess_board[my][mx]
-
+        opponent_color = 'b' if self.turn=='w' else 'w' 
         # Ensure the piece belongs to the current player and the destination is valid
         if start_piece == '--' or end_piece[0] == start_piece[0]:
             return False
 
         piece_type = start_piece[1]
-
+        
         # Pawn moves
         if piece_type == 'P':
             direction = -1 if start_piece[0] == 'w' else 1  # White moves up, black moves down
@@ -440,8 +430,9 @@ class ChessGame:
                     return True
                 # En passant capture
                 last_move = self.last_move  # Store last move as (start, end)
-                if last_move and self.chess_board[last_move[1][1]][last_move[1][0]][1] == 'P':
-                    if last_move[1] == (mx, my - direction) and self.chess_board[my - direction][mx] == opponent_color + 'P':
+                if last_move and self.chess_board[last_move[1][1]][last_move[1][0]][1] == 'P' and abs(last_move[1][1]-last_move[0][1])==2:
+                    print(last_move[1])
+                    if last_move[1][0] == mx and last_move[1][1]+direction == my : 
                         self.pion_passant = True
                         return True
 
@@ -500,7 +491,8 @@ class ChessGame:
                     moves.append((mx, my))
         return moves
 
-
+    def castle(self) : 
+        return
     def move_piece(self, start, x, y): 
         """Moves the piece from start to (x, y). Handles en passant captures."""
         mx, my = start
@@ -532,7 +524,6 @@ class ChessGame:
     def is_king_in_check(self):
         """Checks if the player's king is in check."""
         color=self.turn[0]
-        #print(color)
         king_position = self.get_king_position()
         if not king_position:
             # King not found, possibly captured
@@ -550,7 +541,7 @@ class ChessGame:
                 if piece[0] == opponent_color :
                     
                     if self.is_valid_move((x, y), (x_king, y_king)):
-                        print('in_check')
+                        
                         return True
 
         return False
@@ -582,7 +573,6 @@ class ChessGame:
     def get_king_position(self):
         """Finds and returns the position of the king of the given color."""
         color = self.turn[0]
-       # print(color)
         king = color + 'K'
         for y in range(8):
             for x in range(8):
@@ -600,12 +590,26 @@ class ChessGame:
 
         for move in moves:
             if self.chess_board[move[1]][move[0]] == king:
-                print(king)
+                
                 return move  # Returns the position of the king in check
 
         return (-1, -1)
     
-    
+    def all_moves(self) :
+        if (self.turn=='white') :
+            self.white_moves.clear() 
+            for y in range(8):
+                for x in range(8):
+                    if self.chess_board[y][x][0]=='w' :
+                        self.white_moves[(x,y)]=self.get_valid_moves(x,y)
+        if (self.turn=='black') :
+            self.black_moves.clear()
+            for y in range(8) :
+                for x in range(8) :
+                    if self.chess_board[y][x][0]=='b' :
+                        self.black_moves[(x,y)]=self.get_valid_moves(x,y)
+        
+        
     def update_list_of_boards(self) : 
         l = self.len_list_of_boards
         # Ensure the list_of_boards contains independent deep copies of the board (3D list)
@@ -616,9 +620,17 @@ class ChessGame:
             
     def draw_king_in_check(self) :
         x_king,y_king=self.x_king,self.y_king
-        
+        if x_king==-1 and y_king==-1 : 
+            if (self.turn=='white') : 
+                self.white_king_check=False
+            else :
+                self.black_king_check=False
+            return
         if (x_king, y_king) != (-1, -1):
-            print('rgrger')
+            if (self.turn=='white') : 
+                self.white_king_check=True
+            else :
+                self.black_king_check=True
             pygame.draw.rect(screen, red, pygame.Rect(x_king * square_size, y_king * square_size, square_size, square_size))
     def draw_selected_piece(self) : 
         if self.selected_piece:
@@ -667,7 +679,12 @@ class ChessGame:
                             self.selected_piece, self.possible_moves = None, []
                         elif self.chess_board[y_square][x_square][0]==self.turn[0]:
                             self.selected_piece = (x_square, y_square)
-                            self.possible_moves = self.get_valid_moves(x_square, y_square)  # Only get valid moves
-                            #print(possible_moves)
+                            self.all_moves()
+                            
+                            if (self.turn=='white') : 
+                                self.possible_moves = deepcopy(self.white_moves[(x_square, y_square)])  # Only get valid moves
+                            else :
+                                self.possible_moves = deepcopy(self.black_moves[(x_square, y_square)])  # Only get valid moves
         pygame.display.flip()
+        
     
