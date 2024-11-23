@@ -15,8 +15,12 @@ void Board::changeTurn(){
     else {turn = "white";}
 }
 
-Piece Board::getPiece(int x, int y){
-    return board[y][x];
+Piece Board::getPiece(Point point){
+    return board[point.getY()][point.getX()];
+}
+
+void Board::setPiece(Point point, Piece piece){
+    board[point.getY()][point.getX()] = piece;
 }
 
 vector<Point> Board::getPossibleMoves(Point position){
@@ -93,14 +97,76 @@ vector<Point> Board::getPossibleMoves(Point position){
     return VectOfMoves;
 }
 
+vector<Point> Board::getPossibleAttacks(Point position){
+    int movex,movey;
+    int piecePositionX,piecePositionY;
+    int currPosX,currPosY;
+    int multiplier;
+    vector<Point> VectOfMoves;
+    piecePositionX = position.getX();
+    piecePositionY = position.getY();
+    Piece piece = board[piecePositionY][piecePositionX];
+    if(piece.getColor() != turn){
+        return VectOfMoves;
+    }
+    const Point* elemMoves = piece.getElemMoveSet();
+    if(piece.isMoveSetAttackMoveSet()){
+        for(int idx=0;idx<piece.numberOfElemMoves(); idx++){
+            movex = elemMoves[idx].getX();
+            movey = elemMoves[idx].getY();
+            multiplier = 1;
+            while(true){
+                if (multiplier == 2 && piece.hasInfiniteMoves() == false){
+                    break;
+                }
+                currPosX = piecePositionX + multiplier*movex;
+                currPosY = piecePositionY + multiplier*movey;
+                if (currPosX>=0 && currPosX<8 && currPosY>=0 && currPosY<8 && board[currPosY][currPosX].getColor()!= turn){
+                    multiplier++;
+                    if(board[currPosY][currPosX].getName() != "EmptyPlace"){
+                        VectOfMoves.push_back(Point(currPosX,currPosY));
+                        break;
+                    }
+                }
+                else{
+                    break;
+                }
+            }
+        }
+    }
+    else{
+        const Point* attackMoves = piece.getAttackMoveSet();
+        for(int idx=0; idx<piece.numberOfAttackMoves(); idx++){
+            movex = attackMoves[idx].getX();
+            movey = attackMoves[idx].getY();
+            currPosX = piecePositionX + movex;
+                currPosY = piecePositionY + movey;
+            if (currPosX>=0 && currPosX<8 && currPosY>=0 && currPosY<8 && board[currPosY][currPosX].getColor() != turn && board[currPosY][currPosX].getColor() != "none"){
+                    multiplier++;
+                    VectOfMoves.push_back(Point(currPosX,currPosY));
+                }
+            
+        }
+
+    }
+    return VectOfMoves;
+}
+
 bool Board::movePiece(Point Position1, Point Position2){
     bool winningTheGame = false;
-    Piece piece = board[Position1.getY()][Position1.getX()];
-    board[Position1.getY()][Position1.getX()] = Empty;
-    if (board[Position2.getY()][Position2.getX()].getName()== "King"){
+    Piece piece = getPiece(Position1);
+    setPiece(Position1,Empty);
+    if (getPiece(Position1).getName()== "King"){
+        if (getPiece(Position1).getColor() == "white"){
+            WhiteKingPos = Position2;
+        } else {
+            BlackKingPos = Position2;
+        }
+    }
+    if (getPiece(Position2).getName()== "King"){
         winningTheGame = true;
     }
-    board[Position2.getY()][Position2.getX()] = piece;
+    setPiece(Position2,piece);
     return winningTheGame;
 }
 
