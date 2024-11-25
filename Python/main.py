@@ -1,5 +1,5 @@
 import os
-os.chdir("/home/hassenekallala/Desktop/projet/Projet-echecs-TDLOG/Python")
+os.chdir("C:/Users/hfers/Documents/GitHub/Projet-echecs-TDLOG/Python")
 from chess import ChessGame
 import pygame
 from chess import screen_width,screen_height,added_screen_width
@@ -10,7 +10,7 @@ pygame.init()
 if __name__ == "__main__":
     game = ChessGame()
     white_time, black_time = game.choose_game()  # Initialize game mode selection
-    screen = pygame.display.set_mode((screen_width + added_screen_width ,  screen_height))
+    screen = pygame.display.set_mode((screen_width + added_screen_width , screen_height))
     game.time_reg(white_time, black_time)
     pygame.time.delay(100)
     game.list_of_boards.append(game.chess_board)

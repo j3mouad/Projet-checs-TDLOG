@@ -407,7 +407,7 @@ class ChessGame:
             if (self.rook_moved[0]==0 and self.chess_board[7][5]=='--' and self.chess_board[7][6]=='--') :
                 b = False
                 for key in self.black_moves :
-                    b= (6,7) in self.black_moves[key] or (5,7) in self.black_moves[key] 
+                    b= (6,7) in self.black_moves[key] or (5,7) in self.black_moves[key] or b 
                     if (b) :
                         break
                 self.castle[0]=not b 
@@ -501,12 +501,12 @@ class ChessGame:
         elif piece_type == 'K':
             if max(abs(mx - x), abs(my - y)) == 1:  # One square in any direction
                 return True
-            if (start_piece[0]=='w') :
+            if (start_piece[0]=='w' and not self.white_king_moved ) :
                 if (mx==6 and my == 7  and self.castle[0]) :
                     return True
                 if (mx==2 and my == 7  and self.castle[1]) :
                     return True
-            if (start_piece[0]=='b') :
+            if (start_piece[0]=='b' and not self.black_king_moved) :
                 if (mx==2 and my == 0  and self.castle[2]) :
                     print('ezrfzefze')
                     return True
@@ -542,6 +542,33 @@ class ChessGame:
         mx, my = start
         moving_piece = self.chess_board[my][mx]
         direction = -1 if self.turn == 'black' else 1
+        if (moving_piece[1]=='K' and abs(mx-x)==2 and self.classic and my==y):
+            if (my  == 7 and not self.white_king_moved and not self.white_king_check and self.turn=='white') :
+                self.chess_board[y][x]=moving_piece
+                self.chess_board[my][mx]='--'
+                direction = int((mx-x)/2)
+                if(x==6) :
+                    self.chess_board[my][7]='--'
+                else :
+                    self.chess_board[my][0]='--'
+                rook = moving_piece[0] + 'R'
+                self.chess_board[y][mx-direction]=rook
+                self.white_king_moved=True
+
+                return
+            if (my==0 and not self.black_king_check and not self.black_king_moved and self.black=='black' ) :
+                self.chess_board[y][x]=moving_piece
+                self.chess_board[my][mx]='--'
+                direction = int((mx-x)/2)
+                if(x==6) :
+                    self.chess_board[my][7]='--'
+                else :
+                    self.chess_board[my][0]='--'
+                rook = moving_piece[0] + 'R'
+                self.chess_board[y][mx-direction]=rook
+                self.black_king_moved=True
+
+                return
         if (self.chess_board[my][mx][1]=='K') :
             color = self.chess_board[my][mx][0] 
             if (color=='w') :
@@ -549,18 +576,7 @@ class ChessGame:
             else :
                 self.black_king_moved=True
         # Move the piece from start to (x, y)
-        if (moving_piece[1]=='K' and abs(mx-x)==2 and self.classic):
-            self.chess_board[y][x]=moving_piece
-            self.chess_board[my][mx]='--'
-            direction = int((mx-x)/2)
-            if(x==6) :
-                 self.chess_board[my][7]='--'
-            else :
-                self.chess_board[my][0]='--'
-            rook = moving_piece[0] + 'R'
-            self.chess_board[y][mx-direction]=rook
-            
-            return
+        
             
         self.chess_board[y][x], self.chess_board[my][mx] = moving_piece, '--'
         if ((y==0 or y==7) and  self.chess_board[y][x][1]=='P') :
