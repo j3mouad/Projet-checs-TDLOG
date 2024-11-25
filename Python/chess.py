@@ -16,7 +16,7 @@ screen = pygame.display.set_mode((screen_width + added_screen_width, screen_heig
 pygame.display.set_caption("Chess")
 # Colors
 # Define colors
-white, grey, red = (255, 255, 255), (128, 128, 128), (255, 0, 0)
+white, grey, red, orange = (255, 255, 255), (128, 128, 128), (255, 0, 0), (255,165,0)
 brown, light_brown, highlight_color = (118, 150, 86), (238, 238, 210), (200, 200, 0)
 square_size = screen_width // 8
 black = (0, 0, 0)
@@ -289,9 +289,13 @@ class ChessGame:
     def choose_game(self):
         window = pygame.display.set_mode((screen_width + added_screen_width, screen_height),pygame.RESIZABLE)
         pygame.display.set_caption("Let's play Chess!")
+        
+        # Load the background image
+        background_image = pygame.image.load("background_image.jpg")  # Update with your image path
+        background_image = pygame.transform.scale(background_image, (screen_width + added_screen_width, screen_height))
+        
         font = pygame.font.Font(None, 28)
         text = font.render("Choose color and time ", True, black)
-        window.blit(text, (50, 50))
         
         button_width = 250
         button_height = 50
@@ -314,7 +318,8 @@ class ChessGame:
         
         while first_choosing or second_choosing:
             mouse_pos = pygame.mouse.get_pos()
-            window.fill(white)
+            # Draw the background image
+            window.blit(background_image, (0, 0))
             window.blit(text, (50, 50))
             pygame.draw.rect(window, white if not button_black.collidepoint(mouse_pos) else button_hover_color, button_black)
             pygame.draw.rect(window, white if not button_white.collidepoint(mouse_pos) else button_hover_color, button_white)
@@ -322,19 +327,19 @@ class ChessGame:
             white_text = font.render("White pieces", True, black)
             window.blit(black_text, (button_x + 10, button_y + 10))
             window.blit(white_text, (button_x + 10, button_y + button_height + button_margin + 10))
-            pygame.draw.rect(window, grey if not button_2v2.collidepoint(mouse_pos) else button_hover_color, button_2v2)
-            pygame.draw.rect(window, grey if not button_black.collidepoint(mouse_pos) else button_hover_color, button_black)
-            pygame.draw.rect(window, grey if not button_white.collidepoint(mouse_pos) else button_hover_color, button_white)
-            pygame.draw.rect(window, grey if not button_rapid.collidepoint(mouse_pos) else button_hover_color, button_rapid)
-            pygame.draw.rect(window, grey if not button_classic.collidepoint(mouse_pos) else button_hover_color, button_classic)
-            pygame.draw.rect(window, grey if not button_blitz.collidepoint(mouse_pos) else button_hover_color, button_blitz) 
-            pygame.draw.rect(window, grey if not button_random.collidepoint(mouse_pos) else button_hover_color, button_random)
+            pygame.draw.rect(window, orange if not button_2v2.collidepoint(mouse_pos) else button_hover_color, button_2v2)
+            pygame.draw.rect(window, orange if not button_black.collidepoint(mouse_pos) else button_hover_color, button_black)
+            pygame.draw.rect(window, orange if not button_white.collidepoint(mouse_pos) else button_hover_color, button_white)
+            pygame.draw.rect(window, orange if not button_rapid.collidepoint(mouse_pos) else button_hover_color, button_rapid)
+            pygame.draw.rect(window, orange if not button_classic.collidepoint(mouse_pos) else button_hover_color, button_classic)
+            pygame.draw.rect(window, orange if not button_blitz.collidepoint(mouse_pos) else button_hover_color, button_blitz) 
+            pygame.draw.rect(window, orange if not button_random.collidepoint(mouse_pos) else button_hover_color, button_random)
             black_text = font.render("Jouer avec Noirs", True, black)
             white_text = font.render("Jouer avec Blancs", True, black)
-            classic_text = font.render("Jeu classic",True,black) 
+            classic_text = font.render("Jeu classique",True, black) 
             blitz_text = font.render("Jeu blitz",True,black)
-            rapid_text= font.render("Jeu rapid",True,black)
-            twovtwo_text = font.render("Jeu 2v2",True,black)
+            rapid_text= font.render("Jeu rapide",True,black)
+            twovtwo_text = font.render("Jeu 1 VS 1",True,black)
             random_text=font.render("Jeu de Fisher",True,black)
             window.blit(black_text, (button_x + 10, button_y + (button_height - black_text.get_height()) // 2))
             window.blit(white_text, (button_x + 10, button_y + button_height + button_margin + (button_height - white_text.get_height()) // 2))
