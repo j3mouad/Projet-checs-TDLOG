@@ -1,0 +1,1 @@
+/usr/bin/c++ -fPIC -shared  -o libAI.so CMakeFiles/AI.dir/AI.cpp.o  -Wl,-rpath,/home/hassenekallala/miniconda3/lib /home/hassenekallala/miniconda3/lib/libpython3.12.so 

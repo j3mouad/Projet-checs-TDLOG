@@ -1,3 +1,4 @@
-C:/Users/jmoua/OneDrive/Documents/GitHub/Projet-checs-TDLOG/build/CMakeFiles/Projet-echecs-TDLOG.dir
-C:/Users/jmoua/OneDrive/Documents/GitHub/Projet-checs-TDLOG/build/CMakeFiles/edit_cache.dir
-C:/Users/jmoua/OneDrive/Documents/GitHub/Projet-checs-TDLOG/build/CMakeFiles/rebuild_cache.dir
+/home/hassenekallala/Desktop/projet/c++python/Projet-echecs-TDLOG/build/CMakeFiles/AI.dir
+/home/hassenekallala/Desktop/projet/c++python/Projet-echecs-TDLOG/build/CMakeFiles/Projet-echecs-TDLOG.dir
+/home/hassenekallala/Desktop/projet/c++python/Projet-echecs-TDLOG/build/CMakeFiles/edit_cache.dir
+/home/hassenekallala/Desktop/projet/c++python/Projet-echecs-TDLOG/build/CMakeFiles/rebuild_cache.dir

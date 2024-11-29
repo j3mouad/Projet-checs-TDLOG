@@ -1,0 +1,5 @@
+/snap/clion/305/bin/cmake/linux/x64/bin/cmake -DCMAKE_BUILD_TYPE=Debug -DCMAKE_MAKE_PROGRAM=/snap/clion/305/bin/ninja/linux/x64/ninja -G Ninja -S /home/hassenekallala/Desktop/projet/c++python/Projet-echecs-TDLOG -B /home/hassenekallala/Desktop/projet/c++python/Projet-echecs-TDLOG/cmake-build-debug
+-- Found pybind11: /home/hassenekallala/miniconda3/include (found version "2.13.6")
+-- Configuring done (0.5s)
+-- Generating done (0.0s)
+-- Build files have been written to: /home/hassenekallala/Desktop/projet/c++python/Projet-echecs-TDLOG/cmake-build-debug

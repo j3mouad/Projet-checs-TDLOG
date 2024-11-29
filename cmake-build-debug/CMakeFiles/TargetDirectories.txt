@@ -1,0 +1,4 @@
+/home/hassenekallala/Desktop/projet/c++python/Projet-echecs-TDLOG/cmake-build-debug/CMakeFiles/AI.dir
+/home/hassenekallala/Desktop/projet/c++python/Projet-echecs-TDLOG/cmake-build-debug/CMakeFiles/Projet-echecs-TDLOG.dir
+/home/hassenekallala/Desktop/projet/c++python/Projet-echecs-TDLOG/cmake-build-debug/CMakeFiles/edit_cache.dir
+/home/hassenekallala/Desktop/projet/c++python/Projet-echecs-TDLOG/cmake-build-debug/CMakeFiles/rebuild_cache.dir

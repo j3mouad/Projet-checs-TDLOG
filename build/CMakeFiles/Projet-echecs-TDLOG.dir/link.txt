@@ -1,3 +1,1 @@
-C:\ENPC\Tools\CMake_64\bin\cmake.exe -E rm -f CMakeFiles\Projet-echecs-TDLOG.dir/objects.a
-C:\ENPC\Tools\mingw810_64\bin\ar.exe qc CMakeFiles\Projet-echecs-TDLOG.dir/objects.a @CMakeFiles\Projet-echecs-TDLOG.dir\objects1.rsp
-C:\ENPC\Tools\mingw810_64\bin\g++.exe -g -Wl,--whole-archive CMakeFiles\Projet-echecs-TDLOG.dir/objects.a -Wl,--no-whole-archive -o Projet-echecs-TDLOG.exe -Wl,--out-implib,libProjet-echecs-TDLOG.dll.a -Wl,--major-image-version,0,--minor-image-version,0 @CMakeFiles\Projet-echecs-TDLOG.dir\linklibs.rsp
+/usr/bin/c++ "CMakeFiles/Projet-echecs-TDLOG.dir/main.cpp.o" "CMakeFiles/Projet-echecs-TDLOG.dir/game.cpp.o" "CMakeFiles/Projet-echecs-TDLOG.dir/board.cpp.o" "CMakeFiles/Projet-echecs-TDLOG.dir/pieces.cpp.o" -o Projet-echecs-TDLOG  -Wl,-rpath,/home/hassenekallala/miniconda3/lib /home/hassenekallala/miniconda3/lib/libpython3.12.so 

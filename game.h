@@ -1,6 +1,7 @@
+#pragma once
 #include "board.h"
 #include "player.h"
-
+#include "pieces.h"
 extern Point* initialHeatMap;
 
 class Game{
