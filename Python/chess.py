@@ -5,6 +5,14 @@ import time
 from random import shuffle
 from utils import has_non_empty_list,get_random_value
 import math
+import sys
+import copy
+sys.path.append('/home/hassene/Desktop/Projet-echecs-TDLOG/Python')
+import os
+import sys
+from AI import AI
+new_dir = ('/home/hassene/Desktop/Projet-echecs-TDLOG/Python')
+os.chdir(new_dir)
 # Initialisation de Pygame
 pygame.init()
 click_sound_add_time_button = pygame.mixer.Sound("chess_add_time_sound.wav")  # Ensure you have a click.wav file in the same directory
@@ -110,6 +118,30 @@ class ChessGame:
     def time_reg(self,white_time,black_time):
         self.white_time=white_time
         self.black_time=black_time
+    def copy_game(self):
+        """Custom method to copy the game state."""
+        new_game = copy.copy(self)  # Shallow copy the ChessGame object itself
+        
+        # Deep copy the mutable attributes manually
+        new_game.chess_board = [row[:] for row in self.chess_board]  # Deep copy the chess board
+        new_game.chess_board_squares = [row[:] for row in self.chess_board_squares]  # Copy the square names
+        new_game.list_of_boards = [board[:] for board in self.list_of_boards]  # Deep copy the list of boards
+        new_game.list_of_times = [time[:] for time in self.list_of_times]  # Deep copy the list of times
+        
+        # Deep copy the dictionaries for black and white moves
+        new_game.white_moves = self.white_moves.copy()  
+        new_game.black_moves = self.black_moves.copy()
+        
+        # Copy other mutable attributes as necessary
+        new_game.white_time = self.white_time
+        new_game.black_time = self.black_time
+        new_game.turn = self.turn
+        new_game.player = self.player
+        new_game.last_move = self.last_move[:]
+        new_game.possible_moves = self.possible_moves[:]
+        
+        # Return the copied game object
+        return new_game
     def draw_board(self):
         for row in range(8):
             for col in range(8):
@@ -372,7 +404,6 @@ class ChessGame:
                         self.time_reg(600,600)
                         white_time=600
                         black_time=600
-                        self.classic=False
                     elif button_blitz.collidepoint(event.pos) :
                         second_choosing = False
                         self.time_reg(60,60)
@@ -725,23 +756,26 @@ class ChessGame:
             pygame.draw.rect(screen, highlight_color, pygame.Rect(mx * square_size, my * square_size, square_size, square_size))
     def run(self) :
         for event in pygame.event.get():
+            
             if event.type == pygame.QUIT:
                 self.running = False
-            
-
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 if pygame.mouse.get_pressed()[0]:  # Check if left click
                     x, y = event.pos
                     x_square, y_square = x // square_size, y // square_size
                     if (self.turn=='black' and len(self.black_moves)>3) :
-                        start,end = get_random_value(self.black_moves)
+                        self.all_moves()
+                        start,end = AI(self)
                         self.last_move = [start,end]
+                        print(end)
+                        print(start)
                         self.move_piece(start,end[0],end[1])
                         self.all_moves()
                         self.turn = 'white'
                     # Ensure within board bounds
                     if 0 <= x_square < 8 and 0 <= y_square < 8:
                         if self.selected_piece and (x_square, y_square) in self.possible_moves:
+                            self.all_moves()
                             self.is_king_in_check()
                             self.move_piece(self.selected_piece, x_square, y_square)
                             click_sound_chess.play()

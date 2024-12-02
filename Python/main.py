@@ -4,6 +4,8 @@ from chess import screen_width,screen_height,added_screen_width
 pygame.init()
 import sys
 sys.path.append('/home/hassene/Desktop/Projet-echecs-TDLOG/build/libAI.so')
+import sys
+sys.path.append('/home/hassene/Desktop/Projet-echecs-TDLOG/Python')
 # Main function
 if __name__ == "__main__":
     game = ChessGame()
