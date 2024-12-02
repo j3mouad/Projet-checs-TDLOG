@@ -36,34 +36,35 @@ vector<Point> Game::getPossibleMoves(Point position, Point enPassant){
     return trueMoves;
 }
 
-map<Point,vector<Point>> Game::getAllPossibleMoves(Point enPassant){
-    map<Point,vector<Point>> possibleMoves;
+map<pair<int, int>,vector<Point>> Game::getAllPossibleMoves(Point enPassant){
+    map<pair<int, int>,vector<Point>> possibleMoves;
     for(int x=0; x<8; x++){
         for(int y=0; y<8; y++){
+            pair<int, int> pair(x,y);
             Point point(x,y);
-            possibleMoves[point] = getPossibleMoves(point,enPassant);
+            possibleMoves[pair] = getPossibleMoves(point,enPassant);
         }
     }
     return possibleMoves;
 }
 
-map<Point,vector<Point>> Game::getAllPossibleWhiteMoves(Point enPassant){
+map<pair<int, int>,vector<Point>> Game::getAllPossibleWhiteMoves(Point enPassant){
     if(gameBoard.getTurn() == "white"){
         return getAllPossibleMoves(enPassant);
     } else {
         gameBoard.changeTurn();
-        map<Point,vector<Point>> possibleMoves = getAllPossibleMoves(enPassant);
+        map<pair<int, int>,vector<Point>> possibleMoves = getAllPossibleMoves(enPassant);
         gameBoard.changeTurn();
         return possibleMoves;
     }
 }
 
-map<Point,vector<Point>> Game::getAllPossibleBlackMoves(Point enPassant){
+map<pair<int, int>,vector<Point>> Game::getAllPossibleBlackMoves(Point enPassant){
     if(gameBoard.getTurn() == "black"){
         return getAllPossibleMoves(enPassant);
     } else {
         gameBoard.changeTurn();
-        map<Point,vector<Point>> possibleMoves = getAllPossibleMoves(enPassant);
+        map<pair<int, int>,vector<Point>> possibleMoves = getAllPossibleMoves(enPassant);
         gameBoard.changeTurn();
         return possibleMoves;
     }
