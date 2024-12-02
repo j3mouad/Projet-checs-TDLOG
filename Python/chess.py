@@ -3,7 +3,7 @@ import sys
 from copy import deepcopy
 import time
 from random import shuffle
-from utils import has_non_empty_list
+from utils import has_non_empty_list,get_random_value
 import math
 # Initialisation de Pygame
 pygame.init()
@@ -468,9 +468,7 @@ class ChessGame:
                     return True
                 # En passant capture
                 last_move = self.last_move
-                print (last_move)# Store last move as (start, end)
                 if last_move and self.chess_board[last_move[1][1]][last_move[1][0]][1] == 'P' and abs(last_move[1][1]-last_move[0][1])==2:
-                    print(last_move[1])
                     if last_move[1][0] == mx and last_move[1][1]+direction == my : 
                         self.pion_passant = True
                         return True
@@ -513,10 +511,8 @@ class ChessGame:
                     return True
             if (start_piece[0]=='b' and not self.black_king_moved) :
                 if (mx==2 and my == 0  and self.castle[2]) :
-                    print('ezrfzefze')
                     return True
                 if (mx==6 and my == 0  and self.castle[3]) :
-                    print('fzefezeedf')
                     return True
         # Queen moves
         elif piece_type == 'Q':
@@ -544,11 +540,12 @@ class ChessGame:
 
     def move_piece(self, start, x, y): 
         """Moves the piece from start to (x, y). Handles en passant captures."""
+        
         mx, my = start
         moving_piece = self.chess_board[my][mx]
         direction = -1 if self.turn == 'black' else 1
         if (moving_piece[1]=='K' and abs(mx-x)==2 and self.classic and my==y):
-            if (my  == 7 and not self.white_king_moved and not self.white_king_check and self.turn=='white') :
+            if (my  == 7 and not self.white_king_moved and not self.white_king_check and not self.white_king_check and self.turn=='white') :
                 self.chess_board[y][x]=moving_piece
                 self.chess_board[my][mx]='--'
                 direction = int((mx-x)/2)
@@ -561,7 +558,7 @@ class ChessGame:
                 self.white_king_moved=True
 
                 return
-            if (my==0 and not self.black_king_check and not self.black_king_moved and self.black=='black' ) :
+            if (my==0 and not self.black_king_check and not self.black_king_moved and self.turn=='black' and not self.black_king_check) :
                 self.chess_board[y][x]=moving_piece
                 self.chess_board[my][mx]='--'
                 direction = int((mx-x)/2)
@@ -592,10 +589,7 @@ class ChessGame:
         # Handle en passant capture
         if (self.pion_passant) :
             # Clear the square of the pawn captured via en passant
-            print(x,' ',y+direction)
             self.chess_board[y+direction][x] = '--'
-            
-        
             # Reset en passant if no double-step pawn move occurred
         self.pion_passant = False
 
@@ -733,10 +727,18 @@ class ChessGame:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 self.running = False
+            
+
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 if pygame.mouse.get_pressed()[0]:  # Check if left click
                     x, y = event.pos
                     x_square, y_square = x // square_size, y // square_size
+                    if (self.turn=='black' and len(self.black_moves)>3) :
+                        start,end = get_random_value(self.black_moves)
+                        self.last_move = [start,end]
+                        self.move_piece(start,end[0],end[1])
+                        self.all_moves()
+                        self.turn = 'white'
                     # Ensure within board bounds
                     if 0 <= x_square < 8 and 0 <= y_square < 8:
                         if self.selected_piece and (x_square, y_square) in self.possible_moves:

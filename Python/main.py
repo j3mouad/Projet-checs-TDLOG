@@ -1,11 +1,9 @@
-import os
-os.chdir("C:/Users/hfers/Documents/GitHub/Projet-echecs-TDLOG/Python")
 from chess import ChessGame
 import pygame
 from chess import screen_width,screen_height,added_screen_width
-import sys
 pygame.init()
-
+import sys
+sys.path.append('/home/hassene/Desktop/Projet-echecs-TDLOG/build/libAI.so')
 # Main function
 if __name__ == "__main__":
     game = ChessGame()
@@ -31,7 +29,7 @@ if __name__ == "__main__":
         pygame.display.flip()
         game.castling()
         game.run()
-        game.update_timers()
+        game.update_timers()            
         if k == 0:
             game.time_reg(white_time, black_time)
             k += 1
