@@ -36,7 +36,6 @@ if __name__ == "__main__":
             game.time_reg(white_time, black_time)
             k += 1
             pygame.time.delay(100)
-        
         game.game_ends()
     pygame.quit()
     game.show_winner()

@@ -125,8 +125,7 @@ class ChessGame:
         # Deep copy the mutable attributes manually
         new_game.chess_board = [row[:] for row in self.chess_board]  # Deep copy the chess board
         new_game.chess_board_squares = [row[:] for row in self.chess_board_squares]  # Copy the square names
-        new_game.list_of_boards = [board[:] for board in self.list_of_boards]  # Deep copy the list of boards
-        new_game.list_of_times = [time[:] for time in self.list_of_times]  # Deep copy the list of times
+
         
         # Deep copy the dictionaries for black and white moves
         new_game.white_moves = self.white_moves.copy()  
@@ -656,18 +655,19 @@ class ChessGame:
 
     def simulate_move_and_check(self, start, end):
         """Simulates a move and checks if it puts the player's king in check."""
+        copy_game = self.copy_game()
         piece = self.chess_board[start[1]][start[0]]
         target_piece = self.chess_board[end[1]][end[0]]
         
         # Make the move temporarily
-        self.chess_board[end[1]][end[0]] = piece
-        self.chess_board[start[1]][start[0]] = "--"
+        copy_game.chess_board[end[1]][end[0]] = piece
+        copy_game.chess_board[start[1]][start[0]] = "--"
         # Check if the king is in check after the move
-        in_check = self.is_king_in_check()
+        in_check = copy_game.is_king_in_check()
 
         # Undo the move
-        self.chess_board[start[1]][start[0]] = piece
-        self.chess_board[end[1]][end[0]] = target_piece
+        copy_game.chess_board[start[1]][start[0]] = piece
+        copy_game.chess_board[end[1]][end[0]] = target_piece
 
         return  not in_check
 
@@ -763,7 +763,8 @@ class ChessGame:
                 if pygame.mouse.get_pressed()[0]:  # Check if left click
                     x, y = event.pos
                     x_square, y_square = x // square_size, y // square_size
-                    if (self.turn=='black' and len(self.black_moves)>3) :
+                    h = True
+                    if (self.turn=='black' and len(self.black_moves)>3 and h ) :
                         self.all_moves()
                         start,end = AI(self)
                         self.last_move = [start,end]
