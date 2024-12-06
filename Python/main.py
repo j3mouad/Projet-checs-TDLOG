@@ -5,7 +5,7 @@ pygame.init()
 import sys
 sys.path.append('/home/hassene/Desktop/Projet-echecs-TDLOG/build/libAI.so')
 import sys
-sys.path.append('/home/hassene/Desktop/Projet-echecs-TDLOG/Python')
+sys.path.append('/home/hasssene/Desktop/Projet-echecs-TDLOG/Python')
 # Main function
 if __name__ == "__main__":
     game = ChessGame()

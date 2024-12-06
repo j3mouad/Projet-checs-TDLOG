@@ -115,6 +115,10 @@ class ChessGame:
         self.black_moves={(-1,-1):[-1]}
         self.rook_moved=[0,0,0,0]
         self.castle=[0,0,0,0]
+        self.one_v_one=False
+        self.white=False
+        self.black=False
+
     def time_reg(self,white_time,black_time):
         self.white_time=white_time
         self.black_time=black_time
@@ -388,10 +392,12 @@ class ChessGame:
                     if button_black.collidepoint(event.pos):
                         first_choosing = False
                         self.turn = 'black'
+                        self.black=True
                         self.flip_board()
                     
                     elif button_white.collidepoint(event.pos):
                         first_choosing = False
+                        self.white=True
                         self.player = 'white'
                     elif button_classic.collidepoint(event.pos) :
                         second_choosing=False
@@ -413,6 +419,7 @@ class ChessGame:
                         shuffle(self.chess_board[7])
                     elif  button_2v2.collidepoint(event.pos) : 
                         first_choosing = False
+                        self.one_v_one=True
                         self.player = 'white'
         self.list_of_boards[0]=[self.chess_board]
         self.len_list_of_boards+=1
@@ -511,6 +518,7 @@ class ChessGame:
                 for i in range(1, max(abs(mx - x), abs(my - y))):
                     if self.chess_board[y + i * step_y][x + i * step_x] != '--':
                         return False
+                
                 return True
 
         # Knight moves
@@ -532,9 +540,11 @@ class ChessGame:
 
         # King moves
         elif piece_type == 'K':
+
             if max(abs(mx - x), abs(my - y)) == 1:  # One square in any direction
                 return True
             if (start_piece[0]=='w' and not self.white_king_moved ) :
+                
                 if (mx==6 and my == 7  and self.castle[0]) :
                     return True
                 if (mx==2 and my == 7  and self.castle[1]) :
@@ -609,7 +619,15 @@ class ChessGame:
                 self.black_king_moved=True
         # Move the piece from start to (x, y)
         
-            
+        if (self.chess_board[my][mx][1]=='R') :
+            if (mx==7 and my==7) :
+                self.rook_moved[0] = 1
+            if (mx==0 and my==7) :
+                self.rook_moved[1]==1
+            if (mx == 0 and my == 0) :
+                self.rook_moved[2] = 1
+            if (mx==7 and my == 0 ) :
+                self.rook_moved[3] = 1
         self.chess_board[y][x], self.chess_board[my][mx] = moving_piece, '--'
         if ((y==0 or y==7) and  self.chess_board[y][x][1]=='P') :
             self.chess_board[y][x] = self.chess_board[y][x][0] + 'Q'
@@ -755,6 +773,7 @@ class ChessGame:
             pygame.draw.rect(screen, highlight_color, pygame.Rect(x * square_size, y * square_size, square_size, square_size))
             pygame.draw.rect(screen, highlight_color, pygame.Rect(mx * square_size, my * square_size, square_size, square_size))
     def run(self) :
+        from AI import evaluate
         for event in pygame.event.get():
             
             if event.type == pygame.QUIT:
@@ -766,6 +785,7 @@ class ChessGame:
                     h = True
                     if (self.turn=='black' and len(self.black_moves)>3 and h ) :
                         self.all_moves()
+                        print(evaluate(self))
                         start,end = AI(self)
                         self.last_move = [start,end]
                         print(end)
@@ -796,6 +816,7 @@ class ChessGame:
                             self.selected_piece, self.possible_moves = None, []
                         elif self.chess_board[y_square][x_square][0]==self.turn[0]:
                             self.selected_piece = (x_square, y_square)
+                            self.castling()
                             self.all_moves()
                             if (self.turn=='white') : 
                                 self.possible_moves = deepcopy(self.white_moves[(x_square, y_square)])  # Only get valid moves
