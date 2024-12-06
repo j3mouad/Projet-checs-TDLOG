@@ -39,6 +39,3 @@ if __name__ == "__main__":
         game.game_ends()
     pygame.quit()
     game.show_winner()
-    
-    
- 

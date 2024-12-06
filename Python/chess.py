@@ -785,11 +785,11 @@ class ChessGame:
                     h = True
                     if (self.turn=='black' and len(self.black_moves)>3 and h ) :
                         self.all_moves()
-                        print(evaluate(self))
                         start,end = AI(self)
                         self.last_move = [start,end]
+                        print('rsefzref')
                         print(end)
-                        print(start)
+
                         self.move_piece(start,end[0],end[1])
                         self.all_moves()
                         self.turn = 'white'

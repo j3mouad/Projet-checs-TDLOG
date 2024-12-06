@@ -11,22 +11,23 @@ if new_dir not in sys.path:
 
 # Positional tables for pieces
 PAWN_TABLE = [
-    [0, 0, 0, 0, 0, 0, 0, 0],
-    [0, 0, 0, 0, 0, 0, 0, 0],
-    [0, 0, 0, 0, 0, 0, 0, 0],
-    [0, 0, 0, 10, 10, 0, 0, 0],
-    [0, 0, 0, 10, 10, 0, 0, 0],
-    [0, 0, 0, 0, 0, 0, 0, 0],
-    [0, 0, 0, 0, 0, 0, 0, 0],
-    [0, 0, 0, 0, 0, 0, 0, 0]
+    [ 0,  0,  0,  0,  0,  0,  0,  0],  # 8th rank
+    [30, 30, 30, 30, 30, 30, 30, 30],  # 7th rank (promotion potential)
+    [10, 10, 20, 30, 30, 20, 10, 10],  # 6th rank (advanced pawns gain value)
+    [ 5,  5, 10, 40, 25, 10,  5,  5],  # 5th rank (central control is valuable)
+    [ 0,  0,  0, 20, 20,  0,  0,  0],  # 4th rank (encourage centralization)
+    [ 5, -5, -10,  0,  0, -10, -5,  5], # 3rd rank (discourage premature pushes)
+    [ 5, 10, 10, -20, -20, 10, 10,  5], # 2nd rank (initial pawn moves)
+    [ 0,  0,  0,  0,  0,  0,  0,  0],  # 1st rank (no pawns here)
 ]
+
 KNIGHT_TABLE = [
     [-50, -40, -30, -30, -30, -30, -40, -50],
     [-40, -20, 0, 5, 5, 0, -20, -40],
-    [-30, 5, 10, 15, 15, 10, 5, -30],
-    [-30, 10, 15, 20, 20, 15, 10, -30],
-    [-30, 10, 15, 20, 20, 15, 10, -30],
-    [-30, 5, 10, 15, 15, 10, 5, -30],
+    [-30, 0, 50, 15, 15, 50, 0, -30],
+    [-30, 5, 15, 20, 20, 15, 5, -30],
+    [-30, 5, 15, 20, 20, 15, 5, -30],
+    [-30, 0, 50, 15, 15, 50, 0, -30],
     [-40, -20, 0, 5, 5, 0, -20, -40],
     [-50, -40, -30, -30, -30, -30, -40, -50]
 ]
@@ -43,14 +44,14 @@ BISHOP_TABLE = [
 ]
 
 ROOK_TABLE = [
-    [0, 0, 5, 10, 10, 5, 0, 0],
+    [0, -5, 5, 10, 10, 5, -5, 0],
     [-5, 0, 0, 0, 0, 0, 0, -5],
     [-5, 0, 0, 0, 0, 0, 0, -5],
     [-5, 0, 0, 0, 0, 0, 0, -5],
     [-5, 0, 0, 0, 0, 0, 0, -5],
     [0, 5, 5, 5, 5, 5, 5, 0],
     [0, 10, 10, 10, 10, 10, 10, 0],
-    [0, 0, 5, 10, 10, 5, 0, 0]
+    [0, -5, 5, 10, 10, 5, -5, 0]
 ]
 
 QUEEN_TABLE = [
@@ -76,30 +77,35 @@ KING_TABLE = [
 ]
 
 PIECE_VALUES = {
-    'P': 1,
-    'N': 3,
-    'B': 3,
-    'R': 5,
-    'Q': 9,
-    'K': 10000
+    'P': 100,
+    'N': 300,
+    'B': 320,
+    'R': 500,
+    'Q': 900,
+    'K': 100000
 }
-
+def coeffs(x,y) :
+    if (abs(x-3)+abs(y-3)<=3) :
+        return 1.5
+    if (abs(x-3)+abs(y-3)<=5) :
+        return 1
+    return 0.8
 def evaluate_piece(turn, piece, x, y):
     """Evaluates the score of a piece based on its type, position, and game phase."""
-    mx = x if turn == 'white' else 7 - x
-    coeff = 1
+    my = y if turn == 'white' else 7 - y
     tables = {
         'N': (300, KNIGHT_TABLE),
         'Q': (900, QUEEN_TABLE),
-        'P': (50, PAWN_TABLE),
+        'P': (100, PAWN_TABLE),
         'R': (500, ROOK_TABLE),
         'B': (320, BISHOP_TABLE),
         'K': (10000, KING_TABLE)
     }
-
     if piece[1] in tables:
         base, table = tables[piece[1]]
-        piece_position_score = table[mx][y] * coeff
+        piece_position_score = table[my][x] 
+        coeff = coeffs(x,y)
+        coeff = 1 if (piece[1]=='P' or piece[1]=='K' or piece[1]=='B') else coeff
         # For white pieces, return positive value, for black return negative
         score = base + piece_position_score
         return score if piece[0] == 'w' else -score
@@ -108,19 +114,13 @@ def evaluate_material(game):
     material_score = 0
     for x in range(8):
         for y in range(8):
-            piece = game.chess_board[x][y]
+            piece = game.chess_board[y][x]
             if piece != '--':  # not an empty square
-                material_score += PIECE_VALUES.get(piece[1], 0) if piece[0] == 'w' else -PIECE_VALUES.get(piece[1], 0)
+                material_score += evaluate_piece(game.turn,piece,x,y) 
     return material_score
 def evaluate(game):
     """Calculates the total evaluation score for the game based on various factors."""
-    total_score = 0
-
-    for x in range(8):
-        for y in range(8):
-            piece = game.chess_board[x][y]
-            if piece != '--':  # Ignore empty squares
-                total_score += evaluate_piece(game.turn, piece, x, y)
+    total_score = 0 
 
     # King Safety: Add extra evaluation for the safety of the kings
     white_king_position = find_king_position(game, 'white')
@@ -128,18 +128,18 @@ def evaluate(game):
     total_score += king_safety(game.turn, white_king_position, black_king_position)
 
     # Pawn Structure Evaluation: Check for doubled, isolated, or passed pawns
-    total_score += evaluate_pawn_structure(game)
-
     # Add a bit of evaluation for central control and mobility
-    total_score += evaluate_control_and_mobility(game)
+    total_score += evaluate_control_and_mobility(game) + evaluate_material(game)
+    if (game.len_list_of_boards<10) :
+        total_score += evaluate_opening(game)
 
-    return total_score + evaluate_material(game)
+    return total_score 
 
 def find_king_position(game, color):
     """Returns the position of the king for a given color."""
     for x in range(8):
         for y in range(8):
-            piece = game.chess_board[x][y]
+            piece = game.chess_board[y][x]
             if piece == f'{color[0]}K':  # White king or black king
                 return (x, y)
     return None
@@ -156,60 +156,10 @@ def evaluate_king_position(position):
     if position:
         x, y = position
         # Add a bonus for a king closer to the center
-        return 0 if x in range(2, 6) and y in range(2, 6) else -100
+        return 0 if ((x ==0) or (x==7)) else -100
     return 0
 
-def evaluate_pawn_structure(game):
-    """Evaluates pawn structure considering doubled, isolated, and passed pawns."""
-    score = 0
-    # Loop through the board and evaluate pawns' structure
-    for x in range(8):
-        for y in range(8):
-            piece = game.chess_board[x][y]
-            if piece == 'wp':
-                score += evaluate_white_pawn(game, x, y)
-            elif piece == 'bp':
-                score -= evaluate_black_pawn(game, x, y)
-    return score
 
-def evaluate_white_pawn(game, x, y):
-    """Evaluate the position of a white pawn (for passed pawns, isolated pawns, etc.)."""
-    score = 0
-    # Evaluate pawn's position in terms of passed and isolated pawns
-    if is_passed_pawn(game, 'w', x, y):
-        score += 20
-    if is_isolated_pawn(game, 'w', x, y):
-        score -= 10
-    return score
-
-def evaluate_black_pawn(game, x, y):
-    """Evaluate the position of a black pawn (for passed pawns, isolated pawns, etc.)."""
-    score = 0
-    if is_passed_pawn(game, 'b', x, y):
-        score -= 20
-    if is_isolated_pawn(game, 'b', x, y):
-        score += 10
-    return score
-
-def is_passed_pawn(game, color, x, y):
-    """Checks if a pawn is a passed pawn."""
-    direction = 1 if color == 'w' else -1
-    # Check if there is no opposing pawn blocking the path ahead
-    for i in range(x + direction, 8, direction):
-        if game.chess_board[i][y] == f'bp' if color == 'w' else 'wp':
-            return False
-    return True
-
-def is_isolated_pawn(game, color, x, y):
-    """Checks if a pawn is isolated (no pawns of the same color on adjacent files)."""
-    # Check adjacent files for the same color pawns
-    if color == 'w':
-        if (y > 0 and game.chess_board[x][y - 1] == 'wp') or (y < 7 and game.chess_board[x][y + 1] == 'wp'):
-            return False
-    else:
-        if (y > 0 and game.chess_board[x][y - 1] == 'bp') or (y < 7 and game.chess_board[x][y + 1] == 'bp'):
-            return False
-    return True
 
 def evaluate_control_and_mobility(game):
     """Evaluates central control and piece mobility."""
@@ -224,47 +174,46 @@ def evaluate_control_and_mobility(game):
             score -= 10
 
     # Evaluate piece mobility
-    score += evaluate_piece_mobility(game)
     return score
 
-def evaluate_piece_mobility(game):
-    """Evaluates the mobility of pieces, rewarding those with more available moves."""
+
+def evaluate_opening(game):
     score = 0
-    # Count available moves for each piece (more moves = better mobility)
+    center_squares = [(3, 3), (3, 4), (4, 3), (4, 4)]
+
+    # Central control
+    for x, y in center_squares:
+        piece = game.chess_board[y][x]
+        if piece == 'wp':
+            score += 30
+        elif piece == 'bp':
+            score -= 30
+
+    # Piece development
     for x in range(8):
         for y in range(8):
-            piece = game.chess_board[x][y]
-            if piece != '--':
-                score += count_available_moves(game, x, y)
+            piece = game.chess_board[y][x]
+            if piece.startswith('w') and y > 3 and y <6 and abs(y-x)<4 and (piece[1]=='N' or piece[1]=='Q') :  # Encourage white pieces to advance
+                score += 40
+            elif piece.startswith('b') and y < 6 and y>2 and abs(y-x)<4 and (piece[1]=='N' or piece[1]=='Q'):  # Encourage black pieces to advance
+                score -= 40
+
     return score
 
-def count_available_moves(game, x, y):
-    """Counts the number of available moves for a piece at position (x, y)."""
-    piece = game.chess_board[x][y]
-    moves = 0
-    # Simple move counting logic for different piece types
-    if piece == 'wp' or piece == 'bp':  # Pawns
-        # Consider pawn forward moves (simplified, ignoring en passant and captures)
-        if 0 <= x + 1 < 8:
-            moves += 1
-    # Implement counting moves for other pieces similarly (knights, rooks, bishops, queens, kings)
-    # For brevity, we assume other pieces' move logic is also implemented here
-    return moves
-
-def minimax(game, depth, maximizing_player, alpha, beta):
+def minimax(game, depth, alpha, beta):
     if depth == 0 or not game.running:
         return evaluate(game)
-
-    if  maximizing_player:  # Maximizing for white
+    if  game.turn == 'white':  # Maximizing for white
         max_eval = float('-inf')
         for move in game.white_moves.values():
             for end_pos in move:
                 next_game = game.copy_game()
                 next_game.move_piece(move[0], end_pos[0], end_pos[1])
-                eval = minimax(next_game, depth - 1, False, alpha, beta)
+                next_game.change_player()
+                eval = minimax(next_game, depth - 1,alpha, beta)
                 max_eval = max(max_eval, eval)
                 alpha = max(alpha, eval)
-                if beta <= alpha:
+                if beta+10 <= alpha:
                     break
         return max_eval
     else:  # Minimizing for black
@@ -273,33 +222,34 @@ def minimax(game, depth, maximizing_player, alpha, beta):
             for end_pos in move:
                 next_game = game.copy_game()
                 next_game.move_piece(move[0], end_pos[0], end_pos[1])
-                eval = minimax(next_game, depth - 1, True, alpha, beta)
+                next_game.change_player()
+                eval = minimax(next_game, depth - 1, alpha, beta)
                 min_eval = min(min_eval, eval)
                 beta = min(beta, eval)
-                if beta <= alpha:
+                if beta+10 <= alpha:
                     break
         return min_eval
 
 
 def AI(game, depth=4):
-    print("evaluation is ", evaluate(game))
-    best_score = float('-inf') if game.turn == 'white' else float('inf')
-    best_move = None
-
+    moves_scores = []
     # Determine moves based on whose turn it is
     moves = game.white_moves if game.turn == 'white' else game.black_moves
-
+    
     for start_pos, possible_moves in moves.items():
         for end_pos in possible_moves:
             next_game = game.copy_game()
             next_game.move_piece(start_pos, end_pos[0], end_pos[1])
-            
-            # Recursively call minimax
-            score = minimax(next_game, depth - 1, game.turn == 'white', float('-inf'), float('inf'))
-
-            # Select the best move based on turn
-            if (game.turn == 'white' and score > best_score) or (game.turn == 'black' and score < best_score):
-                best_score = score
-                best_move = (start_pos, end_pos)
-
-    return best_move
+            next_game.change_player()
+            # Evaluate the move using minimax
+            score = minimax(next_game, depth - 1, alpha=-1000000, beta=10000000)
+            moves_scores.append(((start_pos, end_pos), score))
+    
+    # Sort moves based on the score
+    moves_scores.sort(key=lambda x: x[1], reverse=(game.turn == 'white'))
+    
+    # Return the move with the best score
+    if moves_scores:
+        best_move, best_score = moves_scores[0]
+        return best_move  # You could also return the score if needed
+    return None
