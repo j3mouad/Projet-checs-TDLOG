@@ -82,9 +82,9 @@ class ChessGame:
     ["a1", "b1", "c1", "d1", "e1", "f1", "g1", "h1"]
     ])
         
-        self.list_of_boards=[self.chess_board for _ in range(10000)]
+        self.list_of_boards=[self.chess_board for _ in range(1000)]
         self.len_list_of_boards=0 
-        self.list_of_times=[[0,0] for _ in range(10000)]
+        self.list_of_times=[[0,0] for _ in range(1000)]
         self.turn = 'white'
         self.player='white'
         self.last_move=[]
@@ -790,10 +790,13 @@ class ChessGame:
                     h = True
                     if (self.turn=='black' and len(self.black_moves)>3 and h ) :
                         self.all_moves()
-                        start,end = AI(self)
+                        depth = 4
+                        print('before ai',evaluate(self))
+                        start,end = AI(self,depth)
                         self.last_move = [start,end]
 
                         self.move_piece(start,end[0],end[1])
+                        print('after ai, ',evaluate(self))
                         self.all_moves()
                         self.turn = 'white'
                     # Ensure within board bounds

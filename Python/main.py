@@ -7,7 +7,7 @@ sys.path.append('/home/hassene/Desktop/Projet-echecs-TDLOG/build/libAI.so')
 import sys
 sys.path.append('/home/hasssene/Desktop/Projet-echecs-TDLOG/Python')
 
-
+from AI import evaluate
 # Main function
 if __name__ == "__main__":
     game = ChessGame()
