@@ -1,6 +1,6 @@
 import os
 import sys
-
+import random 
 # Set up directory
 new_dir = '/home/hassene/Desktop/Projet-echecs-TDLOG/build'
 os.chdir(new_dir)
@@ -12,24 +12,26 @@ if new_dir not in sys.path:
 # Positional tables for pieces
 PAWN_TABLE = [
     [  0,   0,   0,   0,   0,   0,   0,   0],  
-    [ 50,  50,  50, 40, 40,  50,  50,  50],  
-    [ 10,  10,  20,  20,  20,  20,  10,  10],  
-    [  5,  10,  10,  70,  70,  10,  10,   5],  
-    [  0,   0,   0,  80,  80,   0,   0,   0],  
-    [  5,  -5, 50,   0,   0, 50,  -5,   5],  
-    [  5,  10,  10, -20, -20,  10,  10,   5], 
+    [ 10,  10,  10, -10, -10,  10,  10,  10],  
+    [  5,   5,  10,  20,  20,  10,   5,   5],  
+    [  0,   0,   10,  30,  30,  10,   0,   0],  
+    [  5,   5,  20,  40,  40,  20,   5,   5],  
+    [ 10,  10,  20,  50,  50,  20,  10,  10],  
+    [ 20,  20,  30,  60,  60,  30,  20,  20], 
     [  0,   0,   0,   0,   0,   0,   0,   0], 
 ]
+
 KNIGHT_TABLE = [
     [0, 0, 0, 0, 0, 0, 0, 0],
     [40, 20, 0, 5, 5, 0, 20, 40],
-    [-30, 5, 200, 30, 30, 200, 5, -30],
-    [30, 10, 60, 80, 80, 60, 10, 30],
-    [30, 10, 60, 80, 80, 60, 10, 30],
-    [-30, 5, 200, 30, 30, 200, 5, -30],
+    [-30, 5, 30, 30, 30, 30, 5, -30],
+    [10, 10, 60, 40, 40, 60, 10, 10],
+    [10, 10, 60, 80, 80, 60, 10, 10],
+    [-30, 5, 30, 30, 30, 30, 5, -30],
     [40, 20, 0, 5, 5, 0, 20, 40],
-    [0, 00, 0, 0, 0, 0, 00, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0],
 ]
+
 BISHOP_TABLE = [
     [20, 10, 100, 10, 10, 100, 10, 20],
     [10, 0, 0, 0, 0, 0, 0, 10],
@@ -41,15 +43,16 @@ BISHOP_TABLE = [
     [20, 10, 100, 10, 10, 100, 10, 20]
 ]
 ROOK_TABLE = [
-    [50, 0, 90, 100, 100, 90, 00, 50],
+    [50, 0, 40, 10, 40, 40, 0, 50],
     [50, 0, 0, 0, 0, 0, 0, 50],
     [50, 0, 0, 0, 0, 0, 0, 50],
     [100, 0, 0, 0, 0, 0, 0, 100],
     [100, 0, 0, 0, 0, 0, 0, 100],
     [50, 0, 0, 0, 0, 0, 0, 50],
     [50, 0, 0, 0, 0, 0, 0, 50],
-    [50, 00, 90, 100, 100, 90, 0, 50]
+    [50, 0, 40, 10, 40, 40, 0, 50],
 ]
+
 QUEEN_TABLE = [
     [20, 10, 10, 5, 5, 10, 10, 20],
     [10, 0, 0, 0, 0, 0, 0, 10],
@@ -72,11 +75,11 @@ KING_TABLE = [
 ]
 
 tables = {
-        'N': (3000, KNIGHT_TABLE),
-        'Q': (9000, QUEEN_TABLE),
-        'P': (800, PAWN_TABLE),
-        'R': (5000, ROOK_TABLE),
-        'B': (3000, BISHOP_TABLE),
+        'N': (300, KNIGHT_TABLE),
+        'Q': (900, QUEEN_TABLE),
+        'P': (100, PAWN_TABLE),
+        'R': (500, ROOK_TABLE),
+        'B': (300, BISHOP_TABLE),
         'K': (100000, KING_TABLE)
     }
 
@@ -84,14 +87,7 @@ def evaluate_piece(piece, x, y):
     """Evaluates the score of a piece based on its type, position, and game phase."""
     my = y if piece[0] == 'w' else 7 - y
     
-    tables = {
-        'N': (3000, KNIGHT_TABLE),
-        'Q': (9000, QUEEN_TABLE),
-        'P': (800, PAWN_TABLE),
-        'R': (5000, ROOK_TABLE),
-        'B': (3000, BISHOP_TABLE),
-        'K': (100000, KING_TABLE)
-    }
+    
     if piece[1] in tables:
         base, table = tables[piece[1]]
         piece_position_score = table[my][x] 
@@ -193,68 +189,94 @@ def minimax(game, depth, alpha=float('-inf'), beta=float('inf')):
     
     if game.turn == 'white':  # Maximizing for white
         max_eval = float('-inf')
-        for move in game.white_moves.values():
-            for end_pos in move:
+        white_moves = list(game.white_moves.items())  # Convert to list
+        random.shuffle(white_moves)
+        for start_pos, possible_moves in white_moves:
+            for end_pos in possible_moves:
                 next_game = game.copy_game()
-                next_game.move_piece(move[0], end_pos[0], end_pos[1])
+                next_game.move_piece(start_pos, end_pos[0], end_pos[1])
                 next_game.change_player()
                 eval = minimax(next_game, depth - 1, alpha, beta)
                 max_eval = max(max_eval, eval)
                 alpha = max(alpha, eval)
                 
                 # Beta pruning
-                if beta <= alpha:
+                if beta+100 <= alpha :
                     break
         return max_eval
     else:  # Minimizing for black
         min_eval = float('inf')
-        for move in game.black_moves.values():
-            for end_pos in move:
+        black_moves = list(game.black_moves.items())  # Convert to list
+        random.shuffle(black_moves)
+        for start_pos, possible_moves in black_moves:
+            for end_pos in possible_moves:
                 next_game = game.copy_game()
-                next_game.move_piece(move[0], end_pos[0], end_pos[1])
+                next_game.move_piece(start_pos, end_pos[0], end_pos[1])
                 next_game.change_player()
                 eval = minimax(next_game, depth - 1, alpha, beta)
                 min_eval = min(min_eval, eval)
                 beta = min(beta, eval)
                 
                 # Alpha pruning
-                if beta <= alpha:
+                if beta +100<= alpha:
                     break
         return min_eval
 
-
-def AI(game, depth=7):
-    
+def AI(game, depth=15):
+    """
+    AI for determining the best move using heuristics and minimax evaluation.
+    Returns the best move as a tuple (start_pos, end_pos).
+    """
     moves_scores = []
-    # Determine moves based on whose turn it is
+    exclude = set()  # Use a set to track excluded moves for better performance
     moves = game.white_moves if game.turn == 'white' else game.black_moves
-    b = False
-    start = (-1,-1)
-    end = (-1,-1)
+    b = game.len_list_of_boards < 40  # Depth heuristic
+
+    # Immediate capture heuristic
+    if b:
+        for start_pos, possible_moves in moves.items():
+            x, y = start_pos
+            start_piece = game.chess_board[y][x][1]
+            color = game.chess_board[y][x][0]
+            for end_pos in possible_moves:
+                mx, my = end_pos
+                piece_end = game.chess_board[my][mx][1]
+                color_end = game.chess_board[my][mx][0]
+                if start_piece != '-' and piece_end != '-' and color_end != color and tables[piece_end] >= tables[start_piece]:
+                    return start_pos, end_pos
+
+    # Positional evaluation with exclusion logic
+    if b:
+        for start_pos, possible_moves in moves.items():
+            for end_pos in possible_moves:
+                copy_game = game.copy_game()
+                mx, my = end_pos
+                copy_game.move_piece(start_pos, mx, my)
+                copy_game.all_moves()
+                copy_game.change_player()
+                pos_moves_0 = copy_game.white_moves if copy_game.turn == 'white' else copy_game.black_moves
+                for start, possible_moves1 in pos_moves_0.items():
+                    if end_pos in possible_moves1:  # Exclude moves leading to immediate threat
+                        exclude.add((start_pos, end_pos))
+
+    # Evaluate all possible moves
+    print(exclude)
     for start_pos, possible_moves in moves.items():
-        x,y = start_pos
-        start_piece = game.chess_board[y][x][1]
-        color = game.chess_board[y][x][0]
-        
         for end_pos in possible_moves:
-            mx,my = end_pos 
-            piece_end = game.chess_board[my][mx][1]
-            color_end = game.chess_board[my][mx][0]
-            if (start_piece !='-' and piece_end!='-' and color_end!=color and tables[piece_end]>=tables[start_piece]) :
-                return (start_pos,end_pos)
+            if (start_pos, end_pos) in exclude:
+                continue  # Skip excluded moves
             next_game = game.copy_game()
             next_game.move_piece(start_pos, end_pos[0], end_pos[1])
             next_game.change_player()
             # Evaluate the move using minimax
             score = minimax(next_game, depth - 1)
-            moves_scores.append((score,(start_pos, end_pos)))
-    
-    # Sort moves based on the score
-    moves_scores.sort(reverse = True)
+            moves_scores.append((score, (start_pos, end_pos)))
 
-    print(evaluate(game))
+    # Sort moves based on scores in descending order
+    moves_scores.sort(reverse=True, key=lambda x: x[0])
+
+    print(f"Evaluation score: {evaluate(game)}")
     # Return the move with the best score
     if moves_scores:
-        score ,best_move = moves_scores[1]
-        return best_move  # You could also return the score if needed
+        return moves_scores[0][1]
     return None
