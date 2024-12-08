@@ -6,6 +6,8 @@ import sys
 sys.path.append('/home/hassene/Desktop/Projet-echecs-TDLOG/build/libAI.so')
 import sys
 sys.path.append('/home/hasssene/Desktop/Projet-echecs-TDLOG/Python')
+
+
 # Main function
 if __name__ == "__main__":
     game = ChessGame()
@@ -18,6 +20,7 @@ if __name__ == "__main__":
     k = 0
     p = 0 
     while game.running:
+        
         game.draw_timer()
         game.draw_add_time_button()
         game.handle_add_time_button()
@@ -31,6 +34,7 @@ if __name__ == "__main__":
         pygame.display.flip()
         game.castling()
         game.run()
+        game.all_moves()
         game.update_timers()            
         if k == 0:
             game.time_reg(white_time, black_time)

@@ -11,103 +11,99 @@ if new_dir not in sys.path:
 
 # Positional tables for pieces
 PAWN_TABLE = [
-    [ 0,  0,  0,  0,  0,  0,  0,  0],  # 8th rank
-    [30, 30, 30, 30, 30, 30, 30, 30],  # 7th rank (promotion potential)
-    [10, 10, 20, 30, 30, 20, 10, 10],  # 6th rank (advanced pawns gain value)
-    [ 5,  5, 10, 40, 25, 10,  5,  5],  # 5th rank (central control is valuable)
-    [ 0,  0,  0, 20, 20,  0,  0,  0],  # 4th rank (encourage centralization)
-    [ 5, -5, -10,  0,  0, -10, -5,  5], # 3rd rank (discourage premature pushes)
-    [ 5, 10, 10, -20, -20, 10, 10,  5], # 2nd rank (initial pawn moves)
-    [ 0,  0,  0,  0,  0,  0,  0,  0],  # 1st rank (no pawns here)
+    [  0,   0,   0,   0,   0,   0,   0,   0],  
+    [ 10,  10,  10, -10, -10,  10,  10,  10],  
+    [ 10,  10,  20,  20,  20,  20,  10,  10],  
+    [  5,  10,  10,  25,  25,  10,  10,   5],  
+    [  0,   0,   0,  20,  20,   0,   0,   0],  
+    [  5,  -5, -10,   0,   0, -10,  -5,   5],  
+    [  5,  10,  10, -20, -20,  10,  10,   5], 
+    [  0,   0,   0,   0,   0,   0,   0,   0], 
 ]
-
 KNIGHT_TABLE = [
-    [-50, -40, -30, -30, -30, -30, -40, -50],
-    [-40, -20, 0, 5, 5, 0, -20, -40],
-    [-30, 0, 50, 15, 15, 50, 0, -30],
-    [-30, 5, 15, 20, 20, 15, 5, -30],
-    [-30, 5, 15, 20, 20, 15, 5, -30],
-    [-30, 0, 50, 15, 15, 50, 0, -30],
-    [-40, -20, 0, 5, 5, 0, -20, -40],
-    [-50, -40, -30, -30, -30, -30, -40, -50]
+    [0, 0, 0, 0, 0, 0, 0, 0],
+    [40, 20, 0, 5, 5, 0, 20, 40],
+    [-30, 5, 200, 30, 30, 200, 5, -30],
+    [30, 10, 60, 80, 80, 60, 10, 30],
+    [30, 10, 60, 80, 80, 60, 10, 30],
+    [-30, 5, 200, 30, 30, 200, 5, -30],
+    [40, 20, 0, 5, 5, 0, 20, 40],
+    [0, 00, 0, 0, 0, 0, 00, 0],
 ]
-
 BISHOP_TABLE = [
-    [-20, -10, -10, -10, -10, -10, -10, -20],
-    [-10, 0, 0, 0, 0, 0, 0, -10],
-    [-10, 0, 5, 10, 10, 5, 0, -10],
-    [-10, 5, 10, 15, 15, 10, 5, -10],
-    [-10, 5, 10, 15, 15, 10, 5, -10],
-    [-10, 0, 5, 10, 10, 5, 0, -10],
-    [-10, 0, 0, 0, 0, 0, 0, -10],
-    [-20, -10, -10, -10, -10, -10, -10, -20]
+    [20, 10, 100, 10, 10, 100, 10, 20],
+    [10, 0, 0, 0, 0, 0, 0, 10],
+    [10, 0, 5, 10, 10, 5, 0, 10],
+    [10, 5, 10, 15, 15, 10, 5, 10],
+    [10, 5, 10, 15, 15, 10, 5, 10],
+    [10, 0, 5, 10, 10, 5, 0, 10],
+    [10, 0, 0, 0, 0, 0, 0, 10],
+    [20, 10, 100, 10, 10, 100, 10, 20]
 ]
-
 ROOK_TABLE = [
-    [0, -5, 5, 10, 10, 5, -5, 0],
-    [-5, 0, 0, 0, 0, 0, 0, -5],
-    [-5, 0, 0, 0, 0, 0, 0, -5],
-    [-5, 0, 0, 0, 0, 0, 0, -5],
-    [-5, 0, 0, 0, 0, 0, 0, -5],
-    [0, 5, 5, 5, 5, 5, 5, 0],
-    [0, 10, 10, 10, 10, 10, 10, 0],
-    [0, -5, 5, 10, 10, 5, -5, 0]
+    [50, 0, 90, 100, 100, 90, 00, 50],
+    [50, 0, 0, 0, 0, 0, 0, 50],
+    [50, 0, 0, 0, 0, 0, 0, 50],
+    [100, 0, 0, 0, 0, 0, 0, 100],
+    [100, 0, 0, 0, 0, 0, 0, 100],
+    [50, 0, 0, 0, 0, 0, 0, 50],
+    [50, 0, 0, 0, 0, 0, 0, 50],
+    [50, 00, 90, 100, 100, 90, 0, 50]
 ]
-
 QUEEN_TABLE = [
-    [-20, -10, -10, -5, -5, -10, -10, -20],
-    [-10, 0, 0, 0, 0, 0, 0, -10],
-    [-10, 0, 5, 5, 5, 5, 0, -10],
-    [-5, 0, 5, 10, 10, 5, 0, -5],
-    [0, 5, 5, 10, 10, 5, 5, 0],
-    [-10, 5, 5, 5, 5, 5, 0, -10],
-    [-10, 0, 5, 0, 0, 0, 0, -10],
-    [-20, -10, -10, -5, -5, -10, -10, -20]
+    [20, 10, 10, 5, 5, 10, 10, 20],
+    [10, 0, 0, 0, 0, 0, 0, 10],
+    [10, 0, 50, 50, 50, 50, 0, 10],
+    [5, 0, 50, 100, 100, 50, 0, 5],
+    [0, 50, 50, 100, 100, 50, 50, 0],
+    [10, 50, 50, 50, 50, 50, 0, 10],
+    [10, 0, 50, 0, 0, 0, 0, 10],
+    [20, 10, 10, 5, 5, 10, 10, 20]
+]
+KING_TABLE = [
+    [30, 40, 40, 50, 50, 40, 40, 30],
+    [30, 40, 40, 50, 50, 40, 40, 30],
+    [30, 40, 40, 50, 50, 40, 40, 30],
+    [30, 40, 40, 50, 50, 40, 40, 30],
+    [20, 30, 30, 40, 40, 30, 30, 20],
+    [10, 20, 20, 20, 20, 20, 20, 10],
+    [20, 20, 0, 0, 0, 0, 20, 20],
+    [20, 30, 100, -40, 0, -40, 100, 20]
 ]
 
-KING_TABLE = [
-    [-30, -40, -40, -50, -50, -40, -40, -30],
-    [-30, -40, -40, -50, -50, -40, -40, -30],
-    [-30, -40, -40, -50, -50, -40, -40, -30],
-    [-30, -40, -40, -50, -50, -40, -40, -30],
-    [-20, -30, -30, -40, -40, -30, -30, -20],
-    [-10, -20, -20, -20, -20, -20, -20, -10],
-    [20, 20, 0, 0, 0, 0, 20, 20],
-    [20, 30, 10, 0, 0, 10, 30, 20]
-]
 
 PIECE_VALUES = {
-    'P': 100,
-    'N': 300,
-    'B': 320,
-    'R': 500,
-    'Q': 900,
-    'K': 100000
+    'P': 1000,
+    'N': 3000,
+    'B': 3000,
+    'R': 5000,
+    'Q': 9000,
+    'K': 1000000
 }
-def coeffs(x,y) :
-    if (abs(x-3)+abs(y-3)<=3) :
-        return 1.5
-    if (abs(x-3)+abs(y-3)<=5) :
-        return 1
-    return 0.8
-def evaluate_piece(turn, piece, x, y):
+
+def evaluate_piece(piece, x, y):
     """Evaluates the score of a piece based on its type, position, and game phase."""
-    my = y if turn == 'white' else 7 - y
+    my = y if piece[0] == 'w' else 7 - y
+    
     tables = {
-        'N': (300, KNIGHT_TABLE),
-        'Q': (900, QUEEN_TABLE),
-        'P': (100, PAWN_TABLE),
-        'R': (500, ROOK_TABLE),
-        'B': (320, BISHOP_TABLE),
-        'K': (10000, KING_TABLE)
+        'N': (3000, KNIGHT_TABLE),
+        'Q': (9000, QUEEN_TABLE),
+        'P': (1000, PAWN_TABLE),
+        'R': (5000, ROOK_TABLE),
+        'B': (3000, BISHOP_TABLE),
+        'K': (100000, KING_TABLE)
     }
     if piece[1] in tables:
         base, table = tables[piece[1]]
         piece_position_score = table[my][x] 
-        coeff = coeffs(x,y)
-        coeff = 1 if (piece[1]=='P' or piece[1]=='K' or piece[1]=='B') else coeff
+        coeff = 1
+        black_score = 0
+        white_score = 0 
         # For white pieces, return positive value, for black return negative
-        score = base + piece_position_score
+        score = base + piece_position_score * coeff
+        if (piece[0]=='b') : black_score += score
+        elif (piece[0]=='w') : white_score +=score  
+
         return score if piece[0] == 'w' else -score
     return 0
 def evaluate_material(game):
@@ -116,24 +112,80 @@ def evaluate_material(game):
         for y in range(8):
             piece = game.chess_board[y][x]
             if piece != '--':  # not an empty square
-                material_score += evaluate_piece(game.turn,piece,x,y) 
+                material_score += evaluate_piece(piece,x,y) 
     return material_score
+def evaluate_capture(attacking_piece, target_piece):
+    PIECE_VALUES = {
+        'P': 100,
+        'N': 300,
+        'B': 300,
+        'R': 500,
+        'Q': 900,
+        'K': 20000
+    }
+    if (target_piece=='--') :
+        return 0 
+    if (attacking_piece=='--') :
+        return 0 
+    if (target_piece[0]==attacking_piece[0]) :
+        return 0 
+    coeff = 1 if (target_piece[0]=='w') else -1
+    return (PIECE_VALUES[target_piece[1]] - PIECE_VALUES[attacking_piece[1]])*coeff
+def evaluate_captures(game):
+    """Evaluates the score for potential captures on the board."""
+    capture_score = 0
+    game0 = game.copy_game()
+    game0.all_moves() 
+    for key, value in game0.white_moves.items():
+        x,y = key 
+        attacking_piece = game0.chess_board[y][x]
+        if (len(value)>0) :
+            for move in value :
+
+                if len(move)>0 and move[0]!=-1:  
+                    mx,my= move
+                    target_piece = game0.chess_board[my][mx]
+                    capture_score+=evaluate_capture(attacking_piece,target_piece)
+    
+    for key, value in game0.black_moves.items():
+        x,y = key 
+        attacking_piece = game0.chess_board[y][x]
+        if (len(value)>0):
+            for move in value : 
+                if (len(move)>0 and move[0]!=-1) :
+                    mx,my= move
+                    target_piece = game0.chess_board[my][mx]
+                    capture_score+=evaluate_capture(attacking_piece,target_piece)
+
+    return capture_score
+
 def evaluate(game):
     """Calculates the total evaluation score for the game based on various factors."""
     total_score = 0 
 
-    # King Safety: Add extra evaluation for the safety of the kings
-    white_king_position = find_king_position(game, 'white')
-    black_king_position = find_king_position(game, 'black')
-    total_score += king_safety(game.turn, white_king_position, black_king_position)
+    # Evaluate material
+    material_score = evaluate_material(game)
+    total_score += material_score
 
-    # Pawn Structure Evaluation: Check for doubled, isolated, or passed pawns
-    # Add a bit of evaluation for central control and mobility
-    total_score += evaluate_control_and_mobility(game) + evaluate_material(game)
-    if (game.len_list_of_boards<10) :
-        total_score += evaluate_opening(game)
+    # Evaluate central control and mobility
+    #central_control_score = evaluate_control_and_mobility(game)
+    #total_score += central_control_score
 
-    return total_score 
+    # Evaluate capturing opportunities
+    #capture_score = evaluate_captures(game)
+    #total_score += capture_score
+
+    # King safety
+
+    #king_safety_score = king_safety(game.turn, game.white_king_position, game.black_king_position)
+    #total_score += king_safety_score
+
+    # Evaluate opening strategies if early in the game
+    if game.len_list_of_boards < 20:
+        opening_score = evaluate_opening(game)
+        total_score += opening_score
+
+    return total_score
 
 def find_king_position(game, color):
     """Returns the position of the king for a given color."""
@@ -156,9 +208,8 @@ def evaluate_king_position(position):
     if position:
         x, y = position
         # Add a bonus for a king closer to the center
-        return 0 if ((x ==0) or (x==7)) else -100
+        return 0 if ((x <=1) or (x>=5)) else -300
     return 0
-
 
 
 def evaluate_control_and_mobility(game):
@@ -168,40 +219,45 @@ def evaluate_control_and_mobility(game):
     center = [(3, 3), (3, 4), (4, 3), (4, 4)]
     for x, y in center:
         piece = game.chess_board[x][y]
-        if piece == 'wp':
+        if piece == 'wP':
             score += 10
-        elif piece == 'bp':
+        elif piece == 'bP':
             score -= 10
 
     # Evaluate piece mobility
     return score
 
-
 def evaluate_opening(game):
     score = 0
     center_squares = [(3, 3), (3, 4), (4, 3), (4, 4)]
-
+    
     # Central control
     for x, y in center_squares:
         piece = game.chess_board[y][x]
-        if piece == 'wp':
-            score += 30
-        elif piece == 'bp':
-            score -= 30
-
-    # Piece development
-    for x in range(8):
-        for y in range(8):
-            piece = game.chess_board[y][x]
-            if piece.startswith('w') and y > 3 and y <6 and abs(y-x)<4 and (piece[1]=='N' or piece[1]=='Q') :  # Encourage white pieces to advance
-                score += 40
-            elif piece.startswith('b') and y < 6 and y>2 and abs(y-x)<4 and (piece[1]=='N' or piece[1]=='Q'):  # Encourage black pieces to advance
-                score -= 40
-
+        if piece == 'wP':
+            score += 100  # White pawn controlling the center
+        elif piece == 'bP':
+            score -= 100  # Black pawn controlling the center
+        elif piece[1]=='N' : 
+            if (piece[0]=='w') :
+                score+=100
+            else :
+                score-=100
+        elif piece[1]=='Q' :
+            if (piece[0]=='w') :
+                score+=70
+            else :
+                score-=70
     return score
 
-def minimax(game, depth, alpha, beta):
-    if depth == 0 or not game.running:
+def minimax(game, depth):
+    if (not game.running) :
+        if (game.winner=='Stalemate') :
+            return 0
+        if (game.winner=='white') :
+            return 1e9
+        return -1e9
+    if depth == 0 :
         return evaluate(game)
     if  game.turn == 'white':  # Maximizing for white
         max_eval = float('-inf')
@@ -210,11 +266,9 @@ def minimax(game, depth, alpha, beta):
                 next_game = game.copy_game()
                 next_game.move_piece(move[0], end_pos[0], end_pos[1])
                 next_game.change_player()
-                eval = minimax(next_game, depth - 1,alpha, beta)
+                eval = minimax(next_game, depth - 1)
                 max_eval = max(max_eval, eval)
-                alpha = max(alpha, eval)
-                if beta+10 <= alpha:
-                    break
+
         return max_eval
     else:  # Minimizing for black
         min_eval = float('inf')
@@ -223,15 +277,14 @@ def minimax(game, depth, alpha, beta):
                 next_game = game.copy_game()
                 next_game.move_piece(move[0], end_pos[0], end_pos[1])
                 next_game.change_player()
-                eval = minimax(next_game, depth - 1, alpha, beta)
+                eval = minimax(next_game, depth - 1)
                 min_eval = min(min_eval, eval)
-                beta = min(beta, eval)
-                if beta+10 <= alpha:
-                    break
+
         return min_eval
 
 
-def AI(game, depth=4):
+def AI(game, depth=3):
+    
     moves_scores = []
     # Determine moves based on whose turn it is
     moves = game.white_moves if game.turn == 'white' else game.black_moves
@@ -242,14 +295,15 @@ def AI(game, depth=4):
             next_game.move_piece(start_pos, end_pos[0], end_pos[1])
             next_game.change_player()
             # Evaluate the move using minimax
-            score = minimax(next_game, depth - 1, alpha=-1000000, beta=10000000)
-            moves_scores.append(((start_pos, end_pos), score))
+            score = minimax(next_game, depth - 1)
+            moves_scores.append((score,(start_pos, end_pos)))
     
     # Sort moves based on the score
-    moves_scores.sort(key=lambda x: x[1], reverse=(game.turn == 'white'))
-    
+    moves_scores.sort()
+    print(moves_scores)
+    print(evaluate(game))
     # Return the move with the best score
     if moves_scores:
-        best_move, best_score = moves_scores[0]
+        score ,best_move = moves_scores[0]
         return best_move  # You could also return the score if needed
     return None

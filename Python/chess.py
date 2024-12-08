@@ -6,6 +6,7 @@ from random import shuffle
 from utils import has_non_empty_list,get_random_value
 import math
 import sys
+import numpy as np
 import copy
 sys.path.append('/home/hassene/Desktop/Projet-echecs-TDLOG/Python')
 import os
@@ -60,7 +61,7 @@ pieces_images = {
 class ChessGame:
     def __init__(self):
         self.screen = screen
-        self.chess_board = [
+        self.chess_board = np.array([
             ['bR', 'bN', 'bB', 'bQ', 'bK', 'bB', 'bN', 'bR'],
             ['bP', 'bP', 'bP', 'bP', 'bP', 'bP', 'bP', 'bP'],
             ['--', '--', '--', '--', '--', '--', '--', '--'],
@@ -69,8 +70,8 @@ class ChessGame:
             ['--', '--', '--', '--', '--', '--', '--', '--'],
             ['wP', 'wP', 'wP', 'wP', 'wP', 'wP', 'wP', 'wP'],
             ['wR', 'wN', 'wB', 'wQ', 'wK', 'wB', 'wN', 'wR']
-        ]
-        self.chess_board_squares = [
+        ])
+        self.chess_board_squares = np.array([
     ["a8", "b8", "c8", "d8", "e8", "f8", "g8", "h8"],
     ["a7", "b7", "c7", "d7", "e7", "f7", "g7", "h7"],
     ["a6", "b6", "c6", "d6", "e6", "f6", "g6", "h6"],
@@ -79,7 +80,7 @@ class ChessGame:
     ["a3", "b3", "c3", "d3", "e3", "f3", "g3", "h3"],
     ["a2", "b2", "c2", "d2", "e2", "f2", "g2", "h2"],
     ["a1", "b1", "c1", "d1", "e1", "f1", "g1", "h1"]
-    ]
+    ])
         
         self.list_of_boards=[self.chess_board for _ in range(10000)]
         self.len_list_of_boards=0 
@@ -111,13 +112,15 @@ class ChessGame:
         self.pion_passant=False
         self.last_time_back_clicked=0
         self.x_king, self.y_king = -1, -1
-        self.white_moves={(-1,-1):[-1]}
-        self.black_moves={(-1,-1):[-1]}
+        self.white_moves={(-1,-1):[(-1,-1)]}
+        self.black_moves={(-1,-1):[(-1,-1)]}
         self.rook_moved=[0,0,0,0]
         self.castle=[0,0,0,0]
         self.one_v_one=False
         self.white=False
         self.black=False
+        self.white_king_position = None
+        self.black_king_position = None
 
     def time_reg(self,white_time,black_time):
         self.white_time=white_time
@@ -127,8 +130,7 @@ class ChessGame:
         new_game = copy.copy(self)  # Shallow copy the ChessGame object itself
         
         # Deep copy the mutable attributes manually
-        new_game.chess_board = [row[:] for row in self.chess_board]  # Deep copy the chess board
-        new_game.chess_board_squares = [row[:] for row in self.chess_board_squares]  # Copy the square names
+        new_game.chess_board = np.copy(self.chess_board)  # Deep copy the chess board
 
         
         # Deep copy the dictionaries for black and white moves
@@ -139,10 +141,9 @@ class ChessGame:
         new_game.white_time = self.white_time
         new_game.black_time = self.black_time
         new_game.turn = self.turn
-        new_game.player = self.player
-        new_game.last_move = self.last_move[:]
-        new_game.possible_moves = self.possible_moves[:]
-        
+        new_game.player = np.copy(self.player)
+        new_game.last_move = np.copy(self.last_move[:])
+        new_game.possible_moves = np.copy(self.possible_moves[:])
         # Return the copied game object
         return new_game
     def draw_board(self):
@@ -505,7 +506,7 @@ class ChessGame:
                     return True
                 # En passant capture
                 last_move = self.last_move
-                if last_move and self.chess_board[last_move[1][1]][last_move[1][0]][1] == 'P' and abs(last_move[1][1]-last_move[0][1])==2:
+                if len(last_move)>0 and self.chess_board[last_move[1][1]][last_move[1][0]][1] == 'P' and abs(last_move[1][1]-last_move[0][1])==2:
                     if last_move[1][0] == mx and last_move[1][1]+direction == my : 
                         self.pion_passant = True
                         return True
@@ -723,24 +724,27 @@ class ChessGame:
         return (-1, -1)
     
     def all_moves(self) :
+        copy_game = self.copy_game()
         if (self.turn=='white') :
             self.white_moves.clear() 
+            copy_game.white_moves.clear()
             for y in range(8):
                 for x in range(8):
-                    if self.chess_board[y][x][0]=='w' :
-                        self.white_moves[(x,y)]=self.get_valid_moves(x,y)
+                    if copy_game.chess_board[y][x][0]=='w' :
+                        self.white_moves[(x,y)]=copy_game.get_valid_moves(x,y)
         if (self.turn=='black') :
             self.black_moves.clear()
+            copy_game.black_moves.clear()
             for y in range(8) :
                 for x in range(8) :
                     if self.chess_board[y][x][0]=='b' :
-                        self.black_moves[(x,y)]=self.get_valid_moves(x,y)
+                        self.black_moves[(x,y)]=copy_game.get_valid_moves(x,y)
         
         
     def update_list_of_boards(self) : 
         l = self.len_list_of_boards
         # Ensure the list_of_boards contains independent deep copies of the board (3D list)
-        if self.list_of_boards[l-1] != self.chess_board:
+        if not np.array_equal(self.list_of_boards[l-1], self.chess_board):
             self.list_of_boards[l] = deepcopy(self.chess_board)
             self.list_of_times[l] = [self.white_time, self.black_time]
             self.len_list_of_boards += 1
@@ -774,8 +778,9 @@ class ChessGame:
             pygame.draw.rect(screen, highlight_color, pygame.Rect(mx * square_size, my * square_size, square_size, square_size))
     def run(self) :
         from AI import evaluate
+        self.white_king_position = self.find_king_position( 'white')
+        self.black_king_position = self.find_king_position('black')
         for event in pygame.event.get():
-            
             if event.type == pygame.QUIT:
                 self.running = False
             elif event.type == pygame.MOUSEBUTTONDOWN:
@@ -787,8 +792,6 @@ class ChessGame:
                         self.all_moves()
                         start,end = AI(self)
                         self.last_move = [start,end]
-                        print('rsefzref')
-                        print(end)
 
                         self.move_piece(start,end[0],end[1])
                         self.all_moves()
@@ -854,3 +857,11 @@ class ChessGame:
                     pygame.time.delay(1)
         self.chess_board[7-final_coords.y][final_coords.x] = piece
         pygame.display.flip()
+    def find_king_position(self, color):
+        """Returns the position of the king for a given color."""
+        for x in range(8):
+            for y in range(8):
+                piece = self.chess_board[y][x]
+                if piece == f'{color[0]}K':  # White king or black king
+                    return (x, y)
+        return None
