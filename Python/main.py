@@ -1,13 +1,12 @@
-from chess import ChessGame
+from chess_game import ChessGame
 import pygame
-from chess import screen_width,screen_height,added_screen_width
+from chess_game import screen_width,screen_height,added_screen_width
 pygame.init()
 import sys
 sys.path.append('/home/hassene/Desktop/Projet-echecs-TDLOG/build/libAI.so')
 import sys
 sys.path.append('/home/hasssene/Desktop/Projet-echecs-TDLOG/Python')
 
-from AI import evaluate
 # Main function
 if __name__ == "__main__":
     game = ChessGame()
@@ -18,8 +17,11 @@ if __name__ == "__main__":
     game.list_of_boards.append(game.chess_board)
     game.list_of_times.append((game.white_time, game.black_time))
     k = 0
-    p = 0 
-    while game.running:
+    p = 0
+    counter =  0  
+    while game.running :
+        # Initialize the ChessBoard
+        # Create a python-chess board
         
         game.draw_timer()
         game.draw_add_time_button()
