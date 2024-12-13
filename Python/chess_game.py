@@ -665,11 +665,12 @@ class ChessGame:
             # Reset en passant if no double-step pawn move occurred
         self.pion_passant = False
 
-    def back_move_piece(self, start, x, y, piece): 
+    def back_move_piece(self, start, final, piece): 
         """Reverts a move to restore board state."""
         mx, my = start
-        self.chess_board[y][x], self.chess_board[my][mx] = self.chess_board[my][mx], piece
-
+        x, y = final 
+        self.chess_board[my][mx] = self.chess_board[y][x]
+        self.chess_board[y][x] = piece
     def is_king_in_check(self):
         """Checks if the player's king is in check."""
         color=self.turn[0]
@@ -904,7 +905,12 @@ class ChessGame:
             stockfish_path = "/usr/games/stockfish"  # Replace with the correct path
             with chess.engine.SimpleEngine.popen_uci(stockfish_path) as engine:
                 board = self.convert_to_chess_board()
-                result = engine.analyse(board, chess.engine.Limit(time=0.0001,depth = 3))
+                try:
+                    result = engine.analyse(board, chess.engine.Limit(time=0.00001, depth=3))
+                except chess.engine.EngineTerminatedError as e:
+                    print(f"Engine crashed: {e}")
+                    return 1e5  # Or handle it differently
+
                 score = result["score"]
                 
                 # Convert PovScore to a float (positive for white, negative for black)
