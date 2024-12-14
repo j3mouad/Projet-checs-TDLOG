@@ -16,7 +16,7 @@ screen = pygame.display.set_mode((screen_width + added_screen_width, screen_heig
 pygame.display.set_caption("Chess")
 # Colors
 # Define colors
-white, grey, red = (255, 255, 255), (128, 128, 128), (255, 0, 0)
+white, grey, red, orange = (255, 255, 255), (128, 128, 128), (255, 0, 0), (255,165,0)
 brown, light_brown, highlight_color = (118, 150, 86), (238, 238, 210), (200, 200, 0)
 square_size = screen_width // 8
 black = (0, 0, 0)
@@ -289,9 +289,13 @@ class ChessGame:
     def choose_game(self):
         window = pygame.display.set_mode((screen_width + added_screen_width, screen_height),pygame.RESIZABLE)
         pygame.display.set_caption("Let's play Chess!")
+        
+        # Load the background image
+        background_image = pygame.image.load("background_image.jpg")  # Update with your image path
+        background_image = pygame.transform.scale(background_image, (screen_width + added_screen_width, screen_height))
+        
         font = pygame.font.Font(None, 28)
         text = font.render("Choose color and time ", True, black)
-        window.blit(text, (50, 50))
         
         button_width = 250
         button_height = 50
@@ -314,7 +318,8 @@ class ChessGame:
         
         while first_choosing or second_choosing:
             mouse_pos = pygame.mouse.get_pos()
-            window.fill(white)
+            # Draw the background image
+            window.blit(background_image, (0, 0))
             window.blit(text, (50, 50))
             pygame.draw.rect(window, white if not button_black.collidepoint(mouse_pos) else button_hover_color, button_black)
             pygame.draw.rect(window, white if not button_white.collidepoint(mouse_pos) else button_hover_color, button_white)
@@ -322,19 +327,19 @@ class ChessGame:
             white_text = font.render("White pieces", True, black)
             window.blit(black_text, (button_x + 10, button_y + 10))
             window.blit(white_text, (button_x + 10, button_y + button_height + button_margin + 10))
-            pygame.draw.rect(window, grey if not button_2v2.collidepoint(mouse_pos) else button_hover_color, button_2v2)
-            pygame.draw.rect(window, grey if not button_black.collidepoint(mouse_pos) else button_hover_color, button_black)
-            pygame.draw.rect(window, grey if not button_white.collidepoint(mouse_pos) else button_hover_color, button_white)
-            pygame.draw.rect(window, grey if not button_rapid.collidepoint(mouse_pos) else button_hover_color, button_rapid)
-            pygame.draw.rect(window, grey if not button_classic.collidepoint(mouse_pos) else button_hover_color, button_classic)
-            pygame.draw.rect(window, grey if not button_blitz.collidepoint(mouse_pos) else button_hover_color, button_blitz) 
-            pygame.draw.rect(window, grey if not button_random.collidepoint(mouse_pos) else button_hover_color, button_random)
+            pygame.draw.rect(window, orange if not button_2v2.collidepoint(mouse_pos) else button_hover_color, button_2v2)
+            pygame.draw.rect(window, orange if not button_black.collidepoint(mouse_pos) else button_hover_color, button_black)
+            pygame.draw.rect(window, orange if not button_white.collidepoint(mouse_pos) else button_hover_color, button_white)
+            pygame.draw.rect(window, orange if not button_rapid.collidepoint(mouse_pos) else button_hover_color, button_rapid)
+            pygame.draw.rect(window, orange if not button_classic.collidepoint(mouse_pos) else button_hover_color, button_classic)
+            pygame.draw.rect(window, orange if not button_blitz.collidepoint(mouse_pos) else button_hover_color, button_blitz) 
+            pygame.draw.rect(window, orange if not button_random.collidepoint(mouse_pos) else button_hover_color, button_random)
             black_text = font.render("Jouer avec Noirs", True, black)
             white_text = font.render("Jouer avec Blancs", True, black)
-            classic_text = font.render("Jeu classic",True,black) 
+            classic_text = font.render("Jeu classique",True, black) 
             blitz_text = font.render("Jeu blitz",True,black)
-            rapid_text= font.render("Jeu rapid",True,black)
-            twovtwo_text = font.render("Jeu 2v2",True,black)
+            rapid_text= font.render("Jeu rapide",True,black)
+            twovtwo_text = font.render("Jeu 1 VS 1",True,black)
             random_text=font.render("Jeu de Fisher",True,black)
             window.blit(black_text, (button_x + 10, button_y + (button_height - black_text.get_height()) // 2))
             window.blit(white_text, (button_x + 10, button_y + button_height + button_margin + (button_height - white_text.get_height()) // 2))
@@ -407,7 +412,7 @@ class ChessGame:
             if (self.rook_moved[0]==0 and self.chess_board[7][5]=='--' and self.chess_board[7][6]=='--') :
                 b = False
                 for key in self.black_moves :
-                    b= (6,7) in self.black_moves[key] or (5,7) in self.black_moves[key] 
+                    b= (6,7) in self.black_moves[key] or (5,7) in self.black_moves[key] or b 
                     if (b) :
                         break
                 self.castle[0]=not b 
@@ -501,12 +506,12 @@ class ChessGame:
         elif piece_type == 'K':
             if max(abs(mx - x), abs(my - y)) == 1:  # One square in any direction
                 return True
-            if (start_piece[0]=='w') :
+            if (start_piece[0]=='w' and not self.white_king_moved ) :
                 if (mx==6 and my == 7  and self.castle[0]) :
                     return True
                 if (mx==2 and my == 7  and self.castle[1]) :
                     return True
-            if (start_piece[0]=='b') :
+            if (start_piece[0]=='b' and not self.black_king_moved) :
                 if (mx==2 and my == 0  and self.castle[2]) :
                     print('ezrfzefze')
                     return True
@@ -542,6 +547,33 @@ class ChessGame:
         mx, my = start
         moving_piece = self.chess_board[my][mx]
         direction = -1 if self.turn == 'black' else 1
+        if (moving_piece[1]=='K' and abs(mx-x)==2 and self.classic and my==y):
+            if (my  == 7 and not self.white_king_moved and not self.white_king_check and self.turn=='white') :
+                self.chess_board[y][x]=moving_piece
+                self.chess_board[my][mx]='--'
+                direction = int((mx-x)/2)
+                if(x==6) :
+                    self.chess_board[my][7]='--'
+                else :
+                    self.chess_board[my][0]='--'
+                rook = moving_piece[0] + 'R'
+                self.chess_board[y][mx-direction]=rook
+                self.white_king_moved=True
+
+                return
+            if (my==0 and not self.black_king_check and not self.black_king_moved and self.black=='black' ) :
+                self.chess_board[y][x]=moving_piece
+                self.chess_board[my][mx]='--'
+                direction = int((mx-x)/2)
+                if(x==6) :
+                    self.chess_board[my][7]='--'
+                else :
+                    self.chess_board[my][0]='--'
+                rook = moving_piece[0] + 'R'
+                self.chess_board[y][mx-direction]=rook
+                self.black_king_moved=True
+
+                return
         if (self.chess_board[my][mx][1]=='K') :
             color = self.chess_board[my][mx][0] 
             if (color=='w') :
@@ -549,18 +581,7 @@ class ChessGame:
             else :
                 self.black_king_moved=True
         # Move the piece from start to (x, y)
-        if (moving_piece[1]=='K' and abs(mx-x)==2 and self.classic):
-            self.chess_board[y][x]=moving_piece
-            self.chess_board[my][mx]='--'
-            direction = int((mx-x)/2)
-            if(x==6) :
-                 self.chess_board[my][7]='--'
-            else :
-                self.chess_board[my][0]='--'
-            rook = moving_piece[0] + 'R'
-            self.chess_board[y][mx-direction]=rook
-            
-            return
+        
             
         self.chess_board[y][x], self.chess_board[my][mx] = moving_piece, '--'
         if ((y==0 or y==7) and  self.chess_board[y][x][1]=='P') :
