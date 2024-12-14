@@ -6,6 +6,7 @@ private:
     int x,y;
 public:
     Point(int x, int y) : x(x), y(y){}
+    Point(pair<int,int> p) : x(p.first), y(p.second) {}
     Point() = default;
     // Copy constructor 
     Point(const Point &A) : x(A.x), y(A.y){}

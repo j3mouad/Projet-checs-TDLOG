@@ -4,6 +4,10 @@
 using namespace std;
 #include "utils.h"
 
+
+#include <Imagine/Graphics.h>
+using namespace Imagine;
+
 class Piece {
 private:
     /* the name of the piece */
@@ -20,20 +24,19 @@ private:
     const Point* elemMoveSet; 
     int numOfMoves;
     int numOfAttackMoves;
+    byte* image;
 
 public:
-    // Constructors
-    Piece(string name, string color, bool infiniteMoves, const Point* elemMoveSet, int numOfMoves)
-        : name(name),color(color), infiniteMoves(infiniteMoves), elemMoveSet(elemMoveSet), numOfMoves(numOfMoves) {}
-    Piece(string name, string(color), bool infiniteMoves, const Point* elemMoveSet, const Point* attackMoveSet, int numOfMoves, int numOfAttackMoves)
-        : name(name), color(color), infiniteMoves(infiniteMoves), elemMoveSet(elemMoveSet),moveSetisAttackMoveSet(false), attackMoveSet(attackMoveSet), numOfMoves(numOfMoves), numOfAttackMoves(numOfAttackMoves) {}
+    Piece(string names, string colors, bool infiniteMoves, const Point* elemMoveSet, int numOfMoves, const char* path);
+    Piece(string name, string(color), bool infiniteMoves, const Point* elemMoveSet, const Point* attackMoveSet, int numOfMoves, int numOfAttackMoves, const char* path);
     // Copy Constructor;
-    Piece(const Piece &other) : name(other.name), color(other.color), infiniteMoves(other.infiniteMoves), elemMoveSet(other.elemMoveSet), numOfMoves(other.numOfMoves), attackMoveSet(other.attackMoveSet), moveSetisAttackMoveSet(other.moveSetisAttackMoveSet), numOfAttackMoves(other.numOfAttackMoves) {}
+    Piece(const Piece &other) : name(other.name), color(other.color), infiniteMoves(other.infiniteMoves), elemMoveSet(other.elemMoveSet), numOfMoves(other.numOfMoves), attackMoveSet(other.attackMoveSet), moveSetisAttackMoveSet(other.moveSetisAttackMoveSet), numOfAttackMoves(other.numOfAttackMoves), image(other.image) {}
     // Default Constructor;
     Piece() = default;
     // Getter functions
     string getName() const {return name;}
     string getColor() const {return color;}
+    byte* getImage() const {return image;}
     bool hasInfiniteMoves() const {return infiniteMoves;}
     bool isMoveSetAttackMoveSet() const {return moveSetisAttackMoveSet;}
     int numberOfAttackMoves() const {return numOfAttackMoves;}

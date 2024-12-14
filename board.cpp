@@ -152,17 +152,47 @@ vector<Point> Board::getPossibleAttacks(Point position){
     return VectOfMoves;
 }
 
-bool Board::movePiece(Point Position1, Point Position2){
+bool Board::movePiece(Point Position1, Point Position2, bool changeCastling){
     bool winningTheGame = false;
     Piece piece = getPiece(Position1);
-    setPiece(Position1,Empty);
-    if (getPiece(Position1).getName()== "King"){
-        if (getPiece(Position1).getColor() == "white"){
+    if (piece.getName()== "King"){
+        if (piece.getColor() == "white"){
+            if (changeCastling){
+                LeftCastleWhite = false;
+                RightCastleWhite = false;
+            }
             WhiteKingPos = Position2;
         } else {
+            if (changeCastling){
+                LeftCastleBlack = false;
+                RightCastleBlack = false;
+            }
             BlackKingPos = Position2;
         }
     }
+    if (piece.getName()== "Rook" && changeCastling){
+        if(Position1.getX() == 7 && Position1.getY() == 0){
+            RightCastleWhite = false;
+        }else if(Position1.getX() == 0 && Position1.getY() == 0){
+            LeftCastleWhite = false;
+        }else if(Position1.getX() == 0 && Position1.getY() == 7){
+            LeftCastleBlack = false;
+        }else if(Position1.getX() == 7 && Position1.getY() == 7){
+            RightCastleBlack = false;
+        }
+    }
+    if (changeCastling){
+        if(Position2.getX() == 7 && Position2.getY() == 0){
+            RightCastleWhite = false;
+        }else if(Position2.getX() == 0 && Position2.getY() == 0){
+            LeftCastleWhite = false;
+        }else if(Position2.getX() == 0 && Position2.getY() == 7){
+            LeftCastleBlack = false;
+        }else if(Position2.getX() == 7 && Position2.getY() == 7){
+            RightCastleBlack = false;
+        }
+    }
+    setPiece(Position1,Empty);
     if (getPiece(Position2).getName()== "King"){
         winningTheGame = true;
     }
@@ -173,9 +203,8 @@ bool Board::movePiece(Point Position1, Point Position2){
 void Board::show(){
     for (int idxY = 7; idxY >= 0; idxY-- ){
         for (int idxX = 0; idxX < 8; idxX++ ){
-            cout << board[idxY][idxX].getName() << ":" << board[idxY][idxX].getColor()[0] << "    ";
+            putGreyImage(60*idxX,480 - (60*(idxY+1)),getPiece(Point(idxX,idxY)).getImage(),60,60);
         }
-        cout << endl;
     }
 }
 
