@@ -1,7 +1,9 @@
+import sys
+import numpy as np
 import os
 import sys
 import random
-
+import time
 # Set up directory if needed (adjust as necessary)
 new_dir = '/home/hassene/Desktop/Projet-echecs-TDLOG/build'
 os.chdir(new_dir)
@@ -22,12 +24,12 @@ PAWN_TABLE = [
 
 KNIGHT_TABLE = [
     [0,   0,   0,   0,   0,   0,   0,  0],
-    [40, 20,   0,   5,   5,   0,  20, 40],
+    [10, 20,   0,   5,   5,   0,  20, 10],
     [-30, 5,  30,  30,  30,  30,   5, -30],
-    [10, 10,  60,  40,  40,  60,  10, 10],
-    [10, 10,  60,  80,  80,  60,  10, 10],
+    [10, 10,  30,  30,  30,  30,  10, 10],
+    [10, 10,  30,  30,  40,  30,  10, 10],
     [-30, 5,  30,  30,  30,  30,   5, -30],
-    [40, 20,   0,   5,   5,   0,  20, 40],
+    [10, 20,   0,   5,   5,   0,  20, 10],
     [0,   0,   0,   0,   0,   0,   0,  0],
 ]
 
@@ -43,15 +45,16 @@ BISHOP_TABLE = [
 ]
 
 ROOK_TABLE = [
-    [50,   0,  40,  10,  40,  40,   0, 50],
-    [50,   0,   0,   0,   0,   0,   0, 50],
-    [50,   0,   0,   0,   0,   0,   0, 50],
-    [100,  0,   0,   0,   0,   0,   0,100],
-    [100,  0,   0,   0,   0,   0,   0,100],
-    [50,   0,   0,   0,   0,   0,   0, 50],
-    [50,   0,   0,   0,   0,   0,   0, 50],
-    [50,   0,  40,  10,  40,  40,   0, 50],
+    [0,   -50,  10,  15,  15,  10,   -50,  0],    # Row 1 (rank 8)
+    [5,  10,  15,  20,  20,  15,  10,  5],    # Row 2 (rank 7)
+    [10, 15,  20,  25,  25,  20,  15,  10],   # Row 3 (rank 6)
+    [15, 20,  25,  30,  30,  25,  20,  15],   # Row 4 (rank 5)
+    [20, 25,  30,  35,  35,  30,  25,  20],   # Row 5 (rank 4)
+    [15, 20,  25,  30,  30,  25,  20,  15],   # Row 6 (rank 3)
+    [10, 15,  20,  25,  25,  20,  15,  10],   # Row 7 (rank 2)
+    [0,   -50,  10,  15,  15,  10,   -50,  0],    # Row 8 (rank 1)
 ]
+
 
 QUEEN_TABLE = [
     [20, 10, 10,   5,   5, 10, 10, 20],
@@ -72,7 +75,7 @@ KING_TABLE = [
     [20, 30, 30, 40,  40, 30, 30, 20],
     [10, 20, 20, 20,  20, 20, 20, 10],
     [20, 20,  0,  0,   0,  0, 20, 20],
-    [20, 30,1000,-40,   0,-40,1000,20],
+    [20, 30,100,-40,   0,-40,100,20],
 ]
 
 tables = {
@@ -150,51 +153,6 @@ def get_legal_moves_for_color(game, color):
     return game.white_moves if color == 'white' else game.black_moves
 
 
-def evaluate_mobility(game):
-    """Evaluate how many moves each side has. More mobility = better position."""
-    white_mobility = sum(len(m) for m in game.white_moves.values())
-    black_mobility = sum(len(m) for m in game.black_moves.values())
-    # Give a small bonus based on mobility difference
-    return (white_mobility - black_mobility) * 0.1
-
-
-def is_isolated_pawn(x, y, game):
-    """Check if a pawn is isolated (no friendly pawns on adjacent files)."""
-    piece = game.chess_board[y][x]
-    if piece == '--' or piece[1] != 'P':
-        return False
-    color = piece[0]
-    file_offsets = [-1, 1]
-    for offset in file_offsets:
-        nx = x + offset
-        if 0 <= nx < 8:
-            for ny in range(8):
-                p = game.chess_board[ny][nx]
-                if p != '--' and p[1] == 'P' and p[0] == color:
-                    return False
-    return True
-
-
-
-
-def evaluate_pawn_structure(game):
-    """Evaluate pawn structure (isolated, passed pawns)."""
-    score = 0
-    for y in range(8):
-        for x in range(8):
-            piece = game.chess_board[y][x]
-            if piece != '--' and piece[1] == 'P':
-                color = piece[0]
-                base = 1 if color == 'w' else -1
-                if is_isolated_pawn(x, y, game):
-                    score -= base * 30
-
-    return score
-
-
-
-
-
 def evaluate_control_of_key_squares(game):
     """Evaluate control of central and other important squares."""
     # Already considered a bit in your opening evaluation. Let's extend it:
@@ -249,18 +207,31 @@ def find_king_position(game, color):
             if piece == f'{color[0]}K':  # White king or black king
                 return (x, y)
     return None
+def center_control(game) :
+    score = 0 
+    for start_pos, possible_moves in game.white_moves.items():
+        for end_pos in possible_moves :
+            x,y = end_pos 
+            if (x>2 and x<5 and y>2 and y<5) :
+                score+=1
+    for start_pos, possible_moves in game.black_moves.items():
+        for end_pos in possible_moves :
+            x,y = end_pos 
+            if (x>2 and x<5 and y>2 and y<5) :
+                score-=1
+    return score
 
-
-def evaluate(game):
+def evaluate(game,transposition_table):
     """Calculates the total evaluation score for the game based on various factors."""
     # Base material and position evaluation
+    hash = hash_game(game)
+    if (hash in transposition_table) :
+        return transposition_table[hash] 
     material_score = evaluate_material(game)
 
     # Mobility
-    mobility_score = evaluate_mobility(game)
-
+    center_score = center_control(game)
     # Pawn structure
-    pawn_structure_score = evaluate_pawn_structure(game)
 
     # King safety
     king_safety_score = 0
@@ -284,136 +255,119 @@ def evaluate(game):
     # Combine scores
     # Material remains essential throughout, but other factors change importance over time.
     total_score = (
-        material_score +
-        mobility_score * 0.5 +
-        pawn_structure_score * 0.5 +
+        material_score*1 +
         king_safety_score * 1.0 +
-        piece_coordination_score * 0.5 +
-        control_score * (0.5 * opening_weight + 0.2 * endgame_weight) +
+        piece_coordination_score * 0.6 +
+        control_score * (0.6 * opening_weight + 0.3 * endgame_weight) +
         endgame_score * endgame_weight
     )
 
     return total_score
 
 
-# ---------------- MINIMAX AND AI --------------------
+def hash_game(game):
+    """
+    Hash the current game state. This should return a unique identifier
+    for the current board position and turn.
+    """
+    # For simplicity, you can hash the chessboard and current player
+    board_state = ''.join([str(piece) for row in game.chess_board for piece in row])
+    turn = game.turn  # Assuming 'white' or 'black' for the turn
+    return hash(board_state + turn)
+def minimax(game, depth, transposition_table, alpha=float('-inf'), beta=float('inf')):
 
-def minimax(game, depth, alpha=float('-inf'), beta=float('inf')):
+    # Get the hash of the current game state
+    game_hash = hash_game(game)
+
+    # Check if the current game state has already been evaluated
+    if game_hash in transposition_table:
+        return transposition_table[game_hash]
+
     if not game.running:
         if game.winner == 'Stalemate':
             return 0
-        if game.winner == 'white':
-            return 1e9
-        return -1e9
+        return 1e9 if game.winner == 'white' else -1e9
 
     if depth == 0:
-        return evaluate(game)
+        eval_score = evaluate(game,transposition_table)
+        transposition_table[game_hash] = eval_score  # Store evaluation result
+        return eval_score
 
     if game.turn == 'white':  # Maximizing for white
         max_eval = float('-inf')
-        white_moves = list(game.white_moves.items())
-        random.shuffle(white_moves)
-        for start_pos, possible_moves in white_moves:
+        for start_pos, possible_moves in game.white_moves.items():
             for end_pos in possible_moves:
-                next_game = game.copy_game()
-                next_game.move_piece(start_pos, end_pos[0], end_pos[1])
-                next_game.change_player()
-                eval_score = minimax(next_game, depth - 1, alpha, beta)
+                copy_game = game.copy_game()
+                x, y = end_pos
+                copy_game.move_piece(start_pos, x, y)
+                copy_game.change_player()
+                copy_game.all_moves()
+                eval_score = minimax(copy_game, depth - 1, transposition_table, alpha, beta)
                 max_eval = max(max_eval, eval_score)
                 alpha = max(alpha, eval_score)
                 if beta <= alpha:
-                    break
+                    break  # Prune outer loop
+            if beta <= alpha:
+                break  # Prune outer loop
+        # Store the evaluation result in the transposition table
+        transposition_table[game_hash] = max_eval
         return max_eval
+
     else:  # Minimizing for black
         min_eval = float('inf')
-        black_moves = list(game.black_moves.items())
-        random.shuffle(black_moves)
-        for start_pos, possible_moves in black_moves:
+        for start_pos, possible_moves in game.black_moves.items():
             for end_pos in possible_moves:
-                next_game = game.copy_game()
-                next_game.move_piece(start_pos, end_pos[0], end_pos[1])
-                next_game.change_player()
-                eval_score = minimax(next_game, depth - 1, alpha, beta)
+                copy_game = game.copy_game()
+                x, y = end_pos
+                copy_game.move_piece(start_pos, x, y)
+                copy_game.change_player()
+                copy_game.all_moves()
+                eval_score = minimax(copy_game, depth - 1, transposition_table, alpha, beta)
                 min_eval = min(min_eval, eval_score)
                 beta = min(beta, eval_score)
                 if beta <= alpha:
-                    break
+                    break  # Prune outer loop
+            if beta <= alpha:
+                break  # Prune outer loop
+        # Store the evaluation result in the transposition table
+        transposition_table[game_hash] = min_eval
         return min_eval
 
 
 def AI(game, depth=4):
     """
-    AI for determining the best move using heuristics and minimax evaluation.
+    AI for determining the best move using minimax evaluation.
     Returns the best move as a tuple (start_pos, end_pos).
+    depth must be pair so that it works
     """
+    print(game.turn)
     moves_scores = []
     moves = game.white_moves if game.turn == 'white' else game.black_moves
-    b = game.len_list_of_boards < 25  # Depth heuristic
-
-    # Immediate capture heuristic
-    if b:
-        for start_pos, possible_moves in moves.items():
-            x, y = start_pos
-            start_piece = game.chess_board[y][x][1]
-            color = game.chess_board[y][x][0]
-            for end_pos in possible_moves:
-                mx, my = end_pos
-                piece_end = game.chess_board[my][mx][1]
-                color_end = game.chess_board[my][mx][0]
-                # Attempt immediate beneficial capture
-                if (start_piece != '-' and piece_end != '-' and
-                    color_end != color and tables.get(piece_end, (0,[]))[0] >= tables.get(start_piece,(0,[]))[0]):
-                    return start_pos, end_pos
-
-    # Positional evaluation with exclusion logic
-    exclude = set()
-
-    for start_pos, possible_moves_0 in moves.items():
-        for end_pos in possible_moves_0:
+    transposition_table = {}
+    total_time = 0
+    for start_pos, possible_moves in moves.items():
+        for end_pos in possible_moves:
+            start_time = time.time()  # Record the start time
+            # Create a copy of the game to simulate the move
             copy_game = game.copy_game()
-            mx, my = end_pos
-            copy_game.move_piece(start_pos, mx, my)
             copy_game.all_moves()
+            
+            x, y = end_pos
+            copy_game.move_piece(start_pos, x, y)
             copy_game.change_player()
-
-                # Get opponent's possible moves
-            pos_moves_0 = copy_game.white_moves if copy_game.turn == 'white' else copy_game.black_moves
-
-            threatened = False
-            end_piece = copy_game.chess_board[my][mx]
-            if end_piece != '--':
-                end_piece_val = tables[end_piece[1]][0] if end_piece[1] in tables else 0
-                for st, pmoves1 in pos_moves_0.items():
-                    if end_pos in pmoves1:
-                        sx, sy = st
-                        start_piece_at = copy_game.chess_board[sy][sx]
-                        if start_piece_at != '--':
-                            start_piece_val = tables[start_piece_at[1]][0] if start_piece_at[1] in tables else 0
-                            # If the opponent can capture back with equal or greater value piece, risky move
-                            if end_piece_val >= start_piece_val :
-                                threatened = True
-                                break
-                            if (b) :
-                                threatened = True
-
-                if threatened:
-                    exclude.add((start_pos, end_pos))
-
-    # Evaluate all possible moves that are not excluded
-    for start_pos, possible_moves_0 in moves.items():
-        for end_pos in possible_moves_0:
-            if (start_pos, end_pos) in exclude:
-                continue
-            next_game = game.copy_game()
-            next_game.move_piece(start_pos, end_pos[0], end_pos[1])
-            next_game.change_player()
-            # Evaluate the move using minimax
-            score = minimax(next_game, depth - 1)
+            score = minimax(copy_game, depth - 1,transposition_table)
             moves_scores.append((score, (start_pos, end_pos)))
-
-    moves_scores.sort(reverse=True, key=lambda x: x[0])
+            print(f"Move: {start_pos} -> {end_pos}, Score: {score}")
+            end_time = time.time()
+            print(end_time-start_time)
+            total_time += end_time - start_time
+    # Sort moves by score (higher is better for white, lower for black)
+    moves_scores.sort(reverse=(game.turn == 'white'), key=lambda x: x[0])
 
     # Return the move with the best score
     if moves_scores:
+        print(f"Best move: {moves_scores[0][1]} with score {moves_scores[0][0]}")
+        print(total_time)
         return moves_scores[0][1]
+    print("No valid moves found")
     return None

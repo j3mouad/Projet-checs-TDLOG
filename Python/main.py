@@ -20,7 +20,6 @@ if __name__ == "__main__":
     k = 0
     p = 0 
     while game.running:
-        
         game.draw_timer()
         game.draw_add_time_button()
         game.handle_add_time_button()

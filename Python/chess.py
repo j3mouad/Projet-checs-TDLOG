@@ -10,8 +10,8 @@ import numpy as np
 import copy
 sys.path.append('/home/hassene/Desktop/Projet-echecs-TDLOG/Python')
 import os
-import sys
 from AI import AI
+import sys
 new_dir = ('/home/hassene/Desktop/Projet-echecs-TDLOG/Python')
 os.chdir(new_dir)
 # Initialisation de Pygame
@@ -121,7 +121,7 @@ class ChessGame:
         self.black=False
         self.white_king_position = None
         self.black_king_position = None
-
+    
     def time_reg(self,white_time,black_time):
         self.white_time=white_time
         self.black_time=black_time
@@ -146,6 +146,27 @@ class ChessGame:
         new_game.possible_moves = np.copy(self.possible_moves[:])
         # Return the copied game object
         return new_game
+    def board_to_fen(self):
+        """Converts self.chess_board to a FEN string."""
+        fen_rows = []
+        for row in self.chess_board:
+            empty_count = 0
+            fen_row = ""
+            for piece in row:
+                if piece == '--':
+                    empty_count += 1
+                else:
+                    if empty_count > 0:
+                        fen_row += str(empty_count)
+                        empty_count = 0
+                    # Map 'bP', 'wK', etc., to FEN piece notation
+                    fen_row += piece[1].lower() if piece[0] == 'b' else piece[1].upper()
+            if empty_count > 0:
+                fen_row += str(empty_count)
+            fen_rows.append(fen_row)
+        # Combine rows with '/' and append standard FEN suffix
+        fen = "/".join(fen_rows) + " w - - 0 1"
+        return fen
     def draw_board(self):
         for row in range(8):
             for col in range(8):
@@ -642,11 +663,12 @@ class ChessGame:
             # Reset en passant if no double-step pawn move occurred
         self.pion_passant = False
 
-    def back_move_piece(self, start, x, y, piece): 
+    def back_move_piece(self, start, final, piece): 
         """Reverts a move to restore board state."""
         mx, my = start
-        self.chess_board[y][x], self.chess_board[my][mx] = self.chess_board[my][mx], piece
-
+        x, y = final 
+        self.chess_board[my][mx] = self.chess_board[y][x]
+        self.chess_board[y][x] = piece
     def is_king_in_check(self):
         """Checks if the player's king is in check."""
         color=self.turn[0]
@@ -777,7 +799,6 @@ class ChessGame:
             pygame.draw.rect(screen, highlight_color, pygame.Rect(x * square_size, y * square_size, square_size, square_size))
             pygame.draw.rect(screen, highlight_color, pygame.Rect(mx * square_size, my * square_size, square_size, square_size))
     def run(self) :
-        from AI import evaluate
         self.white_king_position = self.find_king_position( 'white')
         self.black_king_position = self.find_king_position('black')
         for event in pygame.event.get():
@@ -787,16 +808,12 @@ class ChessGame:
                 if pygame.mouse.get_pressed()[0]:  # Check if left click
                     x, y = event.pos
                     x_square, y_square = x // square_size, y // square_size
-                    h = True
-                    if (self.turn=='black' and len(self.black_moves)>3 and h ) :
+                    if (self.turn=='black' and len(self.black_moves)>3 ) :
                         self.all_moves()
-                        depth = 4
-                        print('before ai',evaluate(self))
-                        start,end = AI(self,depth)
+                        start,end = AI(self)
                         self.last_move = [start,end]
 
                         self.move_piece(start,end[0],end[1])
-                        print('after ai, ',evaluate(self))
                         self.all_moves()
                         self.turn = 'white'
                     # Ensure within board bounds
@@ -868,3 +885,5 @@ class ChessGame:
                 if piece == f'{color[0]}K':  # White king or black king
                     return (x, y)
         return None
+
+
