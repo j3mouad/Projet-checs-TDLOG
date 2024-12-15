@@ -4,7 +4,21 @@ import os
 import sys
 import random
 import time
+#Code explanation for Mouad
 
+#The first part is implementing the heuristics(evaluation function and how it works)
+#You should not really in depth how it works you could just copy past everything 
+#The second part includes minimax and AI    
+#it uses hashing to improve speed and avoid recalculations
+#Here is some explanation of how functions work,
+#game.all_moves() generate legal moves of a player 
+#you should also see my copy constructor
+#good luck for implementation
+#I used depth 2 for testing which is really bad 
+# note : depth should always be even (really important )
+#tell me how much depth can you reach in c++
+#if we could reach depth 6 then we could say we have an AI
+#if you have questions send them to me on whatsapp
 # Set up directory if needed (adjust as necessary)
 new_dir = '/home/hassene/Desktop/Projet-echecs-TDLOG/build'
 os.chdir(new_dir)
@@ -115,7 +129,6 @@ def evaluate_material(game):
     return material_score
 
 
-# ---------- NEW / IMPROVED HELPER FUNCTIONS ----------
 
 def get_game_phase(game):
     """
@@ -265,7 +278,8 @@ def evaluate(game,transposition_table):
 
     return total_score
 
-
+#-------------------------------------------------------------------------#
+#This is second part 
 def hash_game(game):
     """
     Hash the current game state. This should return a unique identifier
@@ -334,7 +348,8 @@ def minimax(game, depth, transposition_table, alpha=float('-inf'), beta=float('i
         transposition_table[game_hash] = min_eval
         return min_eval
 
-def AI(game, depth=4):
+transposition_table = {}
+def AI(game, depth=2):
     """
     AI for determining the best move using minimax evaluation.
     Returns the best move as a tuple (start_pos, end_pos).
@@ -343,7 +358,6 @@ def AI(game, depth=4):
     print(game.turn)
     moves_scores = []
     moves = game.white_moves if game.turn == 'white' else game.black_moves
-    transposition_table = {}
     total_time = 0
     for start_pos, possible_moves in moves.items():
         for end_pos in possible_moves:
@@ -351,14 +365,9 @@ def AI(game, depth=4):
             # Create a copy of the game to simulate the move
             copy_game = game.copy_game()
             copy_game.all_moves()
-            temp_score = evaluate(copy_game)
             x, y = end_pos
             copy_game.move_piece(start_pos, x, y)
             copy_game.change_player()
-            temp_temp_score = minimax(copy_game,1,transposition_table)
-            if (temp_temp_score<=temp_score) :
-                print('continue')
-
             score = minimax(copy_game, depth - 1,transposition_table)
             moves_scores.append((score, (start_pos, end_pos)))
             print(f"Move: {start_pos} -> {end_pos}, Score: {score}")

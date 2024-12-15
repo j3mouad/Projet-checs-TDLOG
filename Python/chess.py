@@ -145,6 +145,8 @@ class ChessGame:
         new_game.last_move = np.copy(self.last_move[:])
         new_game.possible_moves = np.copy(self.possible_moves[:])
         # Return the copied game object
+        new_game.rook_moved = deepcopy(self.rook_moved)
+        new_game.castle = deepcopy(self.castle)
         return new_game
     def board_to_fen(self):
         """Converts self.chess_board to a FEN string."""
