@@ -1,6 +1,10 @@
 #include "pieces.h"
 #include <vector>
 
+#include <random>
+#include <chrono>
+#include <map>
+
 
 class Board{
     private:
@@ -17,6 +21,7 @@ class Board{
     public:
         Board(Piece* board,string turn);
         Board() = default;
+        void transformToFisher();
         // getter functions
         Piece getPiece(Point point);
         void setPiece(Point point, Piece piece);

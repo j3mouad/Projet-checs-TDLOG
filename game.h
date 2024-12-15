@@ -2,8 +2,7 @@
 #include "board.h"
 #include "player.h"
 #include <utility>
-#include <map>
-#include <random>
+
 
 extern Point* initialHeatMap;
 
@@ -18,6 +17,7 @@ class Game{
         map<pair<int, int>,vector<Point>> getAllPossibleBlackMoves(Point enPassant);
         void play();
         void play_against_random();
+        void play_fisher(bool onevone = true);
         bool isInCheck();
 };
 

@@ -1,4 +1,52 @@
 #include "board.h"
+vector<pair<int,string>> generateRandomBackRank() { //written by chatgpt
+        unsigned seed = chrono::system_clock::now().time_since_epoch().count();
+        mt19937 rng(seed);
+        vector<pair<int, string>> pieces = {
+            make_pair(0, "Rook"), make_pair(1, "Knight"), make_pair(2, "Bishop"),
+            make_pair(3, "Queen"), make_pair(4, "King"), make_pair(5, "Bishop"),
+            make_pair(6, "Knight"), make_pair(7, "Rook")
+        };
+
+        while (true) {
+            shuffle(pieces.begin(), pieces.end(), rng);
+
+            int bishop1Pos = find_if(pieces.begin(), pieces.end(), [](const pair<int, string>& p) { return p.second == "Bishop"; }) - pieces.begin();
+            int bishop2Pos = find_if(pieces.begin() + bishop1Pos + 1, pieces.end(), [](const pair<int, string>& p) { return p.second == "Bishop"; }) - pieces.begin();
+
+            if ((bishop1Pos % 2 == bishop2Pos % 2)) {
+                continue; 
+            }
+
+
+            int kingPos = find_if(pieces.begin(), pieces.end(), [](const pair<int, string>& p) { return p.second == "King"; }) - pieces.begin();
+            int rook1Pos = find_if(pieces.begin(), pieces.end(), [](const pair<int, string>& p) { return p.second == "Rook"; }) - pieces.begin();
+            int rook2Pos = find_if(pieces.begin() + rook1Pos + 1, pieces.end(), [](const pair<int, string>& p) { return p.second == "Rook"; }) - pieces.begin();
+
+            if (rook1Pos < kingPos && kingPos < rook2Pos) {
+                break; // Valid configuration
+            }
+        }
+
+        return pieces;
+}
+
+void Board::transformToFisher(){
+    cout << 1 << endl;
+    vector<pair<int,string>> backRank = generateRandomBackRank();
+    for (pair<int,string> couple : backRank){
+        cout << couple.second << " : " << couple.first << endl;
+    }
+    cout << 2 << endl;
+    for (int i = 0; i < 8; ++i) {
+        movePiece(Point(i, 0), Point(i, 2)); 
+        movePiece(Point(i, 7), Point(i, 5));
+    }
+    for (int i = 0; i < 8; ++i) {
+        movePiece(Point(backRank[i].first, 2), Point(i, 0)); 
+        movePiece(Point(backRank[i].first, 5), Point(i, 7));
+    }
+}
 
 Board::Board(Piece* initial__board,string Turn){
     turn = Turn;

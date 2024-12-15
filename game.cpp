@@ -495,6 +495,15 @@ void Game::play_against_random(){
     }
 }
 
+void Game::play_fisher(bool onevone){
+    gameBoard.transformToFisher();
+    if(onevone){
+        play();
+    } else {
+        play_against_random();
+    }
+}
+
 bool Game::isInCheck(){
     vector<Point> test;
     int x,y;
