@@ -449,6 +449,9 @@ class ChessGame:
     def castling(self) :
         if not (self.classic) : 
             return 
+        self.change_player()
+        self.all_moves()
+        self.change_player()
         print('this is self.rook_moved ',self.rook_moved)
         if  not (self.white_king_check) and not self.white_king_moved :
             if (self.rook_moved[0]==1) :
@@ -457,6 +460,8 @@ class ChessGame:
             elif (self.rook_moved[0]==0 and self.chess_board[7][5]=='--' and self.chess_board[7][6]=='--') :
                 b = False
                 for key in self.black_moves :
+                    if (b in self.black_moves[key]) :
+                        print('blabla')
                     b= (6,7) in self.black_moves[key] or (5,7) in self.black_moves[key] or b 
                     if (b) :
                         break
@@ -492,7 +497,6 @@ class ChessGame:
                     if (b):
                         break
                 self.castle[3] = not b 
-        print(self.castle) 
     def is_valid_move(self, start, end):
         x, y = start
         mx, my = end
@@ -638,16 +642,12 @@ class ChessGame:
         if (self.chess_board[my][mx][1]=='R') :
             if (mx==7 and my==7) :
                 self.rook_moved[0] = 1
-                print('rook 0 moved')
             if (mx==0 and my==7) :
                 self.rook_moved[1]== 1
-                print('rook 1 moved')
             if (mx == 0 and my == 0) :
                 self.rook_moved[2] = 1
-                print('rook 2 moved')
             if (mx==7 and my == 0 ) :
                 self.rook_moved[3] = 1
-                print('rook 3 moved')
         self.chess_board[y][x], self.chess_board[my][mx] = moving_piece, '--'
         if ((y==0 or y==7) and  self.chess_board[y][x][1]=='P') :
             self.chess_board[y][x] = self.chess_board[y][x][0] + 'Q'
