@@ -148,27 +148,7 @@ class ChessGame:
         new_game.rook_moved = deepcopy(self.rook_moved)
         new_game.castle = deepcopy(self.castle)
         return new_game
-    def board_to_fen(self):
-        """Converts self.chess_board to a FEN string."""
-        fen_rows = []
-        for row in self.chess_board:
-            empty_count = 0
-            fen_row = ""
-            for piece in row:
-                if piece == '--':
-                    empty_count += 1
-                else:
-                    if empty_count > 0:
-                        fen_row += str(empty_count)
-                        empty_count = 0
-                    # Map 'bP', 'wK', etc., to FEN piece notation
-                    fen_row += piece[1].lower() if piece[0] == 'b' else piece[1].upper()
-            if empty_count > 0:
-                fen_row += str(empty_count)
-            fen_rows.append(fen_row)
-        # Combine rows with '/' and append standard FEN suffix
-        fen = "/".join(fen_rows) + " w - - 0 1"
-        return fen
+
     def draw_board(self):
         for row in range(8):
             for col in range(8):
@@ -469,15 +449,22 @@ class ChessGame:
     def castling(self) :
         if not (self.classic) : 
             return 
+        print('this is self.rook_moved ',self.rook_moved)
         if  not (self.white_king_check) and not self.white_king_moved :
-            if (self.rook_moved[0]==0 and self.chess_board[7][5]=='--' and self.chess_board[7][6]=='--') :
+            if (self.rook_moved[0]==1) :
+                self.castle[0]=False
+                
+            elif (self.rook_moved[0]==0 and self.chess_board[7][5]=='--' and self.chess_board[7][6]=='--') :
                 b = False
                 for key in self.black_moves :
                     b= (6,7) in self.black_moves[key] or (5,7) in self.black_moves[key] or b 
                     if (b) :
                         break
+                print(b)
                 self.castle[0]=not b 
-            if (self.rook_moved[1]==0 and self.chess_board[7][1]=='--' and self.chess_board[7][2]=='--' and self.chess_board[7][3]=='--') :
+            if (self.rook_moved[1]==1) :
+                self.castle[1]=False
+            elif (self.rook_moved[1]==0 and self.chess_board[7][1]=='--' and self.chess_board[7][2]=='--' and self.chess_board[7][3]=='--') :
                 b = False
                 for key in self.black_moves :
                     
@@ -487,13 +474,17 @@ class ChessGame:
                 self.castle[1] = not b       
          
         if not (self.black_king_check) and not self.black_king_moved :
-            if (self.rook_moved[2]== 0 and self.chess_board[0][1]=='--' and self.chess_board[0][2]=='--' and self.chess_board[0][3]=='--') :
+            if (self.rook_moved[2]==1) :
+                self.castle[2]=False
+            elif (self.rook_moved[2]== 0 and self.chess_board[0][1]=='--' and self.chess_board[0][2]=='--' and self.chess_board[0][3]=='--') :
                 b = False
                 for key in self.white_moves :
                     b= (1,0) in self.white_moves or (2,0) in self.white_moves or (3,0) in self.white_moves
                     if (b):
                         break
                 self.castle[2] =not  b
+            if (self.rook_moved[3]==1) :
+                self.castle[3]=False
             if (self.rook_moved[3]==0 and self.chess_board[0][6]=='--' and self.chess_board[0][5]=='--' ) :
                 b = False
                 for key in self.white_moves :
@@ -501,7 +492,7 @@ class ChessGame:
                     if (b):
                         break
                 self.castle[3] = not b 
-                        
+        print(self.castle) 
     def is_valid_move(self, start, end):
         x, y = start
         mx, my = end
@@ -604,7 +595,8 @@ class ChessGame:
 
     def move_piece(self, start, x, y): 
         """Moves the piece from start to (x, y). Handles en passant captures."""
-        
+        if (self.rook_moved[0]==0) :
+            print('rook 0 did not move')
         mx, my = start
         moving_piece = self.chess_board[my][mx]
         direction = -1 if self.turn == 'black' else 1
@@ -646,12 +638,16 @@ class ChessGame:
         if (self.chess_board[my][mx][1]=='R') :
             if (mx==7 and my==7) :
                 self.rook_moved[0] = 1
+                print('rook 0 moved')
             if (mx==0 and my==7) :
-                self.rook_moved[1]==1
+                self.rook_moved[1]== 1
+                print('rook 1 moved')
             if (mx == 0 and my == 0) :
                 self.rook_moved[2] = 1
+                print('rook 2 moved')
             if (mx==7 and my == 0 ) :
                 self.rook_moved[3] = 1
+                print('rook 3 moved')
         self.chess_board[y][x], self.chess_board[my][mx] = moving_piece, '--'
         if ((y==0 or y==7) and  self.chess_board[y][x][1]=='P') :
             self.chess_board[y][x] = self.chess_board[y][x][0] + 'Q'
@@ -810,14 +806,16 @@ class ChessGame:
                 if pygame.mouse.get_pressed()[0]:  # Check if left click
                     x, y = event.pos
                     x_square, y_square = x // square_size, y // square_size
-                    if (self.turn=='black' and len(self.black_moves)>3 ) :
-                        self.all_moves()
-                        start,end = AI(self)
-                        self.last_move = [start,end]
+                    #if (self.turn=='black' and len(self.black_moves)>3 ) :
+                     #   self.all_moves()
+                      #  start,end = AI(self)
+                       # self.last_move = [start,end]
 
-                        self.move_piece(start,end[0],end[1])
-                        self.all_moves()
-                        self.turn = 'white'
+                       # self.move_piece(start,end[0],end[1])
+                        #if (start[0]==7 and start[1]==7) :
+                         #   print('rook moved')
+                       # self.all_moves()
+                       # self.turn = 'white'
                     # Ensure within board bounds
                     if 0 <= x_square < 8 and 0 <= y_square < 8:
                         if self.selected_piece and (x_square, y_square) in self.possible_moves:

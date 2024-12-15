@@ -18,7 +18,7 @@ import time
 # note : depth should always be even (really important )
 #tell me how much depth can you reach in c++
 #if we could reach depth 6 then we could say we have an AI
-#if you have questions send them to me on whatsapp
+#if you have questions send them to me on whatsap
 # Set up directory if needed (adjust as necessary)
 new_dir = '/home/hassene/Desktop/Projet-echecs-TDLOG/build'
 os.chdir(new_dir)
@@ -355,7 +355,6 @@ def AI(game, depth=2):
     Returns the best move as a tuple (start_pos, end_pos).
     depth must be pair so that it works
     """
-    print(game.turn)
     moves_scores = []
     moves = game.white_moves if game.turn == 'white' else game.black_moves
     total_time = 0
@@ -370,17 +369,17 @@ def AI(game, depth=2):
             copy_game.change_player()
             score = minimax(copy_game, depth - 1,transposition_table)
             moves_scores.append((score, (start_pos, end_pos)))
-            print(f"Move: {start_pos} -> {end_pos}, Score: {score}")
+          #  print(f"Move: {start_pos} -> {end_pos}, Score: {score}")
             end_time = time.time()
-            print(end_time-start_time)
+           # print(end_time-start_time)
             total_time += end_time - start_time
     # Sort moves by score (higher is better for white, lower for black)
     moves_scores.sort(reverse=(game.turn == 'white'), key=lambda x: x[0])
 
     # Return the move with the best score
     if moves_scores:
-        print(f"Best move: {moves_scores[0][1]} with score {moves_scores[0][0]}")
-        print(total_time)
+       # print(f"Best move: {moves_scores[0][1]} with score {moves_scores[0][0]}")
+       # print(total_time)
         return moves_scores[0][1]
-    print("No valid moves found")
+    #print("No valid moves found")
     return None
