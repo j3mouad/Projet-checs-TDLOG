@@ -4,6 +4,7 @@ import os
 import sys
 import random
 import time
+
 # Set up directory if needed (adjust as necessary)
 new_dir = '/home/hassene/Desktop/Projet-echecs-TDLOG/build'
 os.chdir(new_dir)
@@ -13,12 +14,12 @@ if new_dir not in sys.path:
 # Positional tables for pieces
 PAWN_TABLE = [
     [  0,   0,   0,   0,   0,   0,   0,   0],
-    [ 10,  10,  10, -10, -10,  10,  10,  10],
+    [ 10,  10,  10, 10, 10,  10,  10,  10],
     [  5,   5,  10,  20,  20,  10,   5,   5],
     [  0,   0,  10,  30,  30,  10,   0,   0],
     [  5,   5,  20,  40,  40,  20,   5,   5],
     [ 10,  10,  20,  50,  50,  20,  10,  10],
-    [ 20,  20,  30,  60,  60,  30,  20,  20],
+    [ 20,  20,  30,  20,  20,  30,  20,  20],
     [  0,   0,   0,   0,   0,   0,   0,   0],
 ]
 
@@ -34,14 +35,14 @@ KNIGHT_TABLE = [
 ]
 
 BISHOP_TABLE = [
-    [20,  10, 100,  10,  10, 100, 10, 20],
-    [10,   0,   0,   0,   0,   0,  0, 10],
+    [20,  10, 10,  10,  10, 10, 10, 20],
+    [10,   30,   0,   0,   0,   0,  30, 10],
     [10,   0,   5,  10,  10,   5,  0, 10],
     [10,   5,  10,  15,  15,  10,  5, 10],
     [10,   5,  10,  15,  15,  10,  5, 10],
     [10,   0,   5,  10,  10,   5,  0, 10],
-    [10,   0,   0,   0,   0,   0,  0, 10],
-    [20,  10, 100,  10,  10, 100, 10, 20],
+    [10,   30,   0,   0,   0,   0,  30, 10],
+    [20,  10, 10,  10,  10, 10, 10, 20],
 ]
 
 ROOK_TABLE = [
@@ -333,7 +334,6 @@ def minimax(game, depth, transposition_table, alpha=float('-inf'), beta=float('i
         transposition_table[game_hash] = min_eval
         return min_eval
 
-
 def AI(game, depth=4):
     """
     AI for determining the best move using minimax evaluation.
@@ -351,10 +351,14 @@ def AI(game, depth=4):
             # Create a copy of the game to simulate the move
             copy_game = game.copy_game()
             copy_game.all_moves()
-            
+            temp_score = evaluate(copy_game)
             x, y = end_pos
             copy_game.move_piece(start_pos, x, y)
             copy_game.change_player()
+            temp_temp_score = minimax(copy_game,1,transposition_table)
+            if (temp_temp_score<=temp_score) :
+                print('continue')
+
             score = minimax(copy_game, depth - 1,transposition_table)
             moves_scores.append((score, (start_pos, end_pos)))
             print(f"Move: {start_pos} -> {end_pos}, Score: {score}")
