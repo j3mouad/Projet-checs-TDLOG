@@ -95,6 +95,7 @@ class ChessGame:
         self.turn = 'white'
         self.player='white'
         self.last_move=[]
+        self.last_move_draw = []
         self.possible_moves=[]
         self.winner = None
         self.cooldown=0.5
@@ -162,18 +163,41 @@ class ChessGame:
                 color = light_brown if (row + col) % 2 == 0 else brown
                 pygame.draw.rect(self.screen, color, pygame.Rect(col * square_size, row * square_size, square_size, square_size))
     
-    def draw_pieces(self):
-        font = pygame.font.Font(None, 12)
+    def draw_move(self) : 
+        if (self.last_move and self.last_move != self.last_move_draw) :
+            self.last_move_draw = self.last_move
+            x,y = self.last_move[0]
+            mx,my = self.last_move[1]
+            dx = (mx-x)/40
+            dy = (my-y)/40
+            piece = self.chess_board[my][mx]
+            print(piece)
+            if (piece != '--') :
+                resized_piece = pygame.transform.scale(pieces_images[piece], (square_size, square_size))
+                for i in range(40):
+                    self.draw_board()
+                    self.draw_pieces(mx,my)
+                    col = y + i * dy
+                    row = x + i * dx
+                    self.screen.blit(resized_piece, pygame.Rect(row * square_size, col * square_size, square_size, square_size))
+                    pygame.time.delay(1)
 
+                    
+                    pygame.display.flip()
+    def draw_pieces(self,mx=-1,my=-1):
+        font = pygame.font.Font(None, 12)        
         for row in range(8):
             for col in range(8):
                 text = font.render(self.chess_board_squares[col][row], True, (0, 0, 255)) 
                 screen.blit(text, (row*square_size, col*square_size))
                 piece = self.chess_board[row][col]
-                if piece != '--':
-                    resized_piece = pygame.transform.scale(pieces_images[piece], (square_size, square_size))
-                    self.screen.blit(resized_piece, pygame.Rect(col * square_size, row * square_size, square_size, square_size))
-                    
+  
+                if piece != '--' :
+                        if (mx==col and my==row) :
+                            continue 
+                        resized_piece = pygame.transform.scale(pieces_images[piece], (square_size, square_size))
+                        self.screen.blit(resized_piece, pygame.Rect(col * square_size, row * square_size, square_size, square_size))
+                        
 
     def draw_add_time_button(self):
         self.button_rect = pygame.Rect(screen_width + 20, 200, 250, 80)

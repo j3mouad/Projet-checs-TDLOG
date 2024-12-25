@@ -30,9 +30,10 @@ if __name__ == "__main__":
         game.draw_king_in_check()
         game.draw_selected_piece()
         game.draw_pieces()
-        pygame.display.flip()
+        
         game.castling()
         game.run()
+        game.draw_move()
         game.all_moves()
         game.change_player()
         game.all_moves()
@@ -42,7 +43,9 @@ if __name__ == "__main__":
             game.time_reg(white_time, black_time)
             k += 1
             pygame.time.delay(100)
+        
         game.game_ends()
+
     pygame.quit()
     game.show_winner()
 
