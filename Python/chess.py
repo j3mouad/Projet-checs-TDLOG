@@ -86,6 +86,12 @@ class ChessGame:
         self.list_of_boards=[self.chess_board for _ in range(1000)]
         self.len_list_of_boards=0 
         self.list_of_times=[[0,0] for _ in range(1000)]
+        self.list_of_last_moves = [[(0,0),(0,0)] for _ in range(1000)]
+        self.list_of_king_check  = [(False,False) for _ in range(1000)]
+        self.list_of_rooks = [[0,0,0,0] for _ in range(1000)]
+        self.list_of_castles = [[0,0,0,0] for _ in range(1000)]
+        self.list_of_king_moves = [(False,False) for _ in range(1000)]
+        self.list_of_passant = [False for _ in range(1000)]
         self.turn = 'white'
         self.player='white'
         self.last_move=[]
@@ -317,10 +323,17 @@ class ChessGame:
         l=self.len_list_of_boards
         self.white_time, self.black_time = self.list_of_times[l - 1]
         self.chess_board = deepcopy(self.list_of_boards[l - 1])
+        self.last_move=self.list_of_last_moves[l-1]
+        self.castle = deepcopy(self.list_of_castles[l-1])
+        self.rook_moved = deepcopy(self.list_of_rooks[l-1])
+        self.white_king_check, self.black_king_check = self.list_of_king_check[l-1]
+        self.white_king_moved, self.black_king_moved = self.list_of_king_moves[l-1]
+        self.pion_passant = self.list_of_passant[l-1]
+        print('rook moved list',self.rook_moved)
+        print('castle list is ',self.castle)
         self.selected_piece=[]
         self.draw_board()
         self.draw_pieces()
-        self.last_move=[]
         self.turn = 'black' if self.turn == 'white' else 'white'
         pygame.display.flip()
         pygame.time.delay(100)
@@ -758,6 +771,13 @@ class ChessGame:
         if not np.array_equal(self.list_of_boards[l-1], self.chess_board):
             self.list_of_boards[l] = deepcopy(self.chess_board)
             self.list_of_times[l] = [self.white_time, self.black_time]
+            self.list_of_last_moves[l] = deepcopy(self.last_move)
+            self.list_of_castles[l] = deepcopy(self.castle)
+            self.list_of_rooks[l] = deepcopy(self.rook_moved)
+            self.list_of_king_check[l] = [self.white_king_check, self.black_king_check]
+            self.list_of_king_moves[l] = [self.white_king_moved, self.black_king_moved]
+            print(self.castle)
+            self.list_of_passant[l] = self.pion_passant
             self.len_list_of_boards += 1
        
     def draw_king_in_check(self) :
@@ -775,7 +795,6 @@ class ChessGame:
         else :
             self.black_king_position = self.find_king_position('black')
             x_king, y_king = self.black_king_position
-            print(x_king,y_king)
             b = False
             for key in self.white_moves :
                 if (x_king,y_king) in self.white_moves[key] :
