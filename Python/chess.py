@@ -191,7 +191,6 @@ class ChessGame:
                 text = font.render(self.chess_board_squares[col][row], True, (0, 0, 255)) 
                 screen.blit(text, (row*square_size, col*square_size))
                 piece = self.chess_board[row][col]
-  
                 if piece != '--' :
                         if (mx==col and my==row) :
                             continue 
@@ -486,18 +485,20 @@ class ChessGame:
     def castling(self) :
         if not (self.classic) : 
             return 
+        self.all_moves()
         self.change_player()
         self.all_moves()
         self.change_player()
+        if (self.white_king_check or self.white_king_moved) :
+            self.castle[0]=False
+            self.castle[1]=False
         if  not (self.white_king_check) and not self.white_king_moved :
             if (self.rook_moved[0]==1) :
                 self.castle[0]=False
-                
             elif (self.rook_moved[0]==0 and self.chess_board[7][5]=='--' and self.chess_board[7][6]=='--') :
                 b = False
                 for key in self.black_moves :
-                    if (b in self.black_moves[key]) :
-                        b= (6,7) in self.black_moves[key] or (5,7) in self.black_moves[key] or b 
+                        b= (6,7) in self.black_moves[key] or (5,7) in self.black_moves[key] 
                         if (b) :
                             break
                 self.castle[0]=not b 
@@ -511,14 +512,16 @@ class ChessGame:
                     if (b) :
                         break
                 self.castle[1] = not b       
-         
+        if (self.black_king_check or self.black_king_moved) :
+            self.castle[2]=False
+            self.castle[3]=False
         if not (self.black_king_check) and not self.black_king_moved :
             if (self.rook_moved[2]==1) :
                 self.castle[2]=False
             elif (self.rook_moved[2]== 0 and self.chess_board[0][1]=='--' and self.chess_board[0][2]=='--' and self.chess_board[0][3]=='--') :
                 b = False
                 for key in self.white_moves :
-                    b= (1,0) in self.white_moves or (2,0) in self.white_moves or (3,0) in self.white_moves
+                    b= (1,0) in self.white_moves[key] or (2,0) in self.white_moves[key] or (3,0) in self.white_moves[key]
                     if (b):
                         break
                 self.castle[2] =not  b

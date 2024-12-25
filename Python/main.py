@@ -30,7 +30,7 @@ if __name__ == "__main__":
         game.draw_king_in_check()
         game.draw_selected_piece()
         game.draw_pieces()
-        
+        pygame.display.flip()
         game.castling()
         game.run()
         game.draw_move()
