@@ -34,6 +34,9 @@ if __name__ == "__main__":
         game.castling()
         game.run()
         game.all_moves()
+        game.change_player()
+        game.all_moves()
+        game.change_player()
         game.update_timers()            
         if k == 0:
             game.time_reg(white_time, black_time)

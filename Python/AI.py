@@ -26,7 +26,7 @@ if new_dir not in sys.path:
     sys.path.append(new_dir)
 
 # Positional tables for pieces
-PAWN_TABLE = [
+PAWN_TABLE = np.array([
     [  0,   0,   0,   0,   0,   0,   0,   0],
     [ 10,  10,  10, 10, 10,  10,  10,  10],
     [  5,   5,  10,  20,  20,  10,   5,   5],
@@ -35,9 +35,9 @@ PAWN_TABLE = [
     [ 10,  10,  20,  50,  50,  20,  10,  10],
     [ 20,  20,  30,  20,  20,  30,  20,  20],
     [  0,   0,   0,   0,   0,   0,   0,   0],
-]
+])
 
-KNIGHT_TABLE = [
+KNIGHT_TABLE = np.array([
     [0,   0,   0,   0,   0,   0,   0,  0],
     [10, 20,   0,   5,   5,   0,  20, 10],
     [-30, 5,  30,  30,  30,  30,   5, -30],
@@ -46,32 +46,31 @@ KNIGHT_TABLE = [
     [-30, 5,  30,  30,  30,  30,   5, -30],
     [10, 20,   0,   5,   5,   0,  20, 10],
     [0,   0,   0,   0,   0,   0,   0,  0],
-]
+])
 
-BISHOP_TABLE = [
+BISHOP_TABLE = np.array([
     [20,  10, 10,  10,  10, 10, 10, 20],
-    [10,   30,   0,   0,   0,   0,  30, 10],
-    [10,   0,   5,  10,  10,   5,  0, 10],
-    [10,   5,  10,  15,  15,  10,  5, 10],
-    [10,   5,  10,  15,  15,  10,  5, 10],
-    [10,   0,   5,  10,  10,   5,  0, 10],
-    [10,   30,   0,   0,   0,   0,  30, 10],
+    [10,  30,   0,   0,   0,   0,  30, 10],
+    [10,   0,   5,  10,  10,   5,   0, 10],
+    [10,   5,  10,  15,  15,  10,   5, 10],
+    [10,   5,  10,  15,  15,  10,   5, 10],
+    [10,   0,   5,  10,  10,   5,   0, 10],
+    [10,  30,   0,   0,   0,   0,  30, 10],
     [20,  10, 10,  10,  10, 10, 10, 20],
-]
+])
 
-ROOK_TABLE = [
-    [0,   -50,  10,  15,  15,  10,   -50,  0],    # Row 1 (rank 8)
-    [5,  10,  15,  20,  20,  15,  10,  5],    # Row 2 (rank 7)
-    [10, 15,  20,  25,  25,  20,  15,  10],   # Row 3 (rank 6)
-    [15, 20,  25,  30,  30,  25,  20,  15],   # Row 4 (rank 5)
-    [20, 25,  30,  35,  35,  30,  25,  20],   # Row 5 (rank 4)
-    [15, 20,  25,  30,  30,  25,  20,  15],   # Row 6 (rank 3)
-    [10, 15,  20,  25,  25,  20,  15,  10],   # Row 7 (rank 2)
-    [0,   -50,  10,  15,  15,  10,   -50,  0],    # Row 8 (rank 1)
-]
+ROOK_TABLE = np.array([
+    [0,   -50,  10,  15,  15,  10,  -50,  0], 
+    [5,   10,  15,  20,  20,  15,   10,  5],
+    [10,  15,  20,  25,  25,  20,   15, 10],
+    [15,  20,  25,  30,  30,  25,   20, 15],
+    [20,  25,  30,  35,  35,  30,   25, 20],
+    [15,  20,  25,  30,  30,  25,   20, 15],
+    [10,  15,  20,  25,  25,  20,   15, 10],
+    [0,   -50,  10,  15,  15,  10,  -50,  0],
+])
 
-
-QUEEN_TABLE = [
+QUEEN_TABLE = np.array([
     [20, 10, 10,   5,   5, 10, 10, 20],
     [10,  0,  0,   0,   0,  0,  0, 10],
     [10,  0, 50,  50,  50, 50,  0, 10],
@@ -80,9 +79,9 @@ QUEEN_TABLE = [
     [10, 50, 50,  50,  50, 50,  0, 10],
     [10,  0, 50,   0,   0,  0,  0, 10],
     [20, 10, 10,   5,   5, 10, 10, 20],
-]
+])
 
-KING_TABLE = [
+KING_TABLE = np.array([
     [30, 40, 40, 50,  50, 40, 40, 30],
     [30, 40, 40, 50,  50, 40, 40, 30],
     [30, 40, 40, 50,  50, 40, 40, 30],
@@ -91,7 +90,8 @@ KING_TABLE = [
     [10, 20, 20, 20,  20, 20, 20, 10],
     [20, 20,  0,  0,   0,  0, 20, 20],
     [20, 30,100,-40,   0,-40,100,20],
-]
+])
+
 
 tables = {
     'N': (300, KNIGHT_TABLE),
@@ -120,14 +120,9 @@ def evaluate_piece(piece, x, y):
 
 def evaluate_material(game):
     """Sum material and positional table values."""
-    material_score = 0
-    for y in range(8):
-        for x in range(8):
-            piece = game.chess_board[y][x]
-            if piece != '--':
-                material_score += evaluate_piece(piece, x, y)
-    return material_score
-
+    return sum(evaluate_piece(game.chess_board[y][x], x, y) 
+               for y in range(8) for x in range(8) 
+               if game.chess_board[y][x] != '--')
 
 
 def get_game_phase(game):
@@ -166,23 +161,14 @@ def get_legal_moves_for_color(game, color):
     """Utility to get all legal moves for a given color."""
     return game.white_moves if color == 'white' else game.black_moves
 
-
 def evaluate_control_of_key_squares(game):
     """Evaluate control of central and other important squares."""
-    # Already considered a bit in your opening evaluation. Let's extend it:
-    # Add more squares (e.g., outposts) that are valuable in mid/endgame.
-
     # As a simple example, still emphasize center squares but now variable based on phase:
-    center_squares = [(3,3),(3,4),(4,3),(4,4)]
-    score = 0
-    for (x, y) in center_squares:
-        piece = game.chess_board[y][x]
-        if piece != '--':
-            if piece[0] == 'w':
-                score += 20
-            else:
-                score -= 20
-    return score
+    center_squares = [(3, 3), (3, 4), (4, 3), (4, 4)]
+    return sum(20 if game.chess_board[y][x][0] == 'w' else -20
+               for x, y in center_squares
+               if game.chess_board[y][x] != '--')
+
 
 
 def is_in_endgame(game):
@@ -261,8 +247,6 @@ def evaluate(game,transposition_table):
 
     # Determine game phase and interpolate
     phase = get_game_phase(game)  
-    # opening_weight ~ (1 - phase)
-    # endgame_weight ~ phase
     opening_weight = 1 - phase
     endgame_weight = phase
 
@@ -348,18 +332,27 @@ def minimax(game, depth, transposition_table, alpha=float('-inf'), beta=float('i
         transposition_table[game_hash] = min_eval
         return min_eval
 
-transposition_table = {}
-def AI(game, depth=2):
+def AI(game, depth=4):
     """
     AI for determining the best move using minimax evaluation.
     Returns the best move as a tuple (start_pos, end_pos).
     depth must be pair so that it works
     """
+    transposition_table={}
+    game.all_moves()
+    game.change_player()
+    game.all_moves()        
+    game.change_player()
     moves_scores = []
+    s = 0 ;
+    i = 0
+    eval_score = evaluate(game,{})
+    print(eval_score)
     moves = game.white_moves if game.turn == 'white' else game.black_moves
     total_time = 0
     for start_pos, possible_moves in moves.items():
         for end_pos in possible_moves:
+            i+=1
             start_time = time.time()  # Record the start time
             # Create a copy of the game to simulate the move
             copy_game = game.copy_game()
@@ -367,19 +360,27 @@ def AI(game, depth=2):
             x, y = end_pos
             copy_game.move_piece(start_pos, x, y)
             copy_game.change_player()
+            score = (minimax(copy_game,1,{}))
+            print(score)
+            if (score<=eval_score) :
+                print('continue')
+                s+=1
+                print(s,'  ',i)
+                continue
+
             score = minimax(copy_game, depth - 1,transposition_table)
             moves_scores.append((score, (start_pos, end_pos)))
-          #  print(f"Move: {start_pos} -> {end_pos}, Score: {score}")
+            print(f"Move: {start_pos} -> {end_pos}, Score: {score}")
             end_time = time.time()
-           # print(end_time-start_time)
+            print(end_time-start_time)
             total_time += end_time - start_time
     # Sort moves by score (higher is better for white, lower for black)
     moves_scores.sort(reverse=(game.turn == 'white'), key=lambda x: x[0])
 
     # Return the move with the best score
     if moves_scores:
-       # print(f"Best move: {moves_scores[0][1]} with score {moves_scores[0][0]}")
-       # print(total_time)
+        print(f"Best move: {moves_scores[0][1]} with score {moves_scores[0][0]}")
+        print(total_time)
         return moves_scores[0][1]
-    #print("No valid moves found")
+    print("No valid moves found")
     return None

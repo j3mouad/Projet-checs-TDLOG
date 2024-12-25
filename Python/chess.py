@@ -71,6 +71,7 @@ class ChessGame:
             ['wP', 'wP', 'wP', 'wP', 'wP', 'wP', 'wP', 'wP'],
             ['wR', 'wN', 'wB', 'wQ', 'wK', 'wB', 'wN', 'wR']
         ])
+
         self.chess_board_squares = np.array([
     ["a8", "b8", "c8", "d8", "e8", "f8", "g8", "h8"],
     ["a7", "b7", "c7", "d7", "e7", "f7", "g7", "h7"],
@@ -452,7 +453,6 @@ class ChessGame:
         self.change_player()
         self.all_moves()
         self.change_player()
-        print('this is self.rook_moved ',self.rook_moved)
         if  not (self.white_king_check) and not self.white_king_moved :
             if (self.rook_moved[0]==1) :
                 self.castle[0]=False
@@ -461,11 +461,9 @@ class ChessGame:
                 b = False
                 for key in self.black_moves :
                     if (b in self.black_moves[key]) :
-                        print('blabla')
-                    b= (6,7) in self.black_moves[key] or (5,7) in self.black_moves[key] or b 
-                    if (b) :
-                        break
-                print(b)
+                        b= (6,7) in self.black_moves[key] or (5,7) in self.black_moves[key] or b 
+                        if (b) :
+                            break
                 self.castle[0]=not b 
             if (self.rook_moved[1]==1) :
                 self.castle[1]=False
@@ -587,20 +585,13 @@ class ChessGame:
 
     def get_possible_moves(self, x, y):
         """Returns moves for the piece at (x, y) that don't put its king in check."""
-        moves = []
-        # Check all potential moves
-        for my in range(8):
-            for mx in range(8):
-                if self.is_valid_move((x, y), (mx, my)):
-                    
-                    moves.append((mx, my))
-        return moves
+        return [(mx, my) for mx in range(8) for my in range(8) if self.is_valid_move((x, y), (mx, my))]
+
 
 
     def move_piece(self, start, x, y): 
         """Moves the piece from start to (x, y). Handles en passant captures."""
-        if (self.rook_moved[0]==0) :
-            print('rook 0 did not move')
+ 
         mx, my = start
         moving_piece = self.chess_board[my][mx]
         direction = -1 if self.turn == 'black' else 1
@@ -768,21 +759,34 @@ class ChessGame:
             self.list_of_boards[l] = deepcopy(self.chess_board)
             self.list_of_times[l] = [self.white_time, self.black_time]
             self.len_list_of_boards += 1
-            
+       
     def draw_king_in_check(self) :
-        x_king,y_king=self.x_king,self.y_king
-        if x_king==-1 and y_king==-1 : 
-            if (self.turn=='white') : 
-                self.white_king_check=False
-            else :
-                self.black_king_check=False
-            return
-        if (x_king, y_king) != (-1, -1):
-            if (self.turn=='white') : 
-                self.white_king_check=True
-            else :
-                self.black_king_check=True
-            pygame.draw.rect(screen, red, pygame.Rect(x_king * square_size, y_king * square_size, square_size, square_size))
+        if (self.turn=='white') :
+            self.white_king_position = self.find_king_position( 'white')
+            x_king, y_king = self.white_king_position
+            b = False
+            for key in self.black_moves :
+                if  (x_king,y_king) in self.black_moves[key] :
+                    b = True
+                    break
+            self.white_king_check = b
+            if self.white_king_check:
+                pygame.draw.rect(screen, red, pygame.Rect(x_king * square_size, y_king * square_size, square_size, square_size))
+        else :
+            self.black_king_position = self.find_king_position('black')
+            x_king, y_king = self.black_king_position
+            print(x_king,y_king)
+            b = False
+            for key in self.white_moves :
+                if (x_king,y_king) in self.white_moves[key] :
+                    b = True
+                    break
+            self.black_king_check = b
+            if self.black_king_check:
+                pygame.draw.rect(screen, red, pygame.Rect(x_king * square_size, y_king * square_size, square_size, square_size))
+
+        
+        
     def draw_selected_piece(self) : 
         if self.selected_piece:
             x, y = self.selected_piece
@@ -806,16 +810,17 @@ class ChessGame:
                 if pygame.mouse.get_pressed()[0]:  # Check if left click
                     x, y = event.pos
                     x_square, y_square = x // square_size, y // square_size
-                    #if (self.turn=='black' and len(self.black_moves)>3 ) :
-                     #   self.all_moves()
-                      #  start,end = AI(self)
-                       # self.last_move = [start,end]
+                    """"  if (self.turn=='black') :
+                            self.all_moves()
+                            start,end = AI(self)
+                            print(start,' this is start and end ',end)
+                            self.last_move = [start,end]
 
-                       # self.move_piece(start,end[0],end[1])
-                        #if (start[0]==7 and start[1]==7) :
-                         #   print('rook moved')
-                       # self.all_moves()
-                       # self.turn = 'white'
+                            self.move_piece(start,end[0],end[1])
+                            if (start[0]==7 and start[1]==7) :
+                                print('rook moved')
+                            self.all_moves()
+                            self.turn = 'white'"""
                     # Ensure within board bounds
                     if 0 <= x_square < 8 and 0 <= y_square < 8:
                         if self.selected_piece and (x_square, y_square) in self.possible_moves:
@@ -845,37 +850,6 @@ class ChessGame:
                                 self.possible_moves = deepcopy(self.white_moves[(x_square, y_square)])  # Only get valid moves
                             else :
                                 self.possible_moves = deepcopy(self.black_moves[(x_square, y_square)])  # Only get valid moves
-        pygame.display.flip()
-    def from_float_to_int_coordinates(self, float_coords:coords ):
-        x_square = math.floor(float_coords.x / square_size) 
-        y_square = 7-math.floor(float_coords.y / square_size) 
-        return coords(x_square,y_square)
-    def get_point_in_topleft_square(self, int_coords:coords):
-        x_coordinates = int_coords.x*square_size
-        y_coordinates = (7-int_coords.y)*square_size
-        return coords(x_coordinates,y_coordinates)
-    def translation1(self ,initial_coords: coords, final_coords:coords, steps:int):
-        initial_square = self.get_point_in_topleft_square(initial_coords)
-        final_square = self.get_point_in_topleft_square(final_coords)
-        piece = self.chess_board[7-initial_coords.y][initial_coords.x]
-        self.chess_board[7-initial_coords.y][initial_coords.x] = '--'
-        delta_x = (final_square.x-initial_square.x)/steps
-        delta_y = (final_square.y-initial_square.y)/steps
-        resized_piece = pygame.transform.scale(pieces_images[piece], (square_size, square_size))
-        for i in range(steps):
-            initial_square.x+=delta_x
-            initial_square.y+=delta_y
-            current_square = self.get_point_in_topleft_square(initial_square)
-            self.draw_board()
-            self.draw_pieces()
-            for i in range(-1,2):
-                for j in range(-1,2):
-                    color = light_brown if (i + j + current_square.x + current_square.y) % 2 == 1 else brown
-                    pygame.draw.rect(screen, color, (current_square.x+i, current_square.y+i, square_size, square_size))        
-                    self.screen.blit(resized_piece, pygame.Rect(initial_square.x, initial_square.y,square_size,square_size))
-                    pygame.display.flip()
-                    pygame.time.delay(1)
-        self.chess_board[7-final_coords.y][final_coords.x] = piece
         pygame.display.flip()
     def find_king_position(self, color):
         """Returns the position of the king for a given color."""
