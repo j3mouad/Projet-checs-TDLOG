@@ -329,8 +329,7 @@ class ChessGame:
         self.white_king_check, self.black_king_check = self.list_of_king_check[l-1]
         self.white_king_moved, self.black_king_moved = self.list_of_king_moves[l-1]
         self.pion_passant = self.list_of_passant[l-1]
-        print('rook moved list',self.rook_moved)
-        print('castle list is ',self.castle)
+
         self.selected_piece=[]
         self.draw_board()
         self.draw_pieces()
@@ -776,7 +775,6 @@ class ChessGame:
             self.list_of_rooks[l] = deepcopy(self.rook_moved)
             self.list_of_king_check[l] = [self.white_king_check, self.black_king_check]
             self.list_of_king_moves[l] = [self.white_king_moved, self.black_king_moved]
-            print(self.castle)
             self.list_of_passant[l] = self.pion_passant
             self.len_list_of_boards += 1
        
@@ -832,7 +830,7 @@ class ChessGame:
                     """"  if (self.turn=='black') :
                             self.all_moves()
                             start,end = AI(self)
-                            print(start,' this is start and end ',end)
+                            s(start,' this is start and end ',end)
                             self.last_move = [start,end]
 
                             self.move_piece(start,end[0],end[1])
