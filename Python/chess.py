@@ -3,9 +3,8 @@ import sys
 from copy import deepcopy
 import time
 from random import shuffle
-from utils import has_non_empty_list,get_random_value
+from utils import has_non_empty_list
 import math
-import sys
 import numpy as np
 import copy
 sys.path.append('/home/hassene/Desktop/Projet-echecs-TDLOG/Python')
@@ -38,10 +37,6 @@ button_hover_color = (150, 250, 150)
 
 # Taille de la case
 square_size = screen_width // 8
-class coords:
-    def __init__(self,x,y):
-        self.x=x
-        self.y=y
 # Charger les images des pièces
 pieces_images = {
     'bR': pygame.image.load('black_rook.png'),
