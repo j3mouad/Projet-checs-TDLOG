@@ -7,6 +7,7 @@ import sys
 sys.path.append('/home/hasssene/Desktop/Projet-echecs-TDLOG/Python')
 from Board import Board
 from utils import *
+from first_screen import choose_game
 # Main function
 pygame.init()
 # Main game loop
@@ -16,7 +17,8 @@ def run() :
     # Draw and update the chessboard
     game = ChessGame()
     board = Board(game)
-    white_time,black_time = board.choose_game()
+
+    white_time,black_time = choose_game(board)
     screen.fill(white)
     board.game.time_reg(white_time, black_time)
     pygame.time.delay(100)

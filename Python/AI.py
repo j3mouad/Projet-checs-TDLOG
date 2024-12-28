@@ -302,6 +302,8 @@ def minimax(game, depth, transposition_table, alpha=float('-inf'), beta=float('i
                 copy_game.change_player()
                 copy_game.all_moves()
                 eval_score = minimax(copy_game, depth - 1, transposition_table, alpha, beta)
+                game_hash = hash_game(game)
+                transposition_table[game_hash] = eval_score
                 max_eval = max(max_eval, eval_score)
                 alpha = max(alpha, eval_score)
                 if beta <= alpha:
@@ -323,6 +325,8 @@ def minimax(game, depth, transposition_table, alpha=float('-inf'), beta=float('i
                 copy_game.all_moves()
                 eval_score = minimax(copy_game, depth - 1, transposition_table, alpha, beta)
                 min_eval = min(min_eval, eval_score)
+                game_hash = hash_game(game)
+                transposition_table[game_hash] = eval_score
                 beta = min(beta, eval_score)
                 if beta <= alpha:
                     break  # Prune outer loop
