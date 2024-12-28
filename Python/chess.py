@@ -1,44 +1,21 @@
 import pygame
-import sys
 from copy import deepcopy
-import time
 from random import shuffle
-from utils import has_non_empty_list
-import math
+from utils import *
 import numpy as np
 import copy
-sys.path.append('/home/hassene/Desktop/Projet-echecs-TDLOG/Python')
 import os
 from AI import AI
-import sys
 from button import Button
 new_dir = ('/home/hassene/Desktop/Projet-echecs-TDLOG/Python')
 os.chdir(new_dir)
 # Initialisation de Pygame
 pygame.init()
-click_sound_add_time_button = pygame.mixer.Sound("chess_add_time_sound.wav")  # Ensure you have a click.wav file in the same directory
-click_sound_chess=pygame.mixer.Sound("chess_move_soundf.mp3")
-screen_width = 500
-screen_height = 500
-added_screen_width = 400
+
+
 screen = pygame.display.set_mode((screen_width + added_screen_width, screen_height), pygame.RESIZABLE)
 pygame.display.set_caption("Chess")
-# Colors
-# Define colors
-white, grey, red, orange = (255, 255, 255), (128, 128, 128), (255, 0, 0), (255,165,0)
-brown, light_brown, highlight_color = (118, 150, 86), (238, 238, 210), (200, 200, 0)
-square_size = screen_width // 8
-black = (0, 0, 0)
-brown = (118, 150, 86)
-light_brown = (238, 238, 210)
-button_color = (100, 200, 100)  #green
-button_hover_color = (150, 250, 150)  
 
-
-
-# Taille de la case
-square_size = screen_width // 8
-# Charger les images des pièces
 pieces_images = {
     'bR': pygame.image.load('black_rook.png'),
     'bN': pygame.image.load('black_knight.png'),
@@ -94,8 +71,7 @@ class ChessGame:
         self.last_move_draw = []
         self.possible_moves=[]
         self.winner = None
-        self.cooldown=0.5
-        self.white_time = -1  # 10 minutes en secondes
+        self.white_time = -1  
         self.black_time = -1
         self.white_king_moved=False
         self.black_king_moved=False
@@ -119,9 +95,7 @@ class ChessGame:
         self.black_moves={(-1,-1):[(-1,-1)]}
         self.rook_moved=[0,0,0,0]
         self.castle=[0,0,0,0]
-        self.one_v_one=False
-        self.white=False
-        self.black=False
+  
         self.white_king_position = None
         self.black_king_position = None
     ##########################################First functions manage graphcis#############################################
@@ -167,40 +141,6 @@ class ChessGame:
                 self.winner = 'Stalemate'
                 self.running = False
                 return False
-    def show_winner(self):
-        """
-        Displays the winner of the game in a new screen.
-        Reinitializes the Pygame window and waits for user input before closing the game.
-        """
-        pygame.init()
-        # Set up the new screen for displaying the winner
-        screen = pygame.display.set_mode((screen_width + added_screen_width, screen_height))
-        pygame.display.set_caption("Winner Announcement")
-        screen.fill(white)
-
-        # Render winner text
-        font = pygame.font.Font(None, 72)  # Use a larger font for visibility
-        winner = "No one" if self.winner is None else self.winner
-        winner_text = font.render(f'{winner} won!', True, black)
-        text_rect = winner_text.get_rect(center=(screen.get_width() // 2, screen.get_height() // 2))
-        screen.blit(winner_text, text_rect)
-
-        # Update the display
-        pygame.display.flip()
-
-        # Wait for any user input to close the window
-        waiting = True
-        while waiting:
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    pygame.quit()
-                    exit()  # Exit the game gracefully
-                elif event.type == pygame.KEYDOWN or event.type == pygame.MOUSEBUTTONDOWN:
-                    waiting = False  # Close the winner screen on any key or mouse press
-
-        pygame.quit()
-
-
     #########################################From here functions will manage logic of the game############################################
 
 
@@ -309,15 +249,11 @@ class ChessGame:
         x, y = start  # Current position
         mx, my = end  # Target position
         start_piece = self.chess_board[y][x]  # Piece at the start position
-        end_piece = self.chess_board[my][mx]  # Piece at the target position
-        opponent_color = 'b' if self.turn == 'w' else 'w'  # Determine opponent's color
-        
+        end_piece = self.chess_board[my][mx]  # Piece at the target position        
         # Ensure the piece belongs to the current player and the destination is valid
         if start_piece == '--' or end_piece[0] == start_piece[0]:
             return False  # Empty square or same color piece cannot be moved
-
         piece_type = start_piece[1]  # Type of the piece (e.g., 'P' for pawn, 'R' for rook)
-        
         # Logic for different piece types
         # Pawn move rules
         if piece_type == 'P':

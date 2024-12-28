@@ -1,15 +1,11 @@
 import pygame
-import numpy as np
-import sys
 from copy import deepcopy
 import time
 from random import shuffle
-from utils import has_non_empty_list
-import math
 import os
-from AI import AI
-from button import Button
 from chess import ChessGame
+from utils import *
+import sys
 # Set the new directory and change the working directory
 new_dir = ('/home/hassene/Desktop/Projet-echecs-TDLOG/Python')
 os.chdir(new_dir)
@@ -22,20 +18,11 @@ click_sound_add_time_button = pygame.mixer.Sound("chess_add_time_sound.wav")
 click_sound_chess = pygame.mixer.Sound("chess_move_soundf.mp3")
 
 # Initial screen width and height
-screen_width = 500
-screen_height = 500
-added_screen_width = 400
-square_size = screen_width // 8
+
 # Create a resizable window
 screen = pygame.display.set_mode((screen_width + added_screen_width, screen_height))
 pygame.display.set_caption("Chess")
 
-# Colors
-white, grey, red, orange = (255, 255, 255), (128, 128, 128), (255, 0, 0), (255,165,0)
-brown, light_brown, highlight_color = (118, 150, 86), (238, 238, 210), (200, 200, 0)
-black = (0, 0, 0)
-button_color = (100, 200, 100)  # green
-button_hover_color = (150, 250, 150)
 
 # Load piece images
 pieces_images = {

@@ -1,3 +1,30 @@
+screen_width = 500
+screen_height = 500
+added_screen_width = 400
+# Colors
+# Define colors
+white, grey, red, orange = (255, 255, 255), (128, 128, 128), (255, 0, 0), (255,165,0)
+brown, light_brown, highlight_color = (118, 150, 86), (238, 238, 210), (200, 200, 0)
+square_size = screen_width // 8
+black = (0, 0, 0)
+brown = (118, 150, 86)
+light_brown = (238, 238, 210)
+button_color = (100, 200, 100)  #green
+button_hover_color = (150, 250, 150)  
+square_size = screen_width // 8
+
+
+# Colors
+white, grey, red, orange = (255, 255, 255), (128, 128, 128), (255, 0, 0), (255,165,0)
+brown, light_brown, highlight_color = (118, 150, 86), (238, 238, 210), (200, 200, 0)
+black = (0, 0, 0)
+button_color = (100, 200, 100)  # green
+button_hover_color = (150, 250, 150)
+screen_width = 500
+screen_height = 500
+added_screen_width = 400
+square_size = screen_width // 8
+
 def has_non_empty_list(map_data):
     """
     Checks if a dictionary has any value that is a non-empty list.
