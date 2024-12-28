@@ -1,19 +1,18 @@
 from chess import ChessGame
 import pygame
 from chess import screen_width,screen_height,added_screen_width
-pygame.init()
 import sys
 sys.path.append('/home/hassene/Desktop/Projet-echecs-TDLOG/build/libAI.so')
 import sys
 sys.path.append('/home/hasssene/Desktop/Projet-echecs-TDLOG/Python')
 from Board import Board
-from AI import evaluate
+from utils import *
 # Main function
-white = (255,255,255)
-screen = pygame.display.set_mode((screen_width + added_screen_width, screen_height))
-pygame.display.set_caption("Chess")
+pygame.init()
 # Main game loop
 def run() :
+    screen = pygame.display.set_mode((screen_width + added_screen_width, screen_height))
+    pygame.display.set_caption("Chess")
     # Draw and update the chessboard
     game = ChessGame()
     board = Board(game)

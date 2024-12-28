@@ -326,13 +326,14 @@ class Board:
         self.game.black_king_position = self.game.find_king_position('black')
         
         for event in pygame.event.get():
+    
             if event.type == pygame.QUIT:
                 self.game.running = False
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 if pygame.mouse.get_pressed()[0]:  # Left click check
                     x, y = event.pos
                     x_square, y_square = x // square_size, y // square_size
-                    
+
                     # Ensure the clicked position is within board bounds
                     if 0 <= x_square < 8 and 0 <= y_square < 8:
                         if self.game.selected_piece and (x_square, y_square) in self.game.possible_moves:
@@ -355,6 +356,7 @@ class Board:
                             self.game.change_player()
                             self.game.selected_piece, self.game.possible_moves = None, []  # Reset selected piece and possible moves
                         elif self.game.chess_board[y_square][x_square][0] == self.game.turn[0]:
+
                             # Select a piece if it belongs to the current player
                             self.game.selected_piece = (x_square, y_square)
                             self.game.castling()
