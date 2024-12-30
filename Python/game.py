@@ -30,6 +30,7 @@ def run() :
         board.game.update_list_of_boards()
         board.draw_last_move()
         board.draw_king_in_check()
+
         board.draw_selected_piece()
         board.draw_pieces()
         pygame.display.flip()
@@ -44,12 +45,10 @@ def run() :
         if k == 0:
             board.game.time_reg(white_time, black_time)
             k += 1
-            pygame.time.delay(10)
-        
+
         board.game.game_ends()
 
     pygame.quit()
-    game.show_winner()
 
     
 

@@ -2,14 +2,12 @@ import pygame
 from copy import deepcopy
 from random import shuffle
 import chess
-from numba import jit
 import chess.engine
 from utils import *
 import numpy as np
 import copy
 import os
 from AI import AI
-import numba
 from config import screen_width, screen_height, added_screen_width, square_size, white, grey, red, orange, brown, light_brown, highlight_color, black, button_color, button_hover_color
 
 new_dir = ('/home/hassene/Desktop/Projet-echecs-TDLOG/Python')
@@ -68,7 +66,9 @@ class ChessGame:
         self.list_of_king_moves = [(False,False) for _ in range(1000)]
         self.list_of_passant = [False for _ in range(1000)]
         self.turn = 'white'
-        self.player='white'
+        self.player= False
+        self.white = False
+        self.black = False
         self.last_move=[]
         self.last_move_draw = []
         self.possible_moves=[]
@@ -547,7 +547,7 @@ class ChessGame:
         board.clear()
         for row in range(8):
             for col in range(8):
-                piece = self.chess_board[row, col]
+                piece = self.chess_board[row][col]
                 if piece != '--':
                     color = chess.WHITE if piece[0] == 'w' else chess.BLACK
                     piece_type = chess.Piece.from_symbol(piece[1].upper()).piece_type
@@ -561,13 +561,12 @@ class ChessGame:
             with chess.engine.SimpleEngine.popen_uci(stockfish_path) as engine:
                 board = self.convert_to_chess_board()
                 try:
-                    result = engine.analyse(board, chess.engine.Limit( depth=13))
+                    result = engine.analyse(board, chess.engine.Limit( depth=10))
                 except chess.engine.EngineTerminatedError as e:
                     print(f"Engine crashed: {e}")
                     return 1e5  # Or handle it differently
 
                 score = result["score"]
-                if (score == 999999.0) :
-                    return 0
+                
                 # Convert PovScore to a float (positive for white, negative for black)
                 return score.white().score(mate_score=1e6) if score.is_mate() else score.white().score()

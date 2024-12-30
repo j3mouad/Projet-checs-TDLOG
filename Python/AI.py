@@ -368,11 +368,16 @@ def AI(game, depth=4):
             copy_game.change_player()
             score = (minimax(copy_game,1,{}))
             print(score)
-            if (score<=eval_score) :
-                print('continue')
+            if (game.black and score<=eval_score) :
+                print('continue black')
                 s+=1
                 print(s,'  ',i)
-                continue
+                #continue
+            if (game.white and score>=eval_score) :
+                print('continue white')
+                s+=1
+                print(s,' ',i)
+                #continue
 
             score = minimax(copy_game, depth - 1,transposition_table)
             moves_scores.append((score, (start_pos, end_pos)))
@@ -410,7 +415,7 @@ def AI_hard(game) :
             moves_scores.append((score, (start_pos, end_pos)))
 
 
-    moves_scores.sort(reverse=False, key=lambda x: x[0])
+    moves_scores.sort(reverse=True, key=lambda x: x[0])
 
     # Return the move with the best score
     print(moves_scores)

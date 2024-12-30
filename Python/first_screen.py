@@ -73,14 +73,13 @@ def choose_game(board) :
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     if button_black.collidepoint(event.pos):
                         first_choosing = False
-                        board.game.turn = 'black'
-                        board.game.black=True
+                        board.game.player = True
+                        board.game.black = True
                         board.game.flip_board()
-                    
                     elif button_white.collidepoint(event.pos):
                         first_choosing = False
-                        board.game.white=True
-                        board.game.player = 'white'
+                        board.game.player = True
+                        board.game.white = True
                     elif button_classic.collidepoint(event.pos) :
                         second_choosing=False
                         board.game.time_reg(3600,3600)
@@ -102,7 +101,7 @@ def choose_game(board) :
                     elif  button_2v2.collidepoint(event.pos) : 
                         first_choosing = False
                         board.game.one_v_one=True
-                        board.game.player = 'white'
+                        
         board.game.list_of_boards[0]=[board.game.chess_board]
         board.game.len_list_of_boards+=1
         return (white_time,black_time)
