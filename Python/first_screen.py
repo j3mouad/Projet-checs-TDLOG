@@ -1,7 +1,7 @@
-from utils import *
 import pygame
 from random import shuffle
-import sys
+from config import screen_width, screen_height, added_screen_width, square_size, white, grey, red, orange, brown, light_brown, highlight_color, black, button_color, button_hover_color
+
 pygame.init()
 
 def choose_game(board) :
@@ -70,7 +70,6 @@ def choose_game(board) :
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     pygame.quit()
-                    sys.exit()
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     if button_black.collidepoint(event.pos):
                         first_choosing = False

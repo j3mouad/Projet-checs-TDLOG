@@ -1,12 +1,8 @@
-from chess import ChessGame
 import pygame
-from chess import screen_width,screen_height,added_screen_width
-import sys
-sys.path.append('/home/hassene/Desktop/Projet-echecs-TDLOG/build/libAI.so')
-import sys
-sys.path.append('/home/hasssene/Desktop/Projet-echecs-TDLOG/Python')
 from Board import Board
 from utils import *
+from config import screen_width, screen_height, added_screen_width, square_size, white, grey, red, orange, brown, light_brown, highlight_color, black, button_color, button_hover_color
+from chess_game import ChessGame
 from first_screen import choose_game
 # Main function
 pygame.init()
@@ -21,7 +17,6 @@ def run() :
     white_time,black_time = choose_game(board)
     screen.fill(white)
     board.game.time_reg(white_time, black_time)
-    pygame.time.delay(100)
     board.game.list_of_boards.append(game.chess_board)
     board.game.list_of_times.append((game.white_time, game.black_time))
     k = 0
@@ -49,7 +44,7 @@ def run() :
         if k == 0:
             board.game.time_reg(white_time, black_time)
             k += 1
-            pygame.time.delay(100)
+            pygame.time.delay(10)
         
         board.game.game_ends()
 

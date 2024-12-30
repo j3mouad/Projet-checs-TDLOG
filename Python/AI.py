@@ -2,8 +2,8 @@ import sys
 import numpy as np
 import os
 import sys
-import random
 import time
+from random import randint
 #Code explanation for Mouad
 
 #The first part is implementing the heuristics(evaluation function and how it works)
@@ -230,14 +230,7 @@ def evaluate(game,transposition_table):
     material_score = evaluate_material(game)
 
     # Mobility
-    center_score = center_control(game)
-    # Pawn structure
 
-    # King safety
-    king_safety_score = 0
-
-    # Piece coordination
-    piece_coordination_score = 0
 
     # Control of key squares
     control_score = evaluate_control_of_key_squares(game)
@@ -254,8 +247,6 @@ def evaluate(game,transposition_table):
     # Material remains essential throughout, but other factors change importance over time.
     total_score = (
         material_score*1 +
-        king_safety_score * 1.0 +
-        piece_coordination_score * 0.6 +
         control_score * (0.6 * opening_weight + 0.3 * endgame_weight) +
         endgame_score * endgame_weight
     )
@@ -291,11 +282,18 @@ def minimax(game, depth, transposition_table, alpha=float('-inf'), beta=float('i
         eval_score = evaluate(game,transposition_table)
         transposition_table[game_hash] = eval_score  # Store evaluation result
         return eval_score
-
+    
     if game.turn == 'white':  # Maximizing for white
         max_eval = float('-inf')
         for start_pos, possible_moves in game.white_moves.items():
+            i = 0
             for end_pos in possible_moves:
+                if (i>0) :
+                    s = randint(1,100)
+                    if (s<95) :
+                        continue 
+
+                i+=1
                 copy_game = game.copy_game()
                 x, y = end_pos
                 copy_game.move_piece(start_pos, x, y)
@@ -311,13 +309,17 @@ def minimax(game, depth, transposition_table, alpha=float('-inf'), beta=float('i
             if beta <= alpha:
                 break  # Prune outer loop
         # Store the evaluation result in the transposition table
-        transposition_table[game_hash] = max_eval
         return max_eval
 
     else:  # Minimizing for black
         min_eval = float('inf')
         for start_pos, possible_moves in game.black_moves.items():
+            i = 0
             for end_pos in possible_moves:
+                if (i>0) :
+                    s = randint(1,100)
+                    if (s<95) :
+                        continue 
                 copy_game = game.copy_game()
                 x, y = end_pos
                 copy_game.move_piece(start_pos, x, y)
@@ -332,8 +334,6 @@ def minimax(game, depth, transposition_table, alpha=float('-inf'), beta=float('i
                     break  # Prune outer loop
             if beta <= alpha:
                 break  # Prune outer loop
-        # Store the evaluation result in the transposition table
-        transposition_table[game_hash] = min_eval
         return min_eval
 
 def AI(game, depth=4):
@@ -348,12 +348,14 @@ def AI(game, depth=4):
     game.all_moves()        
     game.change_player()
     moves_scores = []
-    s = 0 ;
+    s = 0 
     i = 0
     eval_score = evaluate(game,{})
+    print(game.evaluate0())
     print(eval_score)
     moves = game.white_moves if game.turn == 'white' else game.black_moves
     total_time = 0
+
     for start_pos, possible_moves in moves.items():
         for end_pos in possible_moves:
             i+=1
@@ -388,3 +390,35 @@ def AI(game, depth=4):
         return moves_scores[0][1]
     print("No valid moves found")
     return None
+
+def AI_hard(game) :
+    game.all_moves()
+    game.change_player()
+    game.all_moves()        
+    game.change_player()
+    moves_scores = []
+
+    moves = game.white_moves if game.turn == 'white' else game.black_moves
+    for start_pos, possible_moves in moves.items():
+        for end_pos in possible_moves:
+            copy_game = game.copy_game()
+            copy_game.all_moves()
+            x, y = end_pos
+            copy_game.move_piece(start_pos, x, y)
+            copy_game.change_player()
+            score = copy_game.evaluate0()
+            moves_scores.append((score, (start_pos, end_pos)))
+
+
+    moves_scores.sort(reverse=False, key=lambda x: x[0])
+
+    # Return the move with the best score
+    print(moves_scores)
+    if moves_scores:
+        print(f"Best move: {moves_scores[0][1]} with score {moves_scores[0][0]}")
+        return moves_scores[0][1]
+    print("No valid moves found")
+    return None
+
+
+    

@@ -1,19 +1,18 @@
 import pygame
 from copy import deepcopy
 import time
+import numba
 from random import shuffle
 import os
-from chess import ChessGame
 from utils import *
-import sys
-from AI import AI
+from AI import AI,AI_hard
 # Set the new directory and change the working directory
 new_dir = ('/home/hassene/Desktop/Projet-echecs-TDLOG/Python')
 os.chdir(new_dir)
-
+from config import *
 # Initialize Pygame
 pygame.init()
-
+from numba import njit
 # Load sound effects
 click_sound_add_time_button = pygame.mixer.Sound("chess_add_time_sound.wav")
 click_sound_chess = pygame.mixer.Sound("chess_move_soundf.mp3")
@@ -40,6 +39,18 @@ pieces_images = {
     'wK': pygame.image.load('white_king.png'),
     'wP': pygame.image.load('white_pawn.png')
 }
+@njit
+def find_king_position(chess_board, color):
+    """
+    Returns the position (x, y) of the king of the specified color.
+    Searches the chess board for the king piece.
+    """
+    for x in range(8):
+        for y in range(8):
+            piece = chess_board[y, x]
+            if piece == f'{color[0]}K':  # Check for white or black king
+                return (x, y)
+    return None
 
 class Board:
     def __init__(self, game):
@@ -60,7 +71,6 @@ class Board:
 
         This method does not return any value.
         """
-        square_size = min(screen.get_width(), screen.get_height()) // 8  # Dynamically adjust square size based on window size
         for row in range(8):
             for col in range(8):
                 color = light_brown if (row + col) % 2 == 0 else brown
@@ -92,7 +102,6 @@ class Board:
         """
         Draws the chess pieces on the board.
         """
-        square_size = min(screen.get_width(), screen.get_height()) // 8  # Dynamically adjust square size based on window size
         font = pygame.font.Font(None, 12)
         for row in range(8):
             for col in range(8):
@@ -256,7 +265,7 @@ class Board:
         The function checks if the king is threatened by any opponent's piece.
         """
         if (self.game.turn == 'white'):
-            self.game.white_king_position = self.game.find_king_position('white')
+            self.game.white_king_position = find_king_position(self.game.chess_board,'white')
             x_king, y_king = self.game.white_king_position
             b = False
             # Check if the white king is in check by any black piece
@@ -269,7 +278,7 @@ class Board:
             if self.game.white_king_check:
                 pygame.draw.rect(screen, red, pygame.Rect(x_king * square_size, y_king * square_size, square_size, square_size))
         else:
-            self.game.black_king_position = self.game.find_king_position('black')
+            self.game.black_king_position = find_king_position(self.game.chess_board,'black')
             x_king, y_king = self.game.black_king_position
             b = False
             # Check if the black king is in check by any white piece
@@ -282,17 +291,6 @@ class Board:
             if self.game.black_king_check:
                 pygame.draw.rect(screen, red, pygame.Rect(x_king * square_size, y_king * square_size, square_size, square_size))
 
-    def draw_last_move(self):
-        """
-        Highlights the squares involved in the last move.
-        It draws a special color on the starting and ending positions of the last move.
-        """
-        if len(self.game.last_move) > 1:
-            x, y = self.game.last_move[0]
-            mx, my = self.game.last_move[1]
-            # Highlight the starting and ending squares of the last move
-            pygame.draw.rect(screen, highlight_color, pygame.Rect(x * square_size, y * square_size, square_size, square_size))
-            pygame.draw.rect(screen, highlight_color, pygame.Rect(mx * square_size, my * square_size, square_size, square_size))
     def draw_selected_piece(self):
         """
         Draws a grey square around the currently selected piece and its possible moves.
@@ -323,55 +321,64 @@ class Board:
         Main game loop. Handles player input, updates the game state, 
         checks for check conditions, and alternates turns.
         """
-        self.game.white_king_position = self.game.find_king_position('white')
-        self.game.black_king_position = self.game.find_king_position('black')
+        self.game.white_king_position = find_king_position(self.game.chess_board,'white')
+        self.game.black_king_position = find_king_position(self.game.chess_board,'black')
         
         for event in pygame.event.get():
-    
-            if event.type == pygame.QUIT:
-                self.game.running = False
-            elif event.type == pygame.MOUSEBUTTONDOWN:
-                if pygame.mouse.get_pressed()[0]:  # Left click check
-                    x, y = event.pos
-                    x_square, y_square = x // square_size, y // square_size
-                    if (self.game.turn=='black') :
-                        start,end = AI(self.game,4)
+            b = True
+            if (self.game.turn=='black') :
+                        self.game.all_moves()
+                        start,end = AI_hard(self.game)
+                        x,y = start 
+                        mx,my = end 
                         self.game.move_piece(start,end[0],end[1])
                         self.game.last_move = [start,end]
                         self.draw_last_move()
+                        click_sound_chess.play()
+                        self.update_timers()
                         self.game.change_player()
+                        self.game.all_moves()
+                        b = False
 
-                    # Ensure the clicked position is within board bounds
-                    if 0 <= x_square < 8 and 0 <= y_square < 8:
-                        if self.game.selected_piece and (x_square, y_square) in self.game.possible_moves:
-                            self.game.all_moves()
-                            self.game.is_king_in_check()
-                            self.game.move_piece(self.game.selected_piece, x_square, y_square)
-                            click_sound_chess.play()
-                            # Update last move
-                            self.game.last_move = [[self.game.selected_piece[0], self.game.selected_piece[1]], [x_square, y_square]]
-                            # Check if the move results in a check
-                            self.x_king, self.y_king = -1, -1  # Reset king position
-                            for i in range(8):
-                                for j in range(8):
-                                    check_pos = self.game.check(i, j)
-                                    self.x_king, self.y_king = check_pos
-                                    if self.x_king != -1:  # If a check is found
+            if event.type == pygame.QUIT:
+                self.game.running = False
+            if (b) :
+                if event.type == pygame.MOUSEBUTTONDOWN :
+                    if pygame.mouse.get_pressed()[0]:  # Left click check
+                        x, y = event.pos
+                        x_square, y_square = x // square_size, y // square_size
+                        
+                        # Ensure the clicked position is within board bounds
+                        if 0 <= x_square < 8 and 0 <= y_square < 8:
+                            if self.game.selected_piece and (x_square, y_square) in self.game.possible_moves:
+                                self.game.all_moves()
+                                self.game.is_king_in_check()
+                                self.game.move_piece(self.game.selected_piece, x_square, y_square)
+                                click_sound_chess.play()
+                                # Update last move
+                                self.game.last_move = [[self.game.selected_piece[0], self.game.selected_piece[1]], [x_square, y_square]]
+                                # Check if the move results in a check
+                                self.x_king, self.y_king = -1, -1  # Reset king position
+                                for i in range(8):
+                                    for j in range(8):
+                                        check_pos = self.game.check(i, j)
+                                        self.x_king, self.y_king = check_pos
+                                        if self.x_king != -1:  # If a check is found
+                                            break
+                                    if self.x_king != -1:
                                         break
-                                if self.x_king != -1:
-                                    break
-                            self.game.change_player()
-                            self.game.selected_piece, self.game.possible_moves = None, []  # Reset selected piece and possible moves
-                        elif self.game.chess_board[y_square][x_square][0] == self.game.turn[0]:
+                                self.game.change_player()
+                                self.game.selected_piece, self.game.possible_moves = None, []  # Reset selected piece and possible moves
+                            elif self.game.chess_board[y_square][x_square][0] == self.game.turn[0]:
 
-                            # Select a piece if it belongs to the current player
-                            self.game.selected_piece = (x_square, y_square)
-                            self.game.castling()
-                            self.game.all_moves()
-                            if self.game.turn == 'white':
-                                self.game.possible_moves = deepcopy(self.game.white_moves[(x_square, y_square)])
-                            else:
-                                self.game.possible_moves = deepcopy(self.game.black_moves[(x_square, y_square)])
+                                # Select a piece if it belongs to the current player
+                                self.game.selected_piece = (x_square, y_square)
+                                self.game.castling()
+                                self.game.all_moves()
+                                if self.game.turn == 'white':
+                                    self.game.possible_moves = deepcopy(self.game.white_moves[(x_square, y_square)])
+                                else:
+                                    self.game.possible_moves = deepcopy(self.game.black_moves[(x_square, y_square)])
         pygame.display.flip()
        
 

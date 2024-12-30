@@ -1,19 +1,21 @@
 import pygame
 from copy import deepcopy
 from random import shuffle
+import chess
+from numba import jit
+import chess.engine
 from utils import *
 import numpy as np
 import copy
 import os
 from AI import AI
-from button import Button
+import numba
+from config import screen_width, screen_height, added_screen_width, square_size, white, grey, red, orange, brown, light_brown, highlight_color, black, button_color, button_hover_color
+
 new_dir = ('/home/hassene/Desktop/Projet-echecs-TDLOG/Python')
 os.chdir(new_dir)
-# Initialisation de Pygame
 pygame.init()
-
-
-screen = pygame.display.set_mode((screen_width + added_screen_width, screen_height), pygame.RESIZABLE)
+screen = pygame.display.set_mode((500 + 400, 500), pygame.RESIZABLE)
 pygame.display.set_caption("Chess")
 
 pieces_images = {
@@ -143,7 +145,6 @@ class ChessGame:
                 return False
     #########################################From here functions will manage logic of the game############################################
 
-
     def find_king_position(self, color):
         """
         Returns the position (x, y) of the king of the specified color.
@@ -169,7 +170,6 @@ class ChessGame:
             self.turn = 'black'  # If current player is white, change to black
         else:
             self.turn = 'white'  # Otherwise, change to white
-
     def castling(self):
         """Check and update castling availability for both players."""
         if not self.classic: 
@@ -221,7 +221,6 @@ class ChessGame:
                     if b:
                         break
                 self.castle[3] = not b
-
     def copy_game(self):
         """Create and return a deep copy of the current game state."""
         new_game = copy.copy(self)  # Shallow copy the ChessGame object itself
@@ -269,7 +268,7 @@ class ChessGame:
                     return True
                 # En passant capture
                 last_move = self.last_move
-                if len(last_move) > 0 and self.chess_board[last_move[1][1]][last_move[1][0]][1] == 'P' and abs(last_move[1][1] - last_move[0][1]) == 2:
+                if len(last_move)  and self.chess_board[last_move[1][1]][last_move[1][0]][1] == 'P' and abs(last_move[1][1] - last_move[0][1]) == 2:
                     if last_move[1][0] == mx and last_move[1][1] + direction == my:
                         self.pion_passant = True
                         return True
@@ -331,7 +330,6 @@ class ChessGame:
     def get_possible_moves(self, x, y):
         """Returns moves for the piece at (x, y) that don't put its king in check."""
         return [(mx, my) for mx in range(8) for my in range(8) if self.is_valid_move((x, y), (mx, my))]
-
 
 
     def move_piece(self, start, x, y): 
@@ -396,7 +394,6 @@ class ChessGame:
             self.chess_board[y+direction][x] = '--'
             # Reset en passant if no double-step pawn move occurred
         self.pion_passant = False
-
     def back_move_piece(self, start, final, piece): 
         """Reverts a move to restore board state."""
         mx, my = start
@@ -427,7 +424,6 @@ class ChessGame:
                         return True
 
         return False
-
     def simulate_move_and_check(self, start, end):
         """Simulates a move and checks if it puts the player's king in check."""
         copy_game = self.copy_game()
@@ -445,7 +441,6 @@ class ChessGame:
         copy_game.chess_board[end[1]][end[0]] = target_piece
 
         return  not in_check
-
     def get_valid_moves(self, x_square, y_square):
         """Returns a list of valid moves that do not put the player's own king in check."""
         self.possible_moves = self.get_possible_moves(x_square, y_square)
@@ -462,6 +457,7 @@ class ChessGame:
                 if self.chess_board[y][x] == king:
                     return (x, y)
         return None
+    
     
     def check(self, x_square, y_square):
         """Checks if the move puts the opponent's king in check."""
@@ -513,7 +509,6 @@ class ChessGame:
                     if self.chess_board[y][x][0] == 'b':  # Check if the piece belongs to black
                         self.black_moves[(x, y)] = copy_game.get_valid_moves(x, y)
 
-
     def update_list_of_boards(self):
         """
         Updates the history of board states, storing deep copies of the current board state.
@@ -536,7 +531,6 @@ class ChessGame:
             - Increases `len_list_of_boards` by 1 to reflect the addition of a new game state.
         """
         l = self.len_list_of_boards
-
         # Ensure the list_of_boards contains independent deep copies of the board (3D list)
         if not np.array_equal(self.list_of_boards[l - 1], self.chess_board):
             self.list_of_boards[l] = deepcopy(self.chess_board)  # Deep copy the current board
@@ -548,3 +542,32 @@ class ChessGame:
             self.list_of_king_moves[l] = [self.white_king_moved, self.black_king_moved]  # Store the king move status
             self.list_of_passant[l] = self.pion_passant  # Store the en passant status
             self.len_list_of_boards += 1  # Increment the board history counter
+    def convert_to_chess_board(self):
+        board = chess.Board()
+        board.clear()
+        for row in range(8):
+            for col in range(8):
+                piece = self.chess_board[row, col]
+                if piece != '--':
+                    color = chess.WHITE if piece[0] == 'w' else chess.BLACK
+                    piece_type = chess.Piece.from_symbol(piece[1].upper()).piece_type
+                    square = chess.square(col, 7 - row)
+                    board.set_piece_at(square, chess.Piece(piece_type, color))
+        return board
+
+    def evaluate0(self):
+            # Use a chess engine to evaluate the position
+            stockfish_path = "/usr/games/stockfish"  # Replace with the correct path
+            with chess.engine.SimpleEngine.popen_uci(stockfish_path) as engine:
+                board = self.convert_to_chess_board()
+                try:
+                    result = engine.analyse(board, chess.engine.Limit( depth=13))
+                except chess.engine.EngineTerminatedError as e:
+                    print(f"Engine crashed: {e}")
+                    return 1e5  # Or handle it differently
+
+                score = result["score"]
+                if (score == 999999.0) :
+                    return 0
+                # Convert PovScore to a float (positive for white, negative for black)
+                return score.white().score(mate_score=1e6) if score.is_mate() else score.white().score()
