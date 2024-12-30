@@ -1,0 +1,1 @@
+/usr/bin/c++ -fPIC -shared  -o libAI.so CMakeFiles/AI.dir/AI.cpp.o  /usr/lib/x86_64-linux-gnu/libpython3.10.so 

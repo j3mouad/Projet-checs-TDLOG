@@ -1,5 +1,6 @@
 #include "pieces.h"
 
+<<<<<<< HEAD
 // Constructors
 Piece::Piece(string names, string colors, bool infiniteMovess, const Point* elemMoveSets, int numOfMovess, const char* path){
     int width,height;
@@ -66,3 +67,5 @@ Piece BlackBishop("Bishop", "black" ,true, BishopMoveSet,4,pathBishopBlack);
 Piece BlackRook("Rook", "black", true, RookMoveSet,4,pathRookBlack);
 Piece BlackKnight("Knight", "black", false, KnightMoveSet,8,pathKnightBlack);
 Piece BlackPawn("Pawn", "black", false, BlackPawnMoveSet, BlackPawnAttackMoveSet,1,2,pathPawnBlack);
+=======
+>>>>>>> Hassen_C++_work

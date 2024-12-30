@@ -44,7 +44,15 @@ public:
     const Point* getElemMoveSet() const {return elemMoveSet;}
     const Point* getAttackMoveSet() const {return attackMoveSet;}
 };
-
+extern const Point KingAndQueenMoveSet[];
+extern const Point RookMoveSet[];
+extern const Point BishopMoveSet[];
+extern const Point KnightMoveSet[];
+extern const Point WhitePawnMoveSet[];
+extern const Point WhitePawnAttackMoveSet[];
+extern const Point BlackPawnMoveSet[];
+extern const Point BlackPawnAttackMoveSet[];
+extern const Point emptyMoveSet[];
 
 extern Piece WhiteKing;
 extern Piece WhiteQueen;

@@ -1,9 +1,16 @@
+<<<<<<< HEAD
 
 #include "board.h"
 #include "player.h"
 #include <utility>
 
 
+=======
+#pragma once
+#include "board.h"
+#include "player.h"
+#include "pieces.h"
+>>>>>>> Hassen_C++_work
 extern Point* initialHeatMap;
 
 class Game{
