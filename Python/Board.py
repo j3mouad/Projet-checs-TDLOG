@@ -176,11 +176,11 @@ class Board:
         if self.game.black_time <= 5:
             black_timer_surface = font.render(f'Black: {self.game.black_time // 60}:{self.game.black_time % 60:02}', True, red)
 
-        if self.game.player == 'white':
+        if self.game.turn == 'white':
             pygame.draw.rect(self.screen, white, (screen_width, 0, added_screen_width, screen_height))
             self.screen.blit(white_timer_surface, (screen_width + 20, 450))
             self.screen.blit(black_timer_surface, (screen_width + 20, 50))
-        if self.game.player == 'black':
+        if self.game.turn == 'black':
             pygame.draw.rect(self.screen, white, (screen_width, 0, added_screen_width, screen_height))
             self.screen.blit(black_timer_surface, (screen_width + 20, 450))
             self.screen.blit(white_timer_surface, (screen_width + 20, 50))

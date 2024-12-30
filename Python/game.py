@@ -22,7 +22,9 @@ def run() :
     k = 0
     p = 0 
     while board.game.running:
+        print(board.game.white_time)
         board.draw_timer()
+        pygame.time.delay(100)
         board.draw_add_time_button()
         board.handle_add_time_button()
         board.draw_move_back_button()
