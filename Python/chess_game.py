@@ -7,14 +7,13 @@ from utils import *
 import numpy as np
 import copy
 import os
-from AI import AI
-from config import screen_width, screen_height, added_screen_width, square_size, white, grey, red, orange, brown, light_brown, highlight_color, black, button_color, button_hover_color
+from config import *
+from promotion import Promotion_screen
 
 new_dir = ('/home/hassene/Desktop/Projet-echecs-TDLOG/Python')
 os.chdir(new_dir)
 pygame.init()
-screen = pygame.display.set_mode((500 + 400, 500), pygame.RESIZABLE)
-pygame.display.set_caption("Chess")
+
 
 pieces_images = {
     'bR': pygame.image.load('black_rook.png'),
@@ -32,7 +31,7 @@ pieces_images = {
 }
 
 class ChessGame:
-    def __init__(self):
+    def __init__(self,screen):
         self.screen = screen
         self.chess_board = np.array([
             ['bR', 'bN', 'bB', 'bQ', 'bK', 'bB', 'bN', 'bR'],
@@ -106,43 +105,6 @@ class ChessGame:
         self.black_time=black_time
 
 
-    def game_ends(self):
-        """
-        Checks if the game has ended.
-
-        This method checks if either player has run out of time or if the game is in a stalemate 
-        condition (when a player cannot make a valid move). If a player is in checkmate, 
-        the other player wins. The game ends when one of these conditions is met.
-
-        Returns:
-            bool: True if the game has ended, False otherwise.
-        """
-        if self.white_time <= 0:
-            self.winner = 'black'
-            self.running = False
-            return True
-        if self.black_time <= 0:
-            self.winner = 'white'
-            self.running = False
-            return True
-        if not has_non_empty_list(self.white_moves) and self.turn == 'white':
-            if self.white_king_check:
-                self.winner = 'black'
-                self.running = False
-                return True
-            else:
-                self.winner = 'Stalemate'
-                self.running = False
-                return False
-        if not has_non_empty_list(self.black_moves) and self.turn == 'black':
-            if self.black_king_check:
-                self.winner = 'white'
-                self.running = False
-                return True
-            else:
-                self.winner = 'Stalemate'
-                self.running = False
-                return False
     #########################################From here functions will manage logic of the game############################################
 
     def find_king_position(self, color):
@@ -188,13 +150,22 @@ class ChessGame:
         if not self.white_king_check and not self.white_king_moved:
             if self.rook_moved[0] == 1:
                 self.castle[0] = False  # White rook moved, castling is no longer possible
-            elif self.rook_moved[0] == 0 and self.chess_board[7][5] == '--' and self.chess_board[7][6] == '--':
+            elif self.chess_board[7][5] == '--' and self.chess_board[7][6] == '--':
                 b = False
                 for key in self.black_moves:
                     b = (6, 7) in self.black_moves[key] or (5, 7) in self.black_moves[key]
                     if b:
                         break
                 self.castle[0] = not b  # If no black pieces threaten castling, allow castling
+            if self.rook_moved[1] == 1 :
+                self.castle[1] = False
+            elif (self.chess_board[7][1]=='--' and self.chess_board[7][2]=='--' and self.chess_board[7][3]=='--') :
+                b= False
+                for key in self.black_moves :
+                    b = (2,7) in self.black_moves[key] or (3.7) in self.black_moves[key]
+                    if b :
+                        break
+                self.castle[1] = not b 
         
         # Repeat similar logic for black king and rook
         if self.black_king_check or self.black_king_moved:
@@ -384,7 +355,12 @@ class ChessGame:
                 self.rook_moved[3] = 1
         self.chess_board[y][x], self.chess_board[my][mx] = moving_piece, '--'
         if ((y==0 or y==7) and  self.chess_board[y][x][1]=='P') :
-            self.chess_board[y][x] = self.chess_board[y][x][0] + 'Q'
+            color = self.turn
+            piece = Promotion_screen(color)[0]
+            if (piece=='K') :
+                piece = 'N'
+
+            self.chess_board[y][x] = self.chess_board[y][x][0] + piece
             
                     
             
@@ -542,6 +518,27 @@ class ChessGame:
             self.list_of_king_moves[l] = [self.white_king_moved, self.black_king_moved]  # Store the king move status
             self.list_of_passant[l] = self.pion_passant  # Store the en passant status
             self.len_list_of_boards += 1  # Increment the board history counter
+    def game_ends(self):
+        if self.white_time <= 0:
+            self.running = False
+            return -1  # Black wins
+        if self.black_time <= 0:
+            self.running = False
+            return 1  # White wins
+
+        if self.is_king_in_check():
+            current_moves = self.white_moves if self.turn == 'white' else self.black_moves
+            if not has_non_empty_list(current_moves):
+                return -1 if self.turn == 'white' else 1  # Checkmate
+        
+        current_moves = self.white_moves if self.turn == 'white' else self.black_moves
+        if not has_non_empty_list(current_moves):
+            return 0  # Stalemate
+
+        return None  # Game continues
+
+        
+
     def convert_to_chess_board(self):
         board = chess.Board()
         board.clear()

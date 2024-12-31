@@ -4,6 +4,7 @@ import time
 from random import shuffle
 import os
 from utils import *
+from Button import Button,squares
 from AI import AI
 # Set the new directory and change the working directory
 new_dir = ('/home/hassene/Desktop/Projet-echecs-TDLOG/Python')
@@ -12,32 +13,7 @@ from config import *
 # Initialize Pygame
 pygame.init()
 from numba import njit
-# Load sound effects
-click_sound_add_time_button = pygame.mixer.Sound("chess_add_time_sound.wav")
-click_sound_chess = pygame.mixer.Sound("chess_move_soundf.mp3")
 
-# Initial screen width and height
-
-# Create a resizable window
-screen = pygame.display.set_mode((screen_width + added_screen_width, screen_height))
-pygame.display.set_caption("Chess")
-
-
-# Load piece images
-pieces_images = {
-    'bR': pygame.image.load('black_rook.png'),
-    'bN': pygame.image.load('black_knight.png'),
-    'bB': pygame.image.load('black_bishop.png'),
-    'bQ': pygame.image.load('black_queen.png'),
-    'bK': pygame.image.load('black_king.png'),
-    'bP': pygame.image.load('black_pawn.png'),
-    'wR': pygame.image.load('white_rook.png'),
-    'wN': pygame.image.load('white_knight.png'),
-    'wB': pygame.image.load('white_bishop.png'),
-    'wQ': pygame.image.load('white_queen.png'),
-    'wK': pygame.image.load('white_king.png'),
-    'wP': pygame.image.load('white_pawn.png')
-}
 def find_king_position(chess_board, color):
     """
     Returns the position (x, y) of the king of the specified color.
@@ -51,7 +27,15 @@ def find_king_position(chess_board, color):
     return None
 
 class Board:
-    def __init__(self, game):
+
+    def __init__(self, game,screen):
+
+
+        # Initial screen width and height
+
+        # Create a resizable window
+        self.screen = screen
+        pygame.display.set_caption("Chess")
         self.screen = screen
         self.game = game
         self.cooldown = 0.5
@@ -71,8 +55,7 @@ class Board:
         """
         for row in range(8):
             for col in range(8):
-                color = light_brown if (row + col) % 2 == 0 else brown
-                pygame.draw.rect(self.screen, color, pygame.Rect(col * square_size, row * square_size, square_size, square_size))
+                squares[col][row].draw(self.screen)
 
     def draw_move(self):
         """
@@ -82,12 +65,12 @@ class Board:
             self.game.last_move_draw = self.game.last_move
             x, y = self.game.last_move[0]
             mx, my = self.game.last_move[1]
-            dx = (mx - x) / 40
-            dy = (my - y) / 40
+            dx = (mx - x) / 20
+            dy = (my - y) / 20
             piece = self.game.chess_board[my][mx]
             if (piece != '--'):
                 resized_piece = pygame.transform.scale(pieces_images[piece], (square_size, square_size))
-                for i in range(40):
+                for i in range(20):
                     self.draw_board()
                     self.draw_pieces(mx, my)
                     col = y + i * dy
@@ -104,7 +87,7 @@ class Board:
         for row in range(8):
             for col in range(8):
                 text = font.render(self.game.chess_board_squares[col][row], True, (0, 0, 255)) 
-                screen.blit(text, (row * square_size, col * square_size))
+                self.screen.blit(text, (row * square_size, col * square_size))
                 piece = self.game.chess_board[row][col]
                 if piece != '--':
                     if (mx == col and my == row):
@@ -274,7 +257,7 @@ class Board:
             self.game.white_king_check = b
             # If white king is in check, draw a red square around its position
             if self.game.white_king_check:
-                pygame.draw.rect(screen, red, pygame.Rect(x_king * square_size, y_king * square_size, square_size, square_size))
+                pygame.draw.rect(self.screen, red, pygame.Rect(x_king * square_size, y_king * square_size, square_size, square_size))
         else:
             self.game.black_king_position = find_king_position(self.game.chess_board,'black')
             x_king, y_king = self.game.black_king_position
@@ -287,7 +270,7 @@ class Board:
             self.game.black_king_check = b
             # If black king is in check, draw a red square around its position
             if self.game.black_king_check:
-                pygame.draw.rect(screen, red, pygame.Rect(x_king * square_size, y_king * square_size, square_size, square_size))
+                pygame.draw.rect(self.screen, red, pygame.Rect(x_king * square_size, y_king * square_size, square_size, square_size))
 
     def draw_selected_piece(self):
         """
@@ -299,10 +282,10 @@ class Board:
             # Ensure the selected piece belongs to the current player
             if self.game.turn[0] == self.game.chess_board[y][x][0]:
                 # Highlight the selected piece
-                pygame.draw.rect(screen, grey, pygame.Rect(x * square_size, y * square_size, square_size, square_size))
+                pygame.draw.rect(self.screen, grey, pygame.Rect(x * square_size, y * square_size, square_size, square_size))
                 # Highlight all possible valid moves of the selected piece
                 for mx, my in self.game.possible_moves:
-                    pygame.draw.rect(screen, grey, pygame.Rect(mx * square_size, my * square_size, square_size, square_size))
+                    pygame.draw.rect(self.screen, grey, pygame.Rect(mx * square_size, my * square_size, square_size, square_size))
     def draw_last_move(self):
         """
         Highlights the squares involved in the last move.
@@ -312,8 +295,8 @@ class Board:
             x, y = self.game.last_move[0]
             mx, my = self.game.last_move[1]
             # Highlight the starting and ending squares of the last move
-            pygame.draw.rect(screen, highlight_color, pygame.Rect(x * square_size, y * square_size, square_size, square_size))
-            pygame.draw.rect(screen, highlight_color, pygame.Rect(mx * square_size, my * square_size, square_size, square_size))
+            pygame.draw.rect(self.screen, highlight_color, pygame.Rect(x * square_size, y * square_size, square_size, square_size))
+            pygame.draw.rect(self.screen, highlight_color, pygame.Rect(mx * square_size, my * square_size, square_size, square_size))
     def run(self):
         """
         Main game loop. Handles player input, updates the game state, 
@@ -337,7 +320,6 @@ class Board:
                 if (self.game.black and self.game.turn=='white') :
                             self.game.all_moves()
                             a = AI(self.game)
-                            print(a)
                             start,end = a
                             x,y = start 
                             mx,my = end 
@@ -357,6 +339,9 @@ class Board:
                     
                     # Ensure the clicked position is within board bounds
                     if 0 <= x_square < 8 and 0 <= y_square < 8:
+                        if (self.game.selected_piece and (x_square,y_square) not in self.game.possible_moves) :
+                            self.game.selected_piece = None
+                            self.game.possible_moves = []
                         if self.game.selected_piece and (x_square, y_square) in self.game.possible_moves:
                             self.game.all_moves()
                             self.game.is_king_in_check()
@@ -386,6 +371,7 @@ class Board:
                                 self.game.possible_moves = deepcopy(self.game.white_moves[(x_square, y_square)])
                             else:
                                 self.game.possible_moves = deepcopy(self.game.black_moves[(x_square, y_square)])
+                    
         pygame.display.flip()
        
 
