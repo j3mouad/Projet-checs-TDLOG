@@ -108,6 +108,8 @@ def choose_game(board):
                     board.game.chess_board[0][6] = 'bC'
                     board.game.chess_board[7][1] = 'wC'
                     board.game.chess_board[7][6] = 'wC'
+                    board.game.chess_board[0][3] = 'bM'
+                    board.game.chess_board[7][3] = 'wM'
 
 
                     

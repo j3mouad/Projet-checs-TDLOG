@@ -15,27 +15,6 @@ os.chdir(new_dir)
 pygame.init()
 
 
-pieces_images = {
-    'bR': pygame.image.load('black_rook.png'),
-    'bN': pygame.image.load('black_knight.png'),
-    'bB': pygame.image.load('black_bishop.png'),
-    'bQ': pygame.image.load('black_queen.png'),
-    'bK': pygame.image.load('black_king.png'),
-    'bP': pygame.image.load('black_pawn.png'),
-    'wR': pygame.image.load('white_rook.png'),
-    'wN': pygame.image.load('white_knight.png'),
-    'wB': pygame.image.load('white_bishop.png'),
-    'wQ': pygame.image.load('white_queen.png'),
-    'wK': pygame.image.load('white_king.png'),
-    'wP': pygame.image.load('white_pawn.png'),
-    'wW':pygame.image.load('white_wazir.png'),
-    'bW':pygame.image.load('black_wazir.png'),
-    'wF':pygame.image.load('white_ferz.png'),
-    'bF':pygame.image.load('black_ferz.png'),
-    'wC':pygame.image.load('white_camel.png'),
-    'bC':pygame.image.load('black_camel.png')
-
-}
 
 class ChessGame:
     def __init__(self,screen):
@@ -104,16 +83,12 @@ class ChessGame:
         self.rook_moved=[0,0,0,0]
         self.castle=[0,0,0,0]
         self.hard = False
-
-  
         self.white_king_position = None
         self.black_king_position = None
     ##########################################First functions manage graphcis#############################################
     def time_reg(self,white_time,black_time):
         self.white_time=white_time
         self.black_time=black_time
-
-
     #########################################From here functions will manage logic of the game############################################
 
     def find_king_position(self, color):
@@ -270,6 +245,26 @@ class ChessGame:
         elif piece_type == 'F':
             if abs(mx-x) == 1 and abs(my-y) == 1:
                 return True           
+        elif piece_type == 'M' :
+            from random import randint
+            r = randint(1,10)
+            if (r<=5) :
+                if abs(mx - x) == abs(my - y) or x == mx or y == my:  # Diagonal, horizontal, or vertical move
+                    step_x = 1 if mx > x else -1 if mx < x else 0
+                    step_y = 1 if my > y else -1 if my < y else 0
+                    for i in range(1, max(abs(mx - x), abs(my - y))):
+                        if self.chess_board[y + i * step_y][x + i * step_x] != '--':  # Check if path is blocked
+                            return False
+                    return True
+            else :
+                if x == mx or y == my:  # Horizontal or vertical move
+                    step_x = 1 if mx > x else -1 if mx < x else 0
+                    step_y = 1 if my > y else -1 if my < y else 0
+                    for i in range(1, max(abs(mx - x), abs(my - y))):
+                        if self.chess_board[y + i * step_y][x + i * step_x] != '--':  # Check if path is blocked
+                            return False
+                    return True
+
 
         # Knight move rules
         elif piece_type == 'N':

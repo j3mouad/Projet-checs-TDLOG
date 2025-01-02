@@ -46,6 +46,8 @@ pieces_images = {
     'wF':pygame.image.load('white_ferz.png'),
     'bF':pygame.image.load('black_ferz.png'),
     'wC':pygame.image.load('white_camel.png'),
-    'bC':pygame.image.load('black_camel.png')
+    'bC':pygame.image.load('black_camel.png'),
+    'wM':pygame.image.load('white_malika.png'),
+    'bM':pygame.image.load('black_malika.png')
 
 }
