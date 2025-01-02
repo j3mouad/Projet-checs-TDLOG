@@ -16,17 +16,18 @@ brown = (118, 150, 86)
 light_brown = (238, 238, 210)
 highlight_color = (200, 200, 0)
 black = (0, 0, 0)
-HOVER_COLOR = (0, 170, 200)
+HOVER_COLOR = (204,255,250)
 
 # Button colors
 button_color = (100, 200, 100)  # green
 button_hover_color = (150, 250, 150)
 click_sound_add_time_button = pygame.mixer.Sound("chess_add_time_sound.wav")
 click_sound_chess = pygame.mixer.Sound("chess_move_soundf.mp3")
+check_sound = pygame.mixer.Sound("move-check.mp3")
 # Load sound effects
 
 
-# Load piece images
+#laod pieces images
 pieces_images = {
     'bR': pygame.image.load('black_rook.png'),
     'bN': pygame.image.load('black_knight.png'),
@@ -39,5 +40,12 @@ pieces_images = {
     'wB': pygame.image.load('white_bishop.png'),
     'wQ': pygame.image.load('white_queen.png'),
     'wK': pygame.image.load('white_king.png'),
-    'wP': pygame.image.load('white_pawn.png')
+    'wP': pygame.image.load('white_pawn.png'),
+    'wW':pygame.image.load('white_wazir.png'),
+    'bW':pygame.image.load('black_wazir.png'),
+    'wF':pygame.image.load('white_ferz.png'),
+    'bF':pygame.image.load('black_ferz.png'),
+    'wC':pygame.image.load('white_camel.png'),
+    'bC':pygame.image.load('black_camel.png')
+
 }

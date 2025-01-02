@@ -5,7 +5,7 @@ from random import shuffle
 import os
 from utils import *
 from Button import Button,squares
-from AI import AI
+from AI import AI,AI_hard
 # Set the new directory and change the working directory
 new_dir = ('/home/hassene/Desktop/Projet-echecs-TDLOG/Python')
 os.chdir(new_dir)
@@ -96,48 +96,40 @@ class Board:
                     self.screen.blit(resized_piece, pygame.Rect(col * square_size, row * square_size, square_size, square_size))
     def draw_add_time_button(self):
         """
-        Draws the 'Add Time' button on the screen.
+        Draws the 'Add Time' button on the screen using the Button class.
 
-        This method creates a button that allows the user to add 5 seconds to the opponent's 
-        timer. The button changes color when hovered, and displays the text '+ 5 seconds'.
-
-        Returns:
-            None
-        """
-        self.button_rect = pygame.Rect(screen_width + 20, 200, 250, 80)
-        mouse_pos = pygame.mouse.get_pos()
-        if self.button_rect.collidepoint(mouse_pos):
-            pygame.draw.rect(self.screen, (150, 150, 150), self.button_rect)
-        else:
-            pygame.draw.rect(self.screen, black, self.button_rect)
-
-        font = pygame.font.Font(None, 36)
-        button_text = font.render('+ 5 seconds', True, white)
-        text_rect = button_text.get_rect(center=self.button_rect.center)
-        self.screen.blit(button_text, text_rect)
-
-    def handle_add_time_button(self):
-        """
-        Handles the logic when the 'Add Time' button is clicked.
-
-        This method checks if the left mouse button is pressed and whether enough time has 
-        passed since the last click. When the button is clicked, 5 seconds are added to the 
-        opponent's timer, depending on which player's turn it is.
+        This method uses the Button class to create and manage a button 
+        that allows the user to add 5 seconds to the opponent's timer.
 
         Returns:
             None
         """
+        # Create the button instance
+        self.add_time_button = Button(
+            text="+ 5 seconds",
+            x=screen_width + 20,
+            y=200,
+            width=250,
+            height=80,
+            color=grey
+
+        )
+        self.add_time_button.draw(self.screen)
+
+        
+
+    def handle_add_time_button(self,event):
+        # Draw the button
         current_time = time.time()
-        if pygame.mouse.get_pressed()[0]:
-            if self.button_rect.collidepoint(pygame.mouse.get_pos()):
-                if current_time - self.last_click_time >= self.cooldown:
-                    
-                    click_sound_add_time_button.play()
-                    if self.game.turn == 'white':
-                        self.game.black_time += 5
-                    else:
-                        self.game.white_time += 5
-                    self.last_click_time = current_time
+        if self.add_time_button.is_clicked(event) and current_time - self.last_click_time >= self.cooldown:
+            click_sound_add_time_button.play()
+            if self.game.turn == 'white':
+                self.game.black_time += 5
+            else:
+                self.game.white_time += 5
+
+            self.last_click_time = current_time
+
 
     def draw_timer(self):
         """
@@ -169,64 +161,81 @@ class Board:
             self.screen.blit(white_timer_surface, (screen_width + 20, 50))
     def draw_move_back_button(self):
         """
-        Draws the 'Back' button on the screen.
+        Draws the 'Back' button on the screen using the Button class.
 
-        This method creates a button that allows the player to undo the last move. The button 
-        changes color when hovered over, and displays the text "Back".
+        This method uses the Button class to create and manage a button 
+        that allows the player to undo the last move.
 
         Returns:
             None
         """
-        button_width = 60
-        button_height = 50
-        button_x = screen_width + 150
-        button_y = 300
-        mouse_pos = pygame.mouse.get_pos()
-        button_rect = pygame.Rect(button_x, button_y, button_width, button_height)
+        # Create the button instance
+        self.back_button = Button(
+            text="Back",
+            x=screen_width + 150,
+            y=300,
+            width=60,
+            height=50,
+        )
 
-        pygame.draw.rect(self.screen, black if not button_rect.collidepoint(mouse_pos) else button_hover_color, button_rect)
+        # Draw the button
+        self.back_button.draw(self.screen)
 
-        font = pygame.font.Font(None, 24)
-        text = font.render("Back", True, white)
-        text_rect = text.get_rect(center=button_rect.center)
-        self.screen.blit(text, text_rect)
+        # Handle button click
+       
 
-        if button_rect.collidepoint(mouse_pos) and pygame.mouse.get_pressed()[0]:
-            self.handle_back_button_click()
-
-    def handle_back_button_click(self):
+    def handle_back_button_click(self, event):
         """
         Handles the logic when the 'Back' button is clicked.
 
-        This method handles the logic of undoing the last move by reverting the game state 
-        to the previous one. It checks the cooldown to prevent multiple triggers and ensures 
-        the state can only be reverted if there is a previous board to go back to.
+        This method restores the game state to the previous one if available, adhering to a cooldown
+        to prevent rapid triggers. It also redraws the game UI to reflect the restored state.
 
         Returns:
             None
         """
-        time = pygame.time.get_ticks()
-        if (time - self.game.last_time_back_clicked) <= self.cooldown:
+        # Enforce cooldown to prevent rapid triggers
+
+        current_time = pygame.time.get_ticks()
+        if (current_time - self.game.last_time_back_clicked) <= self.cooldown:
             return
+
+        # Check if a previous state is available
         if self.game.len_list_of_boards == 0:
             return
-        self.game.last_time_back_clicked = time
-        self.game.len_list_of_boards -= 1
-        l = self.game.len_list_of_boards
-        self.game.white_time, self.game.black_time = self.game.list_of_times[l - 1]
-        self.game.chess_board = deepcopy(self.game.list_of_boards[l - 1])
-        self.game.last_move = self.game.list_of_last_moves[l - 1]
-        self.game.castle = deepcopy(self.game.list_of_castles[l - 1])
-        self.game.rook_moved = deepcopy(self.game.list_of_rooks[l - 1])
-        self.game.white_king_check, self.game.black_king_check = self.game.list_of_king_check[l - 1]
-        self.game.white_king_moved, self.game.black_king_moved = self.game.list_of_king_moves[l - 1]
-        self.game.pion_passant = self.game.list_of_passant[l - 1]
-        self.game.selected_piece = []
-        self.draw_board()
-        self.draw_pieces()
-        self.game.turn = 'black' if self.game.turn == 'white' else 'white'
-        pygame.display.flip()
-        pygame.time.delay(100)
+
+        # Update cooldown tracker
+        if (self.back_button.is_clicked(event)) :
+            self.game.last_time_back_clicked = current_time
+
+            # Revert to the previous state
+            self.game.len_list_of_boards -= 1
+            previous_index = self.game.len_list_of_boards
+
+            # Restore game attributes
+            self.game.white_time, self.game.black_time = self.game.list_of_times[previous_index - 1]
+            self.game.chess_board = deepcopy(self.game.list_of_boards[previous_index - 1])
+            self.game.last_move = self.game.list_of_last_moves[previous_index - 1]
+            self.game.castle = deepcopy(self.game.list_of_castles[previous_index - 1])
+            self.game.rook_moved = deepcopy(self.game.list_of_rooks[previous_index - 1])
+            self.game.white_king_check, self.game.black_king_check = self.game.list_of_king_check[previous_index - 1]
+            self.game.white_king_moved, self.game.black_king_moved = self.game.list_of_king_moves[previous_index - 1]
+            self.game.pion_passant = self.game.list_of_passant[previous_index - 1]
+            self.game.selected_piece = []
+
+            # Redraw game board and pieces
+            self.draw_board()
+            self.draw_pieces()
+
+            # Toggle the turn
+            self.game.turn = 'black' if self.game.turn == 'white' else 'white'
+
+            # Update the display
+            pygame.display.flip()
+
+            # Add a short delay for smooth transition
+            pygame.time.delay(100)
+
 
     def update_timers(self):
         current_time = pygame.time.get_ticks()
@@ -306,10 +315,16 @@ class Board:
         self.game.black_king_position = find_king_position(self.game.chess_board,'black')
         
         for event in pygame.event.get():
+            self.handle_add_time_button(event)
+            self.handle_back_button_click( event)
+
             if (self.game.player) :
                 if (self.game.white and self.game.turn == 'black') :
                             self.game.all_moves()
-                            start,end = AI(self.game)
+                            if (self.game.hard) :
+                                start,end = AI_hard(self.game)
+                            else :
+                                start,end = AI(self.game)
                             x,y = start 
                             mx,my = end 
                             self.game.move_piece(start,end[0],end[1])
@@ -319,8 +334,10 @@ class Board:
                             self.game.all_moves()
                 if (self.game.black and self.game.turn=='white') :
                             self.game.all_moves()
-                            a = AI(self.game)
-                            start,end = a
+                            if (self.game.hard) :
+                                start,end = AI_hard(self.game)
+                            else :
+                                start,end = AI(self.game)
                             x,y = start 
                             mx,my = end 
                             self.game.move_piece(start,mx,my)
@@ -371,7 +388,6 @@ class Board:
                                 self.game.possible_moves = deepcopy(self.game.white_moves[(x_square, y_square)])
                             else:
                                 self.game.possible_moves = deepcopy(self.game.black_moves[(x_square, y_square)])
-                    
         pygame.display.flip()
        
 

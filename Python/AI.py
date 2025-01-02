@@ -415,7 +415,7 @@ def AI_hard(game) :
             moves_scores.append((score, (start_pos, end_pos)))
 
 
-    moves_scores.sort(reverse=True, key=lambda x: x[0])
+    moves_scores.sort(reverse=game.turn=='white', key=lambda x: x[0])
 
     # Return the move with the best score
     print(moves_scores)

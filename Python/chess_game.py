@@ -27,7 +27,14 @@ pieces_images = {
     'wB': pygame.image.load('white_bishop.png'),
     'wQ': pygame.image.load('white_queen.png'),
     'wK': pygame.image.load('white_king.png'),
-    'wP': pygame.image.load('white_pawn.png')
+    'wP': pygame.image.load('white_pawn.png'),
+    'wW':pygame.image.load('white_wazir.png'),
+    'bW':pygame.image.load('black_wazir.png'),
+    'wF':pygame.image.load('white_ferz.png'),
+    'bF':pygame.image.load('black_ferz.png'),
+    'wC':pygame.image.load('white_camel.png'),
+    'bC':pygame.image.load('black_camel.png')
+
 }
 
 class ChessGame:
@@ -96,6 +103,8 @@ class ChessGame:
         self.black_moves={(-1,-1):[(-1,-1)]}
         self.rook_moved=[0,0,0,0]
         self.castle=[0,0,0,0]
+        self.hard = False
+
   
         self.white_king_position = None
         self.black_king_position = None
@@ -253,10 +262,22 @@ class ChessGame:
                     if self.chess_board[y + i * step_y][x + i * step_x] != '--':  # Check if path is blocked
                         return False
                 return True
+        # Wazir move rules
+        elif piece_type == 'W':
+            if abs(mx - x) <= 1 and abs(my - y) <= 1:
+                return True
+        # Ferz move rules
+        elif piece_type == 'F':
+            if abs(mx-x) == 1 and abs(my-y) == 1:
+                return True           
 
         # Knight move rules
         elif piece_type == 'N':
             if (abs(mx - x) == 2 and abs(my - y) == 1) or (abs(mx - x) == 1 and abs(my - y) == 2):
+                return True
+        #Camel move rules
+        elif piece_type == 'C' :
+            if (abs(mx - x) == 3 and abs(my - y) == 1) or (abs(mx - x) == 1 and abs(my - y) == 3) :
                 return True
 
         # Bishop move rules
@@ -519,25 +540,31 @@ class ChessGame:
             self.list_of_passant[l] = self.pion_passant  # Store the en passant status
             self.len_list_of_boards += 1  # Increment the board history counter
     def game_ends(self):
+
         if self.white_time <= 0:
             self.running = False
+            pygame.time.delay(1000)
             return -1  # Black wins
         if self.black_time <= 0:
             self.running = False
+            pygame.time.delay(1000)
             return 1  # White wins
 
         if self.is_king_in_check():
             current_moves = self.white_moves if self.turn == 'white' else self.black_moves
             if not has_non_empty_list(current_moves):
+                pygame.time.delay(1000)
                 return -1 if self.turn == 'white' else 1  # Checkmate
         
         current_moves = self.white_moves if self.turn == 'white' else self.black_moves
         if not has_non_empty_list(current_moves):
+            pygame.time.delay(1000)
             return 0  # Stalemate
 
         return None  # Game continues
 
-        
+    def game_ends_3_check(self) :
+        pass
 
     def convert_to_chess_board(self):
         board = chess.Board()
