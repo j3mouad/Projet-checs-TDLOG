@@ -83,6 +83,7 @@ class ChessGame:
         self.rook_moved=[0,0,0,0]
         self.castle=[0,0,0,0]
         self.hard = False
+        self.flipped = False
         self.white_king_position = None
         self.black_king_position = None
     ##########################################First functions manage graphcis#############################################
@@ -212,6 +213,8 @@ class ChessGame:
         # Pawn move rules
         if piece_type == 'P':
             direction = -1 if start_piece[0] == 'w' else 1  # White moves up, black moves down
+            coef = -1 if self.flipped else 1
+            direction *=coef
             if mx == x:  # Moving straight
                 if my == y + direction and end_piece == '--':  # Single step
                     return True
@@ -383,6 +386,7 @@ class ChessGame:
         # Handle en passant capture
         if (self.pion_passant) :
             # Clear the square of the pawn captured via en passant
+            print('bla bla ')
             self.chess_board[y+direction][x] = '--'
             # Reset en passant if no double-step pawn move occurred
         self.pion_passant = False

@@ -54,6 +54,7 @@ def choose_game(board):
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if buttons[0].is_clicked(event):
                     first_choosing = False
+                    board.game.flipped = True
                     board.game.player = True
                     board.game.black = True
                     board.game.flip_board()
@@ -66,6 +67,7 @@ def choose_game(board):
                     board.game.player = True
                     board.game.black = True
                     board.game.hard = True
+                    board.game.flipped = True
                     board.game.flip_board()
                 elif buttons[9].is_clicked(event):
                     first_choosing = False

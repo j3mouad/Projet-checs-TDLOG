@@ -1,4 +1,3 @@
-
 def has_non_empty_list(map_data):
     """
     Checks if a dictionary has any value that is a non-empty list.
@@ -13,7 +12,6 @@ def has_non_empty_list(map_data):
         if isinstance(value, list) and len(value) > 0:
             return True
     return False
-import random
 
 
 

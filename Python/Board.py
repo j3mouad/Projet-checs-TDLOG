@@ -70,7 +70,7 @@ class Board:
             piece = self.game.chess_board[my][mx]
             if (piece != '--'):
                 resized_piece = pygame.transform.scale(pieces_images[piece], (square_size, square_size))
-                for i in range(20):
+                for i in range(1,21):
                     self.draw_board()
                     self.draw_pieces(mx, my)
                     col = y + i * dy
@@ -238,6 +238,7 @@ class Board:
 
 
     def update_timers(self):
+
         current_time = pygame.time.get_ticks()
 
         elapsed_time = (current_time - self.game.last_time_update) // 1000
@@ -317,8 +318,8 @@ class Board:
         for event in pygame.event.get():
             self.handle_add_time_button(event)
             self.handle_back_button_click( event)
-
             if (self.game.player) :
+                
                 if (self.game.white and self.game.turn == 'black') :
                             self.game.all_moves()
                             if (self.game.hard) :
@@ -330,6 +331,7 @@ class Board:
                             self.game.move_piece(start,end[0],end[1])
                             self.game.last_move = [start,end]
                             self.draw_last_move()
+                            self.update_timers()
                             self.game.change_player()
                             self.game.all_moves()
                 if (self.game.black and self.game.turn=='white') :
@@ -343,6 +345,7 @@ class Board:
                             self.game.move_piece(start,mx,my)
                             self.game.last_move = [start,end]
                             self.draw_last_move()
+                            self.update_timers()
                             self.game.change_player()
                             self.game.all_moves()
 
@@ -390,4 +393,3 @@ class Board:
                                 self.game.possible_moves = deepcopy(self.game.black_moves[(x_square, y_square)])
         pygame.display.flip()
        
-
