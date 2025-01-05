@@ -307,6 +307,11 @@ class Board:
             # Highlight the starting and ending squares of the last move
             pygame.draw.rect(self.screen, highlight_color, pygame.Rect(x * square_size, y * square_size, square_size, square_size))
             pygame.draw.rect(self.screen, highlight_color, pygame.Rect(mx * square_size, my * square_size, square_size, square_size))
+    def update_moves(self) :
+        self.game.all_moves()
+        self.game.change_player()
+        self.game.all_moves()
+        self.game.change_player()
     def run(self):
         """
         Main game loop. Handles player input, updates the game state, 
@@ -359,6 +364,8 @@ class Board:
                     
                     # Ensure the clicked position is within board bounds
                     if 0 <= x_square < 8 and 0 <= y_square < 8:
+                        if (x_square,y_square) == (self.game.selected_piece) :
+                            continue
                         if (self.game.selected_piece and (x_square,y_square) not in self.game.possible_moves) :
                             self.game.selected_piece = None
                             self.game.possible_moves = []
@@ -370,17 +377,11 @@ class Board:
                             # Update last move
                             self.game.last_move = [[self.game.selected_piece[0], self.game.selected_piece[1]], [x_square, y_square]]
                             # Check if the move results in a check
-                            self.x_king, self.y_king = -1, -1  # Reset king position
-                            for i in range(8):
-                                for j in range(8):
-                                    check_pos = self.game.check(i, j)
-                                    self.x_king, self.y_king = check_pos
-                                    if self.x_king != -1:  # If a check is found
-                                        break
-                                if self.x_king != -1:
-                                    break
+                            self.game.update_list_of_boards()
+
                             self.game.change_player()
                             self.game.selected_piece, self.game.possible_moves = None, []  # Reset selected piece and possible moves
+                            
                         elif self.game.chess_board[y_square][x_square][0] == self.game.turn[0]:
 
                             # Select a piece if it belongs to the current player
@@ -391,5 +392,10 @@ class Board:
                                 self.game.possible_moves = deepcopy(self.game.white_moves[(x_square, y_square)])
                             else:
                                 self.game.possible_moves = deepcopy(self.game.black_moves[(x_square, y_square)])
+
+        self.game.all_moves()
+        self.game.change_player()
+        self.game.all_moves()
+        self.game.change_player()
         pygame.display.flip()
        

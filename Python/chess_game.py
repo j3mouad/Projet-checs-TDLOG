@@ -324,7 +324,7 @@ class ChessGame:
 
     def move_piece(self, start, x, y): 
         """Moves the piece from start to (x, y). Handles en passant captures."""
- 
+        print('move piuece')
         mx, my = start
         moving_piece = self.chess_board[my][mx]
         direction = -1 if self.turn == 'black' else 1
@@ -372,7 +372,15 @@ class ChessGame:
                 self.rook_moved[2] = 1
             if (mx==7 and my == 0 ) :
                 self.rook_moved[3] = 1
+        
+        if (self.chess_board[my][mx][1]=='P' and abs(mx-x)==1 and self.pion_passant ) :
+            self.chess_board[y+direction][x] = '--'
+        print(self.pion_passant)
+        self.pion_passant = False
+        if (self.chess_board[my][mx][1]=='P' and abs(my-y)==2) :
+            self.pion_passant = True
         self.chess_board[y][x], self.chess_board[my][mx] = moving_piece, '--'
+        
         if ((y==0 or y==7) and  self.chess_board[y][x][1]=='P') :
             color = self.turn
             piece = Promotion_screen(color)[0]
@@ -383,13 +391,7 @@ class ChessGame:
             
                     
             
-        # Handle en passant capture
-        if (self.pion_passant) :
-            # Clear the square of the pawn captured via en passant
-            print('bla bla ')
-            self.chess_board[y+direction][x] = '--'
-            # Reset en passant if no double-step pawn move occurred
-        self.pion_passant = False
+        
     def back_move_piece(self, start, final, piece): 
         """Reverts a move to restore board state."""
         mx, my = start

@@ -22,30 +22,20 @@ def run() :
     board.game.list_of_boards.append(game.chess_board)
     board.game.list_of_times.append((game.white_time, game.black_time))
     k = 0
-    p = 0
     while board.game.running:
         board.draw_timer()
-        
         #board.handle_add_time_button()
         board.draw_move_back_button()
         board.draw_board()  # Draw the board
         board.draw_add_time_button()
-        board.game.update_list_of_boards()
         board.draw_last_move() 
         board.draw_king_in_check()
         board.draw_selected_piece()
         board.draw_pieces()
-        board.game.castling()
         board.run()
-        
         board.draw_move()
         pygame.display.flip()
-        board.game.all_moves()
-        board.game.change_player()
-        board.game.all_moves()
-        board.game.change_player()
         result = board.game.game_ends()
-
         board.update_timers()            
         if k == 0:
             board.game.time_reg(white_time, black_time)
