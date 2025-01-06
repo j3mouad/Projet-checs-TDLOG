@@ -6,7 +6,7 @@ def Rematch_screen(winner):
     if winner is None :
         return
     # Initialize the Pygame screen
-    screen = pygame.display.set_mode((screen_width + added_screen_width, screen_height))
+    screen = pygame.display.set_mode((screen_width , screen_height))
     pygame.display.set_caption("Rematch?")
 
     # Set up the winner message
@@ -19,11 +19,11 @@ def Rematch_screen(winner):
         winner_text = "Stale_mate"
     
     winner_surface = FONT.render(winner_text, True, (0, 0, 0))  # Black color for text
-    winner_rect = winner_surface.get_rect(center=(screen_width // 2 + added_screen_width // 2, screen_height // 4))
+    winner_rect = winner_surface.get_rect(center=(screen_width // 2 , screen_height // 4))
 
     # Create rematch button using the Button class
-    rematch_button = Button('Rematch', (screen_width+added_screen_width) // 2 - 25, screen_height // 2 - 30, 100, 80)
-    quit_button = Button('Quit', (screen_width+added_screen_width) // 2 - 25, screen_height // 2 + 100, 100, 80)
+    rematch_button = Button('Rematch', (screen_width) // 2 - 25, screen_height // 2 - 30, 100, 80)
+    quit_button = Button('Quit', (screen_width) // 2 - 25, screen_height // 2 + 100, 100, 80)
 
     running = True
     while running:

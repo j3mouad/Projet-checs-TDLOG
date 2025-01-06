@@ -5,7 +5,7 @@ from config import *
 
 def Promotion_screen(color) :
     pygame.init()
-    promotion_screen = pygame.display.set_mode((screen_width+added_screen_width, screen_height))
+    promotion_screen = pygame.display.set_mode((screen_width*2, screen_height))
     pygame.display.set_caption("Choose a Piece")
     # Create buttons
     buttons = [
