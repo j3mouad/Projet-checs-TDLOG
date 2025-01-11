@@ -3,9 +3,9 @@ using namespace std;
 #include "game.h"
 
 int main(){
-    openWindow(480,480);
+    openWindow(480,580);
     Game game;
-    game.play_fisher();
+    game.play_against_ai();
     endGraphics();
     return 0;
 }
