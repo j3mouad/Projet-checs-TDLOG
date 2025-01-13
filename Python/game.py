@@ -10,7 +10,7 @@ pygame.init()
 
 # Main game loop
 def run() :
-    screen = pygame.display.set_mode((screen_width , screen_height))
+    screen = pygame.display.set_mode((screen_width, screen_height), pygame.RESIZABLE)
     pygame.display.set_caption("Chess")
     # Draw and update the chessboard
     game = ChessGame(screen)
@@ -37,7 +37,7 @@ def run() :
         board.update_score()
         board.draw_move()
         board.update_moves()
-        
+        board.update_screen()
         pygame.display.flip()
         result = board.game.game_ends()
         board.update_timers()   

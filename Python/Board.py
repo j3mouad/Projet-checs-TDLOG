@@ -339,7 +339,8 @@ class Board:
         self.score_button.draw(self.screen)
     def update_score(self) :
         self.score = evaluate(self.game,{})
-    
+    def update_screen(self) :
+        self.game.screen= self.screen
     def run(self):
         """
         Main game loop. Handles player input, updates the game state, 
@@ -349,6 +350,7 @@ class Board:
         self.game.black_king_position = find_king_position(self.game.chess_board,'black')
         
         for event in pygame.event.get():
+            print(self.screen_width,"  ",self.screen_height)
             self.handle_add_time_button(event)
             self.handle_back_button_click( event)
             if (self.game.player) :

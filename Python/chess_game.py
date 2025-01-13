@@ -163,7 +163,6 @@ class ChessGame:
                 elif self.chess_board[0][1] == '--' and self.chess_board[0][2] == '--' and self.chess_board[0][3] == '--':
                     if not any((1, 0) in self.white_moves[key] or (2, 0) in self.white_moves[key] or (3, 0) in self.white_moves[key] for key in self.white_moves):
                         self.castle[3] = True
-        print(self.castle)
     def copy_game(self):
         """Create and return a deep copy of the current game state."""
         new_game = copy.copy(self)  # Shallow copy the ChessGame object itself
@@ -382,7 +381,7 @@ class ChessGame:
         
         if ((y==0 or y==7) and  self.chess_board[y][x][1]=='P') :
             color = self.turn
-            piece = Promotion_screen(color)[0]
+            piece = Promotion_screen(self,color)[0]
             if (piece=='K') :
                 piece = 'N'
 
