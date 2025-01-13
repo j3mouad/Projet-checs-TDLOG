@@ -163,7 +163,7 @@ class ChessGame:
                 elif self.chess_board[0][1] == '--' and self.chess_board[0][2] == '--' and self.chess_board[0][3] == '--':
                     if not any((1, 0) in self.white_moves[key] or (2, 0) in self.white_moves[key] or (3, 0) in self.white_moves[key] for key in self.white_moves):
                         self.castle[3] = True
-        
+        print(self.castle)
     def copy_game(self):
         """Create and return a deep copy of the current game state."""
         new_game = copy.copy(self)  # Shallow copy the ChessGame object itself
@@ -277,6 +277,7 @@ class ChessGame:
 
         # King move rules
         elif piece_type == 'K':
+
             if max(abs(mx - x), abs(my - y)) == 1:  # One square in any direction
                 return True
             if start_piece[0] == 'w' and not self.white_king_moved:
@@ -284,10 +285,12 @@ class ChessGame:
                     return True
                 if mx == 2 and my == 7 and self.castle[1]:
                     return True
-            if start_piece[0] == 'b' and not self.black_king_moved:
-                if mx == 2 and my == 0 and self.castle[2]:
+            
+            if start_piece[0] == 'b' :
+                if mx == 2 and my == 0 and self.castle[3]:
+                    print("ezffe")
                     return True
-                if mx == 6 and my == 0 and self.castle[3]:
+                if mx == 6 and my == 0 and self.castle[2]:
                     return True
 
         # Queen move rules

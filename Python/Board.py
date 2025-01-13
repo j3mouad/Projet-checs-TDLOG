@@ -337,7 +337,6 @@ class Board:
 
         # Draw the button
         self.score_button.draw(self.screen)
-        print(self.score)
     def update_score(self) :
         self.score = evaluate(self.game,{})
     
