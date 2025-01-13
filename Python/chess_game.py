@@ -83,8 +83,11 @@ class ChessGame:
         self.rook_moved=[0,0,0,0]
         self.castle=[0,0,0,0]
         self.hard = False
+        self.flipped = False
         self.white_king_position = None
         self.black_king_position = None
+        self.rook_pos = [7,0,0,7]
+        self.king_of_the_hill = False
     ##########################################First functions manage graphcis#############################################
     def time_reg(self,white_time,black_time):
         self.white_time=white_time
@@ -118,64 +121,48 @@ class ChessGame:
             self.turn = 'white'  # Otherwise, change to white
     def castling(self):
         """Check and update castling availability for both players."""
-        if not self.classic: 
-            return  # Return if the game is not in classic mode
-        
+
         self.all_moves()  # Update all moves for the current player
         self.change_player()  # Switch to the opponent
         self.all_moves()  # Update all moves for the opponent
         self.change_player()  # Switch back to the original player
-        
-        # Check if castling is possible for the white king
-        if self.white_king_check or self.white_king_moved:
-            self.castle[0] = False  # White king cannot castle if in check or moved
-            self.castle[1] = False  # White king cannot castle if in check or moved
-        
-        if not self.white_king_check and not self.white_king_moved:
-            if self.rook_moved[0] == 1:
-                self.castle[0] = False  # White rook moved, castling is no longer possible
-            elif self.chess_board[7][5] == '--' and self.chess_board[7][6] == '--':
-                b = False
-                for key in self.black_moves:
-                    b = (6, 7) in self.black_moves[key] or (5, 7) in self.black_moves[key]
-                    if b:
-                        break
-                self.castle[0] = not b  # If no black pieces threaten castling, allow castling
-            if self.rook_moved[1] == 1 :
-                self.castle[1] = False
-            elif (self.chess_board[7][1]=='--' and self.chess_board[7][2]=='--' and self.chess_board[7][3]=='--') :
-                b= False
-                for key in self.black_moves :
-                    b = (2,7) in self.black_moves[key] or (3.7) in self.black_moves[key]
-                    if b :
-                        break
-                self.castle[1] = not b 
-        
-        # Repeat similar logic for black king and rook
-        if self.black_king_check or self.black_king_moved:
-            self.castle[2] = False
-            self.castle[3] = False
-        
-        if not self.black_king_check and not self.black_king_moved:
-            if self.rook_moved[2] == 1:
-                self.castle[2] = False
-            elif self.rook_moved[2] == 0 and self.chess_board[0][1] == '--' and self.chess_board[0][2] == '--' and self.chess_board[0][3] == '--':
-                b = False
-                for key in self.white_moves:
-                    b = (1, 0) in self.white_moves[key] or (2, 0) in self.white_moves[key] or (3, 0) in self.white_moves[key]
-                    if b:
-                        break
-                self.castle[2] = not b
 
-            if self.rook_moved[3] == 1:
+            # Standard chess castling logic
+        if self.white_king_check or self.white_king_moved:
+                self.castle[0] = False  # White king-side castling not possible
+                self.castle[1] = False  # White queen-side castling not possible
+            
+        if not self.white_king_check and not self.white_king_moved:
+                # White king-side castling
+                if self.rook_moved[0]:
+                    self.castle[0] = False
+                elif self.chess_board[7][5] == '--' and self.chess_board[7][6] == '--':
+                    if not any((6, 7) in self.black_moves[key] or (5, 7) in self.black_moves[key] for key in self.black_moves):
+                        self.castle[0] = True
+                # White queen-side castling
+                if self.rook_moved[1]:
+                    self.castle[1] = False
+                elif self.chess_board[7][1] == '--' and self.chess_board[7][2] == '--' and self.chess_board[7][3] == '--':
+                    if not any((2, 7) in self.black_moves[key] or (3, 7) in self.black_moves[key] for key in self.black_moves):
+                        self.castle[1] = True
+
+            # Black king-side and queen-side castling (similar logic)
+        if self.black_king_check or self.black_king_moved:
+                self.castle[2] = False
                 self.castle[3] = False
-            if self.rook_moved[3] == 0 and self.chess_board[0][6] == '--' and self.chess_board[0][5] == '--':
-                b = False
-                for key in self.white_moves:
-                    b = (5, 0) in self.white_moves[key] or (6, 0) in self.white_moves[key]
-                    if b:
-                        break
-                self.castle[3] = not b
+            
+        if not self.black_king_check and not self.black_king_moved:
+                if self.rook_moved[2]:
+                    self.castle[2] = False
+                elif self.chess_board[0][5] == '--' and self.chess_board[0][6] == '--':
+                    if not any((5, 0) in self.white_moves[key] or (6, 0) in self.white_moves[key] for key in self.white_moves):
+                        self.castle[2] = True
+
+                if self.rook_moved[3]:
+                    self.castle[3] = False
+                elif self.chess_board[0][1] == '--' and self.chess_board[0][2] == '--' and self.chess_board[0][3] == '--':
+                    if not any((1, 0) in self.white_moves[key] or (2, 0) in self.white_moves[key] or (3, 0) in self.white_moves[key] for key in self.white_moves):
+                        self.castle[3] = True
     def copy_game(self):
         """Create and return a deep copy of the current game state."""
         new_game = copy.copy(self)  # Shallow copy the ChessGame object itself
@@ -212,6 +199,8 @@ class ChessGame:
         # Pawn move rules
         if piece_type == 'P':
             direction = -1 if start_piece[0] == 'w' else 1  # White moves up, black moves down
+            coef = -1 if self.flipped else 1
+            direction *=coef
             if mx == x:  # Moving straight
                 if my == y + direction and end_piece == '--':  # Single step
                     return True
@@ -287,6 +276,7 @@ class ChessGame:
 
         # King move rules
         elif piece_type == 'K':
+
             if max(abs(mx - x), abs(my - y)) == 1:  # One square in any direction
                 return True
             if start_piece[0] == 'w' and not self.white_king_moved:
@@ -294,10 +284,11 @@ class ChessGame:
                     return True
                 if mx == 2 and my == 7 and self.castle[1]:
                     return True
-            if start_piece[0] == 'b' and not self.black_king_moved:
-                if mx == 2 and my == 0 and self.castle[2]:
+            
+            if start_piece[0] == 'b' :
+                if mx == 2 and my == 0 and self.castle[3]:
                     return True
-                if mx == 6 and my == 0 and self.castle[3]:
+                if mx == 6 and my == 0 and self.castle[2]:
                     return True
 
         # Queen move rules
@@ -318,35 +309,43 @@ class ChessGame:
         """Returns moves for the piece at (x, y) that don't put its king in check."""
         return [(mx, my) for mx in range(8) for my in range(8) if self.is_valid_move((x, y), (mx, my))]
 
-
+    def find_rook_positions(self):
+        """Find the positions of the rooks for both players."""
+        rooks = []
+        
+        # Loop through the board to find rook positions
+        for x in range(8):
+            if self.chess_board[7][x] == 'wR':  # White rooks on the 8th row (index 7)
+                rooks.append(x)
+            
+        return rooks
     def move_piece(self, start, x, y): 
         """Moves the piece from start to (x, y). Handles en passant captures."""
- 
         mx, my = start
         moving_piece = self.chess_board[my][mx]
         direction = -1 if self.turn == 'black' else 1
-        if (moving_piece[1]=='K' and abs(mx-x)==2 and self.classic and my==y):
-            if (my  == 7 and not self.white_king_moved and not self.white_king_check and not self.white_king_check and self.turn=='white') :
+        if ( moving_piece[1]=='K' and abs(mx-x)>=2 and my==y):
+            if (my  == 7 and not self.white_king_moved and not self.white_king_check and self.turn=='white') :
                 self.chess_board[y][x]=moving_piece
                 self.chess_board[my][mx]='--'
                 direction = int((mx-x)/2)
                 if(x==6) :
-                    self.chess_board[my][7]='--'
+                    self.chess_board[my][self.rook_pos[0]]='--'
                 else :
-                    self.chess_board[my][0]='--'
+                    self.chess_board[my][self.rook_pos[1]]='--'
                 rook = moving_piece[0] + 'R'
-                self.chess_board[y][mx-direction]=rook
+                self.chess_board[y][x+direction]=rook
                 self.white_king_moved=True
 
                 return
-            if (my==0 and not self.black_king_check and not self.black_king_moved and self.turn=='black' and not self.black_king_check) :
+            if (my==0 and not self.black_king_check and not self.black_king_moved and self.turn=='black' ) :
                 self.chess_board[y][x]=moving_piece
                 self.chess_board[my][mx]='--'
                 direction = int((mx-x)/2)
                 if(x==6) :
-                    self.chess_board[my][7]='--'
+                    self.chess_board[my][self.rook_pos[0]]='--'
                 else :
-                    self.chess_board[my][0]='--'
+                    self.chess_board[my][self.rook_pos[1]]='--'
                 rook = moving_piece[0] + 'R'
                 self.chess_board[y][mx-direction]=rook
                 self.black_king_moved=True
@@ -361,18 +360,28 @@ class ChessGame:
         # Move the piece from start to (x, y)
         
         if (self.chess_board[my][mx][1]=='R') :
-            if (mx==7 and my==7) :
-                self.rook_moved[0] = 1
-            if (mx==0 and my==7) :
-                self.rook_moved[1]== 1
-            if (mx == 0 and my == 0) :
-                self.rook_moved[2] = 1
-            if (mx==7 and my == 0 ) :
-                self.rook_moved[3] = 1
+            
+                if (mx==7 and my==7) :
+                    self.rook_moved[0] = 1
+                if (mx==0 and my==7) :
+                    self.rook_moved[1]== 1
+                if (mx == 0 and my == 0) :
+                    self.rook_moved[2] = 1
+                if (mx==7 and my == 0 ) :
+                    self.rook_moved[3] = 1
+            
+
+        
+        if (self.chess_board[my][mx][1]=='P' and abs(mx-x)==1 and self.pion_passant ) :
+            self.chess_board[y+direction][x] = '--'
+        self.pion_passant = False
+        if (self.chess_board[my][mx][1]=='P' and abs(my-y)==2) :
+            self.pion_passant = True
         self.chess_board[y][x], self.chess_board[my][mx] = moving_piece, '--'
+        
         if ((y==0 or y==7) and  self.chess_board[y][x][1]=='P') :
             color = self.turn
-            piece = Promotion_screen(color)[0]
+            piece = Promotion_screen(self,color)[0]
             if (piece=='K') :
                 piece = 'N'
 
@@ -380,12 +389,7 @@ class ChessGame:
             
                     
             
-        # Handle en passant capture
-        if (self.pion_passant) :
-            # Clear the square of the pawn captured via en passant
-            self.chess_board[y+direction][x] = '--'
-            # Reset en passant if no double-step pawn move occurred
-        self.pion_passant = False
+        
     def back_move_piece(self, start, final, piece): 
         """Reverts a move to restore board state."""
         mx, my = start
@@ -555,11 +559,16 @@ class ChessGame:
         if not has_non_empty_list(current_moves):
             pygame.time.delay(1000)
             return 0  # Stalemate
-
+        if (self.king_of_the_hill) :
+            x_w,y_w = self.find_king_position('w')
+            x_b,y_b = self.find_king_position('b')
+            if (x_w in [3,4] and y_w in [3,4] and self.turn == 'black') :
+                return 1
+            if (x_b in [3,4] and y_b in [3,4] and self.turn == 'white'):
+                return -1
         return None  # Game continues
 
-    def game_ends_3_check(self) :
-        pass
+
 
     def convert_to_chess_board(self):
         board = chess.Board()

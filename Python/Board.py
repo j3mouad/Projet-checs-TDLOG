@@ -5,7 +5,7 @@ from random import shuffle
 import os
 from utils import *
 from Button import Button,squares
-from AI import AI,AI_hard
+from AI import AI,AI_hard,evaluate
 # Set the new directory and change the working directory
 new_dir = ('/home/hassene/Desktop/Projet-echecs-TDLOG/Python')
 os.chdir(new_dir)
@@ -25,9 +25,7 @@ def find_king_position(chess_board, color):
             if piece == f'{color[0]}K':  # Check for white or black king
                 return (x, y)
     return None
-
 class Board:
-
     def __init__(self, game,screen):
 
 
@@ -41,6 +39,11 @@ class Board:
         self.cooldown = 0.5
         self.number_of_time_same_piece_clicked = 0
         self.last_click_time = 0
+        self.screen_width = screen_width
+        self.screen_height = screen_height
+        self.x_square_size = screen_width//16
+        self.y_square_size = screen_height // 8 
+        self.score = evaluate(self.game,{})
 
     def draw_board(self):
         """
@@ -55,7 +58,10 @@ class Board:
         """
         for row in range(8):
             for col in range(8):
-                squares[col][row].draw(self.screen)
+                color = light_brown if (row + col) % 2 == 0 else brown
+                square = Button("",col*self.x_square_size,row*self.y_square_size,self.x_square_size,self.y_square_size,image_path = None,color = color)
+                square.draw(self.screen)
+        
 
     def draw_move(self):
         """
@@ -65,17 +71,17 @@ class Board:
             self.game.last_move_draw = self.game.last_move
             x, y = self.game.last_move[0]
             mx, my = self.game.last_move[1]
-            dx = (mx - x) / 20
-            dy = (my - y) / 20
+            dx = (mx - x) / 5
+            dy = (my - y) / 5
             piece = self.game.chess_board[my][mx]
             if (piece != '--'):
-                resized_piece = pygame.transform.scale(pieces_images[piece], (square_size, square_size))
-                for i in range(20):
+                resized_piece = pygame.transform.scale(pieces_images[piece], (self.x_square_size, self.y_square_size))
+                for i in range(1,6):
                     self.draw_board()
                     self.draw_pieces(mx, my)
                     col = y + i * dy
                     row = x + i * dx
-                    self.screen.blit(resized_piece, pygame.Rect(row * square_size, col * square_size, square_size, square_size))
+                    self.screen.blit(resized_piece, pygame.Rect(row * self.x_square_size, col * self.y_square_size, self.x_square_size, self.y_square_size))
                     pygame.time.delay(1)
                     pygame.display.flip()
 
@@ -83,17 +89,18 @@ class Board:
         """
         Draws the chess pieces on the board.
         """
+
         font = pygame.font.Font(None, 12)
         for row in range(8):
             for col in range(8):
                 text = font.render(self.game.chess_board_squares[col][row], True, (0, 0, 255)) 
-                self.screen.blit(text, (row * square_size, col * square_size))
+                self.screen.blit(text, (row * self.x_square_size, col * self.y_square_size))
                 piece = self.game.chess_board[row][col]
                 if piece != '--':
                     if (mx == col and my == row):
                         continue 
-                    resized_piece = pygame.transform.scale(pieces_images[piece], (square_size, square_size))
-                    self.screen.blit(resized_piece, pygame.Rect(col * square_size, row * square_size, square_size, square_size))
+                    resized_piece = pygame.transform.scale(pieces_images[piece], (self.x_square_size , self.y_square_size ))
+                    self.screen.blit(resized_piece, pygame.Rect(col * self.x_square_size, row * self.y_square_size, self.x_square_size, self.y_square_size))
     def draw_add_time_button(self):
         """
         Draws the 'Add Time' button on the screen using the Button class.
@@ -107,14 +114,14 @@ class Board:
         # Create the button instance
         self.add_time_button = Button(
             text="+ 5 seconds",
-            x=screen_width + 20,
-            y=200,
-            width=250,
-            height=80,
+            x=self.screen_width//2 + self.x_square_size,
+            y=self.screen_height//2-self.y_square_size,
+            width=3*self.x_square_size,
+            height=self.y_square_size,
             color=grey
 
         )
-        self.add_time_button.draw(self.screen)
+        self.add_time_button.draw(self.screen,size = int(square_size//3))
 
         
 
@@ -143,6 +150,7 @@ class Board:
         Returns:
             None
         """
+        self.screen.fill(white)
         font = pygame.font.Font(None, 36)
         white_timer_surface = font.render(f'White: {self.game.white_time // 60}:{self.game.white_time % 60:02}', True, black)
         black_timer_surface = font.render(f'Black: {self.game.black_time // 60}:{self.game.black_time % 60:02}', True, black)
@@ -151,14 +159,16 @@ class Board:
         if self.game.black_time <= 5:
             black_timer_surface = font.render(f'Black: {self.game.black_time // 60}:{self.game.black_time % 60:02}', True, red)
 
-        if self.game.turn == 'white':
-            pygame.draw.rect(self.screen, white, (screen_width, 0, added_screen_width, screen_height))
-            self.screen.blit(white_timer_surface, (screen_width + 20, 450))
-            self.screen.blit(black_timer_surface, (screen_width + 20, 50))
-        if self.game.turn == 'black':
-            pygame.draw.rect(self.screen, white, (screen_width, 0, added_screen_width, screen_height))
-            self.screen.blit(black_timer_surface, (screen_width + 20, 450))
-            self.screen.blit(white_timer_surface, (screen_width + 20, 50))
+        # Clear the right half of the screen for the timer area
+        pygame.draw.rect(self.screen, white, (self.screen_width // 2, 0, self.screen_width // 2, self.screen_height))
+
+        # Correct the timer surface positions
+        white_timer_position = (self.screen_width // 2 + self.x_square_size // 2, self.screen_height - self.y_square_size)
+        black_timer_position = (self.screen_width // 2 + self.x_square_size // 2, self.y_square_size)
+
+        self.screen.blit(white_timer_surface, white_timer_position)
+        self.screen.blit(black_timer_surface, black_timer_position)
+
     def draw_move_back_button(self):
         """
         Draws the 'Back' button on the screen using the Button class.
@@ -172,10 +182,10 @@ class Board:
         # Create the button instance
         self.back_button = Button(
             text="Back",
-            x=screen_width + 150,
-            y=300,
-            width=60,
-            height=50,
+            x=self.screen_width//2 + 2*self.x_square_size,
+            y=self.screen_height//2+self.y_square_size,
+            width=self.x_square_size ,
+            height=int(self.y_square_size),
         )
 
         # Draw the button
@@ -224,6 +234,7 @@ class Board:
             self.game.selected_piece = []
 
             # Redraw game board and pieces
+            
             self.draw_board()
             self.draw_pieces()
 
@@ -238,6 +249,7 @@ class Board:
 
 
     def update_timers(self):
+
         current_time = pygame.time.get_ticks()
 
         elapsed_time = (current_time - self.game.last_time_update) // 1000
@@ -266,7 +278,7 @@ class Board:
             self.game.white_king_check = b
             # If white king is in check, draw a red square around its position
             if self.game.white_king_check:
-                pygame.draw.rect(self.screen, red, pygame.Rect(x_king * square_size, y_king * square_size, square_size, square_size))
+                pygame.draw.rect(self.screen, red, pygame.Rect(x_king * self.x_square_size, y_king * self.y_square_size, self.x_square_size, self.y_square_size))
         else:
             self.game.black_king_position = find_king_position(self.game.chess_board,'black')
             x_king, y_king = self.game.black_king_position
@@ -279,7 +291,7 @@ class Board:
             self.game.black_king_check = b
             # If black king is in check, draw a red square around its position
             if self.game.black_king_check:
-                pygame.draw.rect(self.screen, red, pygame.Rect(x_king * square_size, y_king * square_size, square_size, square_size))
+                pygame.draw.rect(self.screen, red, pygame.Rect(x_king * self.x_square_size, y_king * self.y_square_size, self.x_square_size, self.y_square_size))
 
     def draw_selected_piece(self):
         """
@@ -291,10 +303,10 @@ class Board:
             # Ensure the selected piece belongs to the current player
             if self.game.turn[0] == self.game.chess_board[y][x][0]:
                 # Highlight the selected piece
-                pygame.draw.rect(self.screen, grey, pygame.Rect(x * square_size, y * square_size, square_size, square_size))
+                pygame.draw.rect(self.screen, grey, pygame.Rect(x * self.x_square_size, y * self.y_square_size, self.x_square_size, self.y_square_size))
                 # Highlight all possible valid moves of the selected piece
                 for mx, my in self.game.possible_moves:
-                    pygame.draw.rect(self.screen, grey, pygame.Rect(mx * square_size, my * square_size, square_size, square_size))
+                    pygame.draw.rect(self.screen, grey, pygame.Rect(mx * self.x_square_size, my * self.y_square_size, self.x_square_size, self.y_square_size))
     def draw_last_move(self):
         """
         Highlights the squares involved in the last move.
@@ -304,8 +316,31 @@ class Board:
             x, y = self.game.last_move[0]
             mx, my = self.game.last_move[1]
             # Highlight the starting and ending squares of the last move
-            pygame.draw.rect(self.screen, highlight_color, pygame.Rect(x * square_size, y * square_size, square_size, square_size))
-            pygame.draw.rect(self.screen, highlight_color, pygame.Rect(mx * square_size, my * square_size, square_size, square_size))
+            pygame.draw.rect(self.screen, highlight_color, pygame.Rect(x * self.x_square_size, y * self.y_square_size, self.x_square_size, self.y_square_size))
+            pygame.draw.rect(self.screen, highlight_color, pygame.Rect(mx * self.x_square_size, my * self.y_square_size, self.x_square_size, self.y_square_size))
+    def update_moves(self) :
+        self.game.castling()
+        self.game.all_moves()
+        self.game.change_player()
+        self.game.castling()
+        self.game.all_moves()
+        self.game.change_player()
+    def draw_score(self) :
+         
+        self.score_button = Button(
+            text="score : " + str(self.score),
+            x=self.screen_width//2 + 4*self.x_square_size,
+            y=self.screen_height//2+self.y_square_size,
+            width=self.x_square_size ,
+            height=int(self.y_square_size),
+        )
+
+        # Draw the button
+        self.score_button.draw(self.screen)
+    def update_score(self) :
+        self.score = evaluate(self.game,{})
+    def update_screen(self) :
+        self.game.screen= self.screen
     def run(self):
         """
         Main game loop. Handles player input, updates the game state, 
@@ -315,9 +350,9 @@ class Board:
         self.game.black_king_position = find_king_position(self.game.chess_board,'black')
         
         for event in pygame.event.get():
+            print(self.screen_width,"  ",self.screen_height)
             self.handle_add_time_button(event)
             self.handle_back_button_click( event)
-
             if (self.game.player) :
                 if (self.game.white and self.game.turn == 'black') :
                             self.game.all_moves()
@@ -330,6 +365,7 @@ class Board:
                             self.game.move_piece(start,end[0],end[1])
                             self.game.last_move = [start,end]
                             self.draw_last_move()
+                            self.update_timers()
                             self.game.change_player()
                             self.game.all_moves()
                 if (self.game.black and self.game.turn=='white') :
@@ -343,51 +379,56 @@ class Board:
                             self.game.move_piece(start,mx,my)
                             self.game.last_move = [start,end]
                             self.draw_last_move()
+                            self.update_timers()
                             self.game.change_player()
                             self.game.all_moves()
 
             if event.type == pygame.QUIT:
                 self.game.running = False
-            
+            elif event.type == pygame.VIDEORESIZE:
+                # Mettre à jour la taille de l'écran
+                self.screen_width, self.screen_height = event.w-event.w%16, event.h-event.h%8
+                self.screen = pygame.display.set_mode((self.screen_width, self.screen_height), pygame.RESIZABLE)
+                self.x_square_size = int(self.screen_width / 16)
+                self.y_square_size = int(self.screen_height/8)
+
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if pygame.mouse.get_pressed()[0]:  # Left click check
                     x, y = event.pos
-                    x_square, y_square = x // square_size, y // square_size
-                    
+                    x_square, y_square = int(x // self.x_square_size), int(y // self.y_square_size)
                     # Ensure the clicked position is within board bounds
                     if 0 <= x_square < 8 and 0 <= y_square < 8:
+                        if (x_square,y_square) == (self.game.selected_piece) :
+                            continue
                         if (self.game.selected_piece and (x_square,y_square) not in self.game.possible_moves) :
                             self.game.selected_piece = None
                             self.game.possible_moves = []
                         if self.game.selected_piece and (x_square, y_square) in self.game.possible_moves:
-                            self.game.all_moves()
-                            self.game.is_king_in_check()
+                            #self.game.all_moves()
+                            #self.game.is_king_in_check()
                             self.game.move_piece(self.game.selected_piece, x_square, y_square)
                             click_sound_chess.play()
                             # Update last move
                             self.game.last_move = [[self.game.selected_piece[0], self.game.selected_piece[1]], [x_square, y_square]]
                             # Check if the move results in a check
-                            self.x_king, self.y_king = -1, -1  # Reset king position
-                            for i in range(8):
-                                for j in range(8):
-                                    check_pos = self.game.check(i, j)
-                                    self.x_king, self.y_king = check_pos
-                                    if self.x_king != -1:  # If a check is found
-                                        break
-                                if self.x_king != -1:
-                                    break
+                            self.game.update_list_of_boards()
+                            
                             self.game.change_player()
+                            self.update_moves()
                             self.game.selected_piece, self.game.possible_moves = None, []  # Reset selected piece and possible moves
+                        
                         elif self.game.chess_board[y_square][x_square][0] == self.game.turn[0]:
 
                             # Select a piece if it belongs to the current player
                             self.game.selected_piece = (x_square, y_square)
-                            self.game.castling()
-                            self.game.all_moves()
+                           # self.game.castling()
+                           # self.game.all_moves()
+                            self.game.is_king_in_check()
                             if self.game.turn == 'white':
                                 self.game.possible_moves = deepcopy(self.game.white_moves[(x_square, y_square)])
                             else:
                                 self.game.possible_moves = deepcopy(self.game.black_moves[(x_square, y_square)])
+
+        
         pygame.display.flip()
        
-

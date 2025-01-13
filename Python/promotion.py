@@ -3,9 +3,11 @@ import pygame
 import sys
 from config import *
 
-def Promotion_screen(color) :
+def Promotion_screen(game,color) :
     pygame.init()
-    promotion_screen = pygame.display.set_mode((screen_width+added_screen_width, screen_height))
+    screen = game.screen
+    width, height = screen.get_size()
+    promotion_screen = pygame.display.set_mode((width,height))
     pygame.display.set_caption("Choose a Piece")
     # Create buttons
     buttons = [

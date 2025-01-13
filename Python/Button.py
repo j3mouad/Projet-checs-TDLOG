@@ -44,8 +44,9 @@ class Button:
             return self.rect.collidepoint(event.pos)
         return False
 squares = [[None for _ in range(8)] for _ in range(8)]
-for row in range(8):
-            for col in range(8):
-                color = light_brown if (row + col) % 2 == 0 else brown
-                square = Button("",col*square_size,row*square_size,square_size,square_size,image_path = None,color = color)
-                squares[col][row] = square
+def draw(squares,x_square_size,y_square_size):
+    for row in range(8):
+                for col in range(8):
+                    color = light_brown if (row + col) % 2 == 0 else brown
+                    square = Button("",col*x_square_size,row*y_square_size,square_size,square_size,image_path = None,color = color)
+                    squares[col][row] = square
