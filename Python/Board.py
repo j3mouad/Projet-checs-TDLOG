@@ -5,7 +5,7 @@ from random import shuffle
 import os
 from utils import *
 from Button import Button,squares
-from AI import AI,AI_hard
+from AI import AI,AI_hard,evaluate
 # Set the new directory and change the working directory
 new_dir = ('/home/hassene/Desktop/Projet-echecs-TDLOG/Python')
 os.chdir(new_dir)
@@ -43,6 +43,7 @@ class Board:
         self.screen_height = screen_height
         self.x_square_size = screen_width//16
         self.y_square_size = screen_height // 8 
+        self.score = evaluate(self.game,{})
 
     def draw_board(self):
         """
@@ -99,7 +100,7 @@ class Board:
                     if (mx == col and my == row):
                         continue 
                     resized_piece = pygame.transform.scale(pieces_images[piece], (self.x_square_size , self.y_square_size ))
-                    self.screen.blit(resized_piece, pygame.Rect(col * self.y_square_size, row * self.x_square_size, self.x_square_size, self.y_square_size))
+                    self.screen.blit(resized_piece, pygame.Rect(col * self.x_square_size, row * self.y_square_size, self.x_square_size, self.y_square_size))
     def draw_add_time_button(self):
         """
         Draws the 'Add Time' button on the screen using the Button class.
@@ -324,6 +325,22 @@ class Board:
         self.game.castling()
         self.game.all_moves()
         self.game.change_player()
+    def draw_score(self) :
+         
+        self.score_button = Button(
+            text="score : " + str(self.score),
+            x=self.screen_width//2 + 4*self.x_square_size,
+            y=self.screen_height//2+self.y_square_size,
+            width=self.x_square_size ,
+            height=int(self.y_square_size),
+        )
+
+        # Draw the button
+        self.score_button.draw(self.screen)
+        print(self.score)
+    def update_score(self) :
+        self.score = evaluate(self.game,{})
+    
     def run(self):
         """
         Main game loop. Handles player input, updates the game state, 

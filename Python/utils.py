@@ -14,4 +14,13 @@ def has_non_empty_list(map_data):
     return False
 
 
-
+def check_list(L, x, y,color='white'):
+    # Determine the start and end of the range
+    start = min(x, y)
+    end = max(x, y)
+    piece = color[0]+'R'
+    # Check if L[7][i] is '--' for all i in the range [start, end]
+    for i in range(start, end + 1):
+        if L[7][i] != '--' and L[7][i]!=piece:
+            return False
+    return True

@@ -290,7 +290,7 @@ def minimax(game, depth, transposition_table, alpha=float('-inf'), beta=float('i
             for end_pos in possible_moves:
                 if (i>0) :
                     s = randint(1,100)
-                    if (s<95) :
+                    if (s<1000) :
                         continue 
 
                 i+=1
@@ -318,7 +318,7 @@ def minimax(game, depth, transposition_table, alpha=float('-inf'), beta=float('i
             for end_pos in possible_moves:
                 if (i>0) :
                     s = randint(1,100)
-                    if (s<95) :
+                    if (s<1000) :
                         continue 
                 copy_game = game.copy_game()
                 x, y = end_pos
@@ -336,7 +336,7 @@ def minimax(game, depth, transposition_table, alpha=float('-inf'), beta=float('i
                 break  # Prune outer loop
         return min_eval
 
-def AI(game, depth=4):
+def AI(game, depth=2):
     """
     AI for determining the best move using minimax evaluation.
     Returns the best move as a tuple (start_pos, end_pos).

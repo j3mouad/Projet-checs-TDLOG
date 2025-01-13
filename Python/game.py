@@ -27,15 +27,17 @@ def run() :
         #board.handle_add_time_button()
         board.draw_move_back_button()
         board.draw_board()  # Draw the board
+        board.draw_score()
         board.draw_add_time_button()
         board.draw_last_move() 
         board.draw_king_in_check()
         board.draw_selected_piece()
         board.draw_pieces()
         board.run()
+        board.update_score()
         board.draw_move()
         board.update_moves()
-
+        
         pygame.display.flip()
         result = board.game.game_ends()
         board.update_timers()   

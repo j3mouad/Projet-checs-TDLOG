@@ -2,9 +2,41 @@ import pygame
 from Button import Button  # Assuming the Button class is in a separate module
 from config import *
 from config import screen_width
-from random import shuffle
+from random import shuffle,seed,sample,choice
 screen_width = 1000
 screen_height = 500
+
+def shuffle_fischer_row():
+    # Start with empty row
+    row = [''] * 8
+
+    # Place the bishops on opposite-colored squares
+    bishop_positions = sample([0, 2, 4, 6], 1) + sample([1, 3, 5, 7], 1)
+    row[bishop_positions[0]] = 'B'
+    row[bishop_positions[1]] = 'B'
+
+    # Place the king between two rooks
+    open_positions = [i for i in range(8) if row[i] == '']
+    king_position = choice(open_positions[1:-1])
+    row[king_position] = 'K'
+
+    # Rooks on either side of the king
+    left_rook_position =choice([pos for pos in open_positions if pos < king_position])
+    row[left_rook_position] = 'R'
+    right_rook_position =choice([pos for pos in open_positions if pos > king_position])
+    row[right_rook_position] = 'R'
+
+    # Fill remaining positions with queen and knights
+    remaining_positions = [i for i in range(8) if row[i] == '']
+    pieces = ['Q', 'N', 'N']
+    shuffle(pieces)
+    for pos, piece in zip(remaining_positions, pieces):
+        row[pos] = piece
+
+    return row
+
+# Shuffle both rows in the same way for a Fischer Random Chess game
+fischer_row = shuffle_fischer_row()
 def choose_game(board):
     global screen_width, screen_height
 
@@ -35,7 +67,9 @@ def choose_game(board):
     Button("Blitz", button_x + button_width + 40, button_y + 2 * (button_height + button_margin), button_width / 2, button_height),
     Button("Ferry", button_x + button_width + 40 + button_width / 2 + button_margin, button_y + 2 * (button_height + button_margin), button_width / 2, button_height),
     Button("Black pieces / AI_hard", button_x, button_y + 5 * button_height + 2 * button_margin, button_width, button_height),
-    Button("White pieces / AI_hard", button_x, button_y + 6 * button_height + 3 * button_margin, button_width, button_height)
+    Button("White pieces / AI_hard", button_x, button_y + 6 * button_height + 3 * button_margin, button_width, button_height),
+    Button("King of the Hill",button_x + button_width + 40, button_y + 4 * button_height, button_width, button_height)
+
 ]
 
 
@@ -80,7 +114,8 @@ def choose_game(board):
                     Button("Blitz", button_x + button_width + 40, button_y + 2 * (button_height + button_margin), button_width / 2, button_height),
                     Button("Ferry", button_x + button_width + 40 + button_width / 2 + button_margin, button_y + 2 * (button_height + button_margin), button_width / 2, button_height),
                     Button("Black pieces / AI_hard", button_x, button_y + 5 * button_height + 2 * button_margin, button_width, button_height),
-                    Button("White pieces / AI_hard", button_x, button_y + 6 * button_height + 3 * button_margin, button_width, button_height)
+                    Button("White pieces / AI_hard", button_x, button_y + 6 * button_height + 3 * button_margin, button_width, button_height),
+                    Button("King of the Hill",button_x + 2 * button_width, button_y + 4 * button_height, button_width, button_height)
                 ]
                 print(f"Window resized to {event.w}x{event.h}")
             if event.type == pygame.MOUSEBUTTONDOWN:
@@ -106,13 +141,19 @@ def choose_game(board):
                     board.game.player = True
                     board.game.white = True
                     board.game.hard = True
-
+                    
                 elif buttons[2].is_clicked(event):
                     first_choosing = False
                     board.game.one_v_one = True
                 elif buttons[3].is_clicked(event):
-                    shuffle(board.game.chess_board[0])
-                    shuffle(board.game.chess_board[7])
+                    first_choosing = False
+                    fischer_row = shuffle_fischer_row()
+                    board.game.fisher = True
+                    board.game.chess_board[7] = (['w'+fischer_row[i] for i in range(8)])
+                    board.game.chess_board[0] = ['b'+fischer_row[i] for i in range(8)]
+                    rooks = board.game.find_rook_positions()
+                    
+                    board.game.rook_pos = [rooks[1],rooks[0],rooks[0],rooks[1]]
                 elif buttons[4].is_clicked(event):
                     second_choosing = False
                     board.game.time_reg(600, 600)
@@ -144,7 +185,10 @@ def choose_game(board):
                     board.game.chess_board[7][6] = 'wC'
                     board.game.chess_board[0][3] = 'bM'
                     board.game.chess_board[7][3] = 'wM'
-
+                elif buttons[10].is_clicked(event) :
+                    first_choosing = False
+                    board.game.one_v_one = True
+                    board.game.king_of_the_hill = True
 
                     
 
