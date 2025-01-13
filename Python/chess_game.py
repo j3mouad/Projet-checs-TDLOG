@@ -288,7 +288,6 @@ class ChessGame:
             
             if start_piece[0] == 'b' :
                 if mx == 2 and my == 0 and self.castle[3]:
-                    print("ezffe")
                     return True
                 if mx == 6 and my == 0 and self.castle[2]:
                     return True
