@@ -4,6 +4,16 @@ import sys
 from config import *
 
 def Promotion_screen(game,color) :
+    
+    """Displays the promotion screen allowing the player to choose a piece for pawn promotion.
+
+    Args:
+    game (ChessGame): The current game instance.
+    color (str): The color of the player choosing the promotion ('white' or 'black').
+
+    Returns:
+    str: The type of piece selected for promotion ('Queen', 'Bishop', 'Knight', or 'Rook').
+    """
     pygame.init()
     screen = game.screen
     width, height = screen.get_size()

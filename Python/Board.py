@@ -27,11 +27,12 @@ def find_king_position(chess_board, color):
     return None
 class Board:
     def __init__(self, game,screen):
+        """Initializes a chess board with game data, screen size, and other properties.
 
+        Parameters:
+        game (Game): The game instance containing the game state.
+        screen (pygame.Surface): The surface for rendering the game."""
 
-        # Initial screen width and height
-
-        # Create a resizable window
         self.screen = screen
         pygame.display.set_caption("Chess")
         self.screen = screen
@@ -126,7 +127,13 @@ class Board:
         
 
     def handle_add_time_button(self,event):
-        # Draw the button
+        
+        """Adds 5 seconds to the current player's time when the 'Add Time' button is clicked, 
+        ensuring a cooldown period between clicks.
+
+        Parameters:
+        event (pygame.event): The event triggered by the button click.
+        """
         current_time = time.time()
         if self.add_time_button.is_clicked(event) and current_time - self.last_click_time >= self.cooldown:
             click_sound_add_time_button.play()
@@ -247,9 +254,15 @@ class Board:
             # Add a short delay for smooth transition
             pygame.time.delay(100)
 
-
     def update_timers(self):
+        """
+        Updates the timers for both players based on the elapsed time since the last update.
 
+        Modifies:
+        - self.game.white_time (int): Decreases the white player's time.
+        - self.game.black_time (int): Decreases the black player's time.
+        - self.game.last_time_update (int): Updates the last time the timer was checked.
+        """
         current_time = pygame.time.get_ticks()
 
         elapsed_time = (current_time - self.game.last_time_update) // 1000
@@ -319,6 +332,7 @@ class Board:
             pygame.draw.rect(self.screen, highlight_color, pygame.Rect(x * self.x_square_size, y * self.y_square_size, self.x_square_size, self.y_square_size))
             pygame.draw.rect(self.screen, highlight_color, pygame.Rect(mx * self.x_square_size, my * self.y_square_size, self.x_square_size, self.y_square_size))
     def update_moves(self) :
+        """updates all moves"""
         self.game.castling()
         self.game.all_moves()
         self.game.change_player()
@@ -326,7 +340,11 @@ class Board:
         self.game.all_moves()
         self.game.change_player()
     def draw_score(self) :
-         
+    
+        """Draws the score button on the screen with the current score displayed.
+
+        Creates and draws a button with the current score at a specific position.
+        """
         self.score_button = Button(
             text="score : " + str(self.score),
             x=self.screen_width//2 + 4*self.x_square_size,
@@ -337,9 +355,16 @@ class Board:
 
         # Draw the button
         self.score_button.draw(self.screen)
+
     def update_score(self) :
+        """Updates the score by evaluating the current state of the game.
+        Modifies:
+        - self.score (int): The current score based on the game state."""
         self.score = evaluate(self.game,{})
     def update_screen(self) :
+        """Updates the screen to reflect the current game screen.
+         Modifies:
+        - self.game.screen: Sets the current screen to the updated screen."""
         self.game.screen= self.screen
     def run(self):
         """

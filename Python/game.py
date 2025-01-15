@@ -10,6 +10,7 @@ pygame.init()
 
 # Main game loop
 def run() :
+    """Main game loop to initialize and run the chess game."""
     screen = pygame.display.set_mode((screen_width, screen_height), pygame.RESIZABLE)
     pygame.display.set_caption("Chess")
     # Draw and update the chessboard

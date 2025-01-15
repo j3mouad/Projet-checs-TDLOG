@@ -1,4 +1,5 @@
 # config.py
+"""This file is only used for writing constants we need after that."""
 import pygame
 pygame.init()
 # Screen dimensions

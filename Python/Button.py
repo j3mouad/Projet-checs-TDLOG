@@ -5,12 +5,10 @@ from config import *
 # Initialize Pygame
 pygame.init()
 
-# Screen dimensions
-# Fonts
-
-# Button class
 class Button:
     def __init__(self, text, x, y, width, height, image_path=None,color = grey):
+        """Initialize the Button with text, position, size, optional image, and color."""
+
         self.text = text
         self.rect = pygame.Rect(x, y, width, height)
         self.color = color
@@ -22,6 +20,7 @@ class Button:
             self.image = None
 
     def draw(self, screen,size = 20):
+        """Draw the button on the screen with optional text and image."""
         mouse_pos = pygame.mouse.get_pos()
         if self.rect.collidepoint(mouse_pos):
             pygame.draw.rect(screen, self.hover_color, self.rect)
@@ -40,6 +39,7 @@ class Button:
         screen.blit(text_surface, text_rect)
 
     def is_clicked(self, event):
+        """Check if the button is clicked."""
         if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
             return self.rect.collidepoint(event.pos)
         return False
