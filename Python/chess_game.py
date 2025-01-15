@@ -18,6 +18,41 @@ pygame.init()
 
 class ChessGame:
     def __init__(self,screen):
+        
+        """Represents a chess game, managing the board state, player turns, time tracking, and game logic.
+
+        Attributes:
+        screen (pygame.Surface): The screen to render the game.
+        chess_board (np.array): A 2D array representing the chess board with pieces.
+        chess_board_squares (np.array): A 2D array of square labels for the chess board.
+        list_of_boards (list): A list of previous board states.
+        list_of_times (list): A list of the elapsed time for both players.
+        list_of_last_moves (list): A list of the last moves made for each turn.
+        list_of_king_check (list): A list of king check states for both players.
+        list_of_rooks (list): A list representing rook movement history.
+        list_of_castles (list): A list representing castle movement history.
+        list_of_king_moves (list): A list representing king movement history.
+        list_of_passant (list): A list indicating if en passant is available.
+        turn (str): The current player's turn ('white' or 'black').
+        player (bool): The player's identity (True for white, False for black).
+        winner (str or None): The winner of the game ('white' or 'black'), or None if the game is ongoing.
+        white_time (int): The remaining time for the white player.
+        black_time (int): The remaining time for the black player.
+        running (bool): A flag indicating if the game is still running.
+        classic (bool): A flag indicating if the game follows classic chess rules.
+        selected_piece (list): The coordinates of the selected piece.
+        pion_passant (bool): A flag indicating if en passant is active.
+        x_king, y_king (int): The coordinates of the kings on the board.
+        white_moves (dict): A dictionary storing possible moves for the white player.
+        black_moves (dict): A dictionary storing possible moves for the black player.
+        rook_moved (list): A list indicating whether the rooks have moved.
+        castle (list): A list indicating whether castling is possible for each side.
+        hard (bool): A flag indicating if the game difficulty is set to hard.
+        flipped (bool): A flag indicating if the board is flipped.
+        white_king_position, black_king_position (tuple): The positions of the white and black kings.
+        rook_pos (list): The positions of the rooks.
+        king_of_the_hill (bool): A flag indicating if the King of the Hill rule is active."""
+    
         self.screen = screen
         self.chess_board = np.array([
             ['bR', 'bN', 'bB', 'bQ', 'bK', 'bB', 'bN', 'bR'],
@@ -88,7 +123,6 @@ class ChessGame:
         self.black_king_position = None
         self.rook_pos = [7,0,0,7]
         self.king_of_the_hill = False
-    ##########################################First functions manage graphcis#############################################
     def time_reg(self,white_time,black_time):
         self.white_time=white_time
         self.black_time=black_time
@@ -369,9 +403,6 @@ class ChessGame:
                     self.rook_moved[2] = 1
                 if (mx==7 and my == 0 ) :
                     self.rook_moved[3] = 1
-            
-
-        
         if (self.chess_board[my][mx][1]=='P' and abs(mx-x)==1 and self.pion_passant ) :
             self.chess_board[y+direction][x] = '--'
         self.pion_passant = False
@@ -387,15 +418,7 @@ class ChessGame:
 
             self.chess_board[y][x] = self.chess_board[y][x][0] + piece
             
-                    
-            
-        
-    def back_move_piece(self, start, final, piece): 
-        """Reverts a move to restore board state."""
-        mx, my = start
-        x, y = final 
-        self.chess_board[my][mx] = self.chess_board[y][x]
-        self.chess_board[y][x] = piece
+
     def is_king_in_check(self):
         """Checks if the player's king is in check."""
         color=self.turn[0]
@@ -539,7 +562,11 @@ class ChessGame:
             self.list_of_passant[l] = self.pion_passant  # Store the en passant status
             self.len_list_of_boards += 1  # Increment the board history counter
     def game_ends(self):
+        """Checks if the game has ended based on time, checkmate, stalemate, or specific game rules.
 
+        Returns:
+        int: -1 if Black wins, 1 if White wins, 0 for stalemate, or None if the game continues.
+        """
         if self.white_time <= 0:
             self.running = False
             pygame.time.delay(1000)
@@ -571,6 +598,12 @@ class ChessGame:
 
 
     def convert_to_chess_board(self):
+    
+        """Converts the internal chess board representation to a `chess.Board` object.
+
+        Returns:
+        chess.Board: A `chess.Board` object representing the current board state.
+        """
         board = chess.Board()
         board.clear()
         for row in range(8):
@@ -584,7 +617,13 @@ class ChessGame:
         return board
 
     def evaluate0(self):
-            # Use a chess engine to evaluate the position
+            
+            """Evaluates the current chess position using the Stockfish engine.
+
+            Returns:
+            float: The evaluation score for the position, positive for white advantage, 
+                negative for black advantage. Returns a large number if the engine crashes.
+            """
             stockfish_path = "/usr/games/stockfish"  # Replace with the correct path
             with chess.engine.SimpleEngine.popen_uci(stockfish_path) as engine:
                 board = self.convert_to_chess_board()
