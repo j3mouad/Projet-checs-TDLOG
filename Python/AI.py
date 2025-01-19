@@ -4,22 +4,6 @@ import os
 import sys
 import time
 from random import randint
-#Code explanation for Mouad
-
-#The first part is implementing the heuristics(evaluation function and how it works)
-#You should not really in depth how it works you could just copy past everything 
-#The second part includes minimax and AI    
-#it uses hashing to improve speed and avoid recalculations
-#Here is some explanation of how functions work,
-#game.all_moves() generate legal moves of a player 
-#you should also see my copy constructor
-#good luck for implementation
-#I used depth 2 for testing which is really bad 
-# note : depth should always be even (really important )
-#tell me how much depth can you reach in c++
-#if we could reach depth 6 then we could say we have an AI
-#if you have questions send them to me on whatsap
-# Set up directory if needed (adjust as necessary)
 
 
 # Positional tables for pieces
