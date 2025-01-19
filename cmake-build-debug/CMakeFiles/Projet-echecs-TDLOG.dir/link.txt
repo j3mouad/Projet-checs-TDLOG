@@ -1,1 +1,0 @@
-/usr/bin/c++ -g "CMakeFiles/Projet-echecs-TDLOG.dir/main.cpp.o" "CMakeFiles/Projet-echecs-TDLOG.dir/game.cpp.o" "CMakeFiles/Projet-echecs-TDLOG.dir/board.cpp.o" "CMakeFiles/Projet-echecs-TDLOG.dir/pieces.cpp.o" -o Projet-echecs-TDLOG  /usr/lib/x86_64-linux-gnu/libpython3.10.so

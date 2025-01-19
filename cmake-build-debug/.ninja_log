@@ -1,7 +1,0 @@
-# ninja log v6
-4	1922	1732865553569408798	CMakeFiles/Projet-echecs-TDLOG.dir/board.cpp.o	40902129115b8cd8
-2353	2558	1732865555917402863	Projet-echecs-TDLOG	27e3d6c31b56fbc8
-3	1881	1732865553567408803	CMakeFiles/Projet-echecs-TDLOG.dir/game.cpp.o	41b339dcb1ed6efe
-1263	2353	1732865554828405616	CMakeFiles/Projet-echecs-TDLOG.dir/pieces.cpp.o	56fc4fac467423f2
-2	1263	1732865553566408806	CMakeFiles/Projet-echecs-TDLOG.dir/main.cpp.o	1137d01e900a316
-2	1398	1732867935167519877	build.ninja	21fbc32fddde0883
