@@ -20,10 +20,7 @@ from random import randint
 #if we could reach depth 6 then we could say we have an AI
 #if you have questions send them to me on whatsap
 # Set up directory if needed (adjust as necessary)
-new_dir = '/home/hassene/Desktop/Projet-echecs-TDLOG/build'
-os.chdir(new_dir)
-if new_dir not in sys.path:
-    sys.path.append(new_dir)
+
 
 # Positional tables for pieces
 PAWN_TABLE = np.array([
@@ -414,8 +411,8 @@ def AI_hard(game) :
             score = copy_game.evaluate0()
             moves_scores.append((score, (start_pos, end_pos)))
 
-
-    moves_scores.sort(reverse=game.turn=='white', key=lambda x: x[0])
+    
+    moves_scores.sort(reverse=False, key=lambda x: x[0])
 
     # Return the move with the best score
     print(moves_scores)

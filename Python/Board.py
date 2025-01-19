@@ -15,10 +15,16 @@ pygame.init()
 from numba import njit
 
 def find_king_position(chess_board, color):
+
+    """ Args:
+            chess_board (list of list of str): A 2D list representing the chess board.
+            color (str): The color of the king to find ('white' or 'black').
+
+        Returns:
+            tuple: A tuple (x, y) representing the position of the king on the board.
+                   Returns None if the king is not found.
     """
-    Returns the position (x, y) of the king of the specified color.
-    Searches the chess board for the king piece.
-    """
+
     for x in range(8):
         for y in range(8):
             piece = chess_board[y][x]
@@ -66,7 +72,33 @@ class Board:
 
     def draw_move(self):
         """
-        Animates the movement of a chess piece on the board.
+            This method animates the movement of a chess piece from its original 
+            position to its new position based on the last move made in the game. 
+            The animation is done by interpolating the piece's position in small 
+            steps and redrawing the board and pieces at each step.
+
+            Preconditions:
+            - `self.game.last_move` is a tuple containing the starting and ending 
+              coordinates of the last move.
+            - `self.game.last_move_draw` is used to track the last move that was 
+              drawn to avoid redrawing the same move.
+            - `self.game.chess_board` is a 2D list representing the current state 
+              of the chess board.
+            - `pieces_images` is a dictionary mapping piece identifiers to their 
+              corresponding images.
+            - `self.x_square_size` and `self.y_square_size` are the dimensions of 
+              each square on the board.
+            - `self.screen` is the Pygame display surface.
+
+            Post conditions:
+            - The board and pieces are redrawn with the piece moved to its new 
+              position.
+            - The move animation is displayed on the screen.
+
+            Note:
+            - The method uses Pygame for rendering and animating the movement.
+            - The animation consists of 5 steps, with a short delay between each 
+              step to create a smooth transition.
         """
         if (self.game.last_move and self.game.last_move != self.game.last_move_draw):
             self.game.last_move_draw = self.game.last_move
@@ -88,9 +120,14 @@ class Board:
 
     def draw_pieces(self, mx=-1, my=-1):
         """
-        Draws the chess pieces on the board.
-        """
+            Parameters:
+            mx (int): The x-coordinate of the mouse position. Default is -1.
+            my (int): The y-coordinate of the mouse position. Default is -1.
 
+            This function iterates over the chess board and draws each piece on the screen.
+            If a piece is located at the mouse position (mx, my), it will not be drawn.
+            The pieces are resized to fit the square size of the board.
+        """
         font = pygame.font.Font(None, 12)
         for row in range(8):
             for col in range(8):
@@ -375,7 +412,6 @@ class Board:
         self.game.black_king_position = find_king_position(self.game.chess_board,'black')
         
         for event in pygame.event.get():
-            print(self.screen_width,"  ",self.screen_height)
             self.handle_add_time_button(event)
             self.handle_back_button_click( event)
             if (self.game.player) :

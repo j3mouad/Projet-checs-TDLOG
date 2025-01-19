@@ -129,10 +129,16 @@ class ChessGame:
     #########################################From here functions will manage logic of the game############################################
 
     def find_king_position(self, color):
+        """Find the position of the king on the chess board.
+
+        Args:
+            color (str): The color of the king to find ('white' or 'black').
+
+        Returns:
+            tuple: A tuple (x, y) representing the position of the king on the board,
+                   or None if the king is not found.
         """
-        Returns the position (x, y) of the king of the specified color.
-        Searches the chess board for the king piece.
-        """
+
         for x in range(8):
             for y in range(8):
                 piece = self.chess_board[y][x]
@@ -141,20 +147,55 @@ class ChessGame:
         return None
 
     def flip_board(self):
-        """Flip the chessboard upside down by reversing its rows."""
+        """
+        Flip the chessboard upside down by reversing its rows.
+
+        This method creates a new list representing the chessboard with its rows
+        reversed, effectively flipping the board upside down. The original 
+        chessboard is then updated with this flipped version.
+
+        Returns:
+            None
+        """
         # Create a new list of the chessboard by reversing the rows
         L = [[self.chess_board[i][j] for j in range(8)] for i in range(7, -1, -1)]
         # Update the chessboard with the flipped version
         self.chess_board = deepcopy(L)
 
     def change_player(self):
-        """Switch the current player from white to black or vice versa."""
+        """
+        Switch the current player from white to black or vice versa.
+
+        This method toggles the `turn` attribute between 'white' and 'black'.
+        If the current player is 'white', it changes to 'black', and if the 
+        current player is 'black', it changes to 'white'.
+        """
         if self.turn == 'white':
             self.turn = 'black'  # If current player is white, change to black
         else:
             self.turn = 'white'  # Otherwise, change to white
     def castling(self):
-        """Check and update castling availability for both players."""
+        """
+        Check and update castling availability for both players.
+        This method updates the castling rights for both white and black players based on the current state of the game.
+        It considers whether the kings or rooks have moved, whether the kings are in check, and whether the squares between
+        the kings and rooks are unoccupied and not under attack.
+        Castling rights are stored in the `self.castle` list:
+        - `self.castle[0]`: White king-side castling availability
+        - `self.castle[1]`: White queen-side castling availability
+        - `self.castle[2]`: Black queen-side castling availability
+        - `self.castle[3]`: Black king-side castling availability
+        The method performs the following steps:
+        1. Updates all possible moves for the current player.
+        2. Switches to the opponent and updates their possible moves.
+        3. Switches back to the original player.
+        4. Checks and updates castling rights for the white player.
+        5. Checks and updates castling rights for the black player.
+        Castling conditions:
+        - The king and the chosen rook must not have moved.
+        - There must be no pieces between the king and the chosen rook.
+        - The king must not be in check, and the squares the king passes over must not be under attack.
+        """
 
         self.all_moves()  # Update all moves for the current player
         self.change_player()  # Switch to the opponent
@@ -198,6 +239,13 @@ class ChessGame:
                     if not any((1, 0) in self.white_moves[key] or (2, 0) in self.white_moves[key] or (3, 0) in self.white_moves[key] for key in self.white_moves):
                         self.castle[3] = True
     def copy_game(self):
+        """
+        Create and return a deep copy of the current game state.
+        This method performs a deep copy of the ChessGame object, ensuring that all mutable attributes
+        are copied to prevent unintended modifications to the original game state.
+        Returns:
+            ChessGame: A new instance of ChessGame with the same state as the current game.
+        """
         """Create and return a deep copy of the current game state."""
         new_game = copy.copy(self)  # Shallow copy the ChessGame object itself
         
@@ -220,6 +268,29 @@ class ChessGame:
         return new_game
 
     def is_valid_move(self, start, end):
+        """
+        Check if a move from the start position to the end position is valid.
+        Parameters:
+        start (tuple): A tuple (x, y) representing the starting position on the chess board.
+        end (tuple): A tuple (mx, my) representing the ending position on the chess board.
+        Returns:
+        bool: True if the move is valid according to the rules of the piece being moved, False otherwise.
+        The function checks the validity of moves for different types of pieces:
+        - Pawn ('P'): Handles single and double steps, captures, and en passant.
+        - Rook ('R'): Handles horizontal and vertical moves.
+        - Wazir ('W'): Handles moves to any adjacent square.
+        - Ferz ('F'): Handles diagonal moves to adjacent squares.
+        - Mysterious ('M'): Randomly chooses between rook and queen-like moves.
+        - Knight ('N'): Handles L-shaped moves.
+        - Camel ('C'): Handles (3,1) and (1,3) moves.
+        - Bishop ('B'): Handles diagonal moves.
+        - King ('K'): Handles single square moves in any direction and castling.
+        - Queen ('Q'): Handles diagonal, horizontal, and vertical moves.
+        The function also ensures that:
+        - The piece belongs to the current player.
+        - The destination square is either empty or occupied by an opponent's piece.
+        - The path for pieces like rooks, bishops, and queens is not blocked.
+        """
         """Check if a move from the start position to the end position is valid."""
         x, y = start  # Current position
         mx, my = end  # Target position
@@ -340,21 +411,31 @@ class ChessGame:
 
 
     def get_possible_moves(self, x, y):
-        """Returns moves for the piece at (x, y) that don't put its king in check."""
+        """
+        Returns a list of possible moves for the piece at the given coordinates (x, y) that do not put its king in check.
+
+        Args:
+            x (int): The x-coordinate of the piece.
+            y (int): The y-coordinate of the piece.
+
+        Returns:
+            list of tuple: A list of tuples where each tuple represents a valid move (mx, my) for the piece.
+        """
         return [(mx, my) for mx in range(8) for my in range(8) if self.is_valid_move((x, y), (mx, my))]
 
-    def find_rook_positions(self):
-        """Find the positions of the rooks for both players."""
-        rooks = []
-        
-        # Loop through the board to find rook positions
-        for x in range(8):
-            if self.chess_board[7][x] == 'wR':  # White rooks on the 8th row (index 7)
-                rooks.append(x)
-            
-        return rooks
+
     def move_piece(self, start, x, y): 
-        """Moves the piece from start to (x, y). Handles en passant captures."""
+        """
+        Moves the piece from the start position to the target position (x, y).
+        This method handles special moves such as castling and en passant captures.
+        It also updates the state of the game, including the status of the kings and rooks.
+        Args:
+            start (tuple): A tuple (mx, my) representing the starting coordinates of the piece.
+            x (int): The x-coordinate of the target position.
+            y (int): The y-coordinate of the target position.
+        Returns:
+            None
+        """
         mx, my = start
         moving_piece = self.chess_board[my][mx]
         direction = -1 if self.turn == 'black' else 1
@@ -420,7 +501,14 @@ class ChessGame:
             
 
     def is_king_in_check(self):
-        """Checks if the player's king is in check."""
+        """
+        Checks if the current player's king is in check.
+        This method determines if the king of the player whose turn it is currently
+        is in check. It does so by checking if any of the opponent's pieces can move
+        to the king's position.
+        Returns:
+            bool: True if the king is in check or has been captured, False otherwise.
+        """
         color=self.turn[0]
         king_position = self.get_king_position()
         if not king_position:
@@ -444,7 +532,14 @@ class ChessGame:
 
         return False
     def simulate_move_and_check(self, start, end):
-        """Simulates a move and checks if it puts the player's king in check."""
+        """
+        Simulates a move on the chess board and checks if it puts the player's king in check.
+        Args:
+            start (tuple): The starting position of the piece (column, row).
+            end (tuple): The ending position of the piece (column, row).
+        Returns:
+            bool: True if the move does not put the player's king in check, False otherwise.
+        """
         copy_game = self.copy_game()
         piece = self.chess_board[start[1]][start[0]]
         target_piece = self.chess_board[end[1]][end[0]]
@@ -461,14 +556,41 @@ class ChessGame:
 
         return  not in_check
     def get_valid_moves(self, x_square, y_square):
-        """Returns a list of valid moves that do not put the player's own king in check."""
+        """
+        Get a list of valid moves for a piece at the given coordinates.
+
+        This method calculates all possible moves for the piece located at the 
+        specified (x_square, y_square) coordinates and filters out any moves 
+        that would put the player's own king in check.
+
+        Args:
+            x_square (int): The x-coordinate of the piece on the chessboard.
+            y_square (int): The y-coordinate of the piece on the chessboard.
+
+        Returns:
+            list: A list of valid moves, where each move is represented by a 
+                  tuple of coordinates (x, y).
+        """
         self.possible_moves = self.get_possible_moves(x_square, y_square)
         valid_moves = [move for move in self.possible_moves if self.simulate_move_and_check((x_square, y_square), move)]
         return valid_moves
 
     
     def get_king_position(self):
-        """Finds and returns the position of the king of the given color."""
+        """
+    Finds and returns the position of the current player's king on the chessboard.
+
+    Returns:
+        tuple: A tuple (x, y) representing the x-coordinate (column index) and y-coordinate (row index)
+               of the current player's king. Returns None if the king is not found on the board.
+
+    The function determines the color of the current player's pieces based on the `self.turn` attribute,
+    which indicates whose turn it is ('w' for white or 'b' for black). It then constructs the identifier
+    for the king of that color ('wK' for the white king or 'bK' for the black king). The function iterates
+    through the chessboard, which is represented as an 8x8 list, to find the square containing the king.
+    Once the king is located, its coordinates are returned as a tuple (x, y). If the king is not found,
+    the function returns None.
+    """
         color = self.turn[0]
         king = color + 'K'
         for y in range(8):
@@ -479,7 +601,24 @@ class ChessGame:
     
     
     def check(self, x_square, y_square):
-        """Checks if the move puts the opponent's king in check."""
+        """
+        Checks if the move at the given position puts the opponent's king in check.
+
+        Args:
+            x_square (int): The x-coordinate (column index) of the square from which the piece is moving.
+            y_square (int): The y-coordinate (row index) of the square from which the piece is moving.
+
+        Returns:
+            tuple: A tuple (x, y) representing the position of the opponent's king if it is in check.
+                Returns (-1, -1) if the move does not result in a check or if the square is empty.
+
+        The function first verifies if the selected square contains a piece. If the square is empty ('--'),
+        it returns (-1, -1). It then retrieves all valid moves for the piece at the given square. The color
+        of the opponent is determined based on the current player's turn, and the opponent's king's identifier
+        ('bK' for black king or 'wK' for white king) is set accordingly. The function iterates over the valid
+        moves, checking if any of them capture the opponent's king. If the king is found in the path of a move,
+        its position is returned. If no such move is found, the function returns (-1, -1).
+        """
         if (self.chess_board[y_square][x_square]=='--') :
             return (-1,-1)
         moves = self.get_valid_moves(x_square, y_square)
@@ -604,36 +743,51 @@ class ChessGame:
         Returns:
         chess.Board: A `chess.Board` object representing the current board state.
         """
+        game = self.copy_game()
         board = chess.Board()
+        if (game.turn=='black') :
+            game.flip_board()
         board.clear()
         for row in range(8):
             for col in range(8):
-                piece = self.chess_board[row][col]
+                piece = game.chess_board[row][col]
                 if piece != '--':
                     color = chess.WHITE if piece[0] == 'w' else chess.BLACK
                     piece_type = chess.Piece.from_symbol(piece[1].upper()).piece_type
                     square = chess.square(col, 7 - row)
                     board.set_piece_at(square, chess.Piece(piece_type, color))
         return board
-
     def evaluate0(self):
+        """Evaluates the current chess position using the Stockfish engine.
+
+        Returns:
+        float: The evaluation score for the position, positive for white advantage,
+            negative for black advantage. Returns a large number if the engine crashes.
+        """
+        stockfish_path = "/usr/games/stockfish"  # Replace with the correct path
+        with chess.engine.SimpleEngine.popen_uci(stockfish_path) as engine:
+            board = self.convert_to_chess_board()
+            print(board)
             
-            """Evaluates the current chess position using the Stockfish engine.
+            try:
+                result = engine.analyse(board, chess.engine.Limit(depth=9))
+            except chess.engine.EngineTerminatedError as e:
+                print(f"Engine crashed: {e}")
+                return 1e5  # Return a large score if the engine crashes
 
-            Returns:
-            float: The evaluation score for the position, positive for white advantage, 
-                negative for black advantage. Returns a large number if the engine crashes.
-            """
-            stockfish_path = "/usr/games/stockfish"  # Replace with the correct path
-            with chess.engine.SimpleEngine.popen_uci(stockfish_path) as engine:
-                board = self.convert_to_chess_board()
-                try:
-                    result = engine.analyse(board, chess.engine.Limit( depth=10))
-                except chess.engine.EngineTerminatedError as e:
-                    print(f"Engine crashed: {e}")
-                    return 1e5  # Or handle it differently
+            score = result["score"]
 
-                score = result["score"]
-                
-                # Convert PovScore to a float (positive for white, negative for black)
-                return score.white().score(mate_score=1e6) if score.is_mate() else score.white().score()
+            # Evaluate the score from the perspective of the player whose turn it is
+            if self.turn=='white':
+                # It's White's turn: Use White's perspective
+                print('white')
+                evaluation = score.white().score(mate_score=1e6) if score.is_mate() else score.white().score()
+            else:
+                # It's Black's turn: Use Black's perspective
+                print('black')
+                evaluation = score.black().score(mate_score=-1e6) if score.is_mate() else score.black().score()
+
+            print(f"Turn: {board.turn}, Evaluation: {evaluation}")
+            return evaluation
+
+

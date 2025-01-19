@@ -38,6 +38,21 @@ def shuffle_fischer_row():
 # Shuffle both rows in the same way for a Fischer Random Chess game
 fischer_row = shuffle_fischer_row()
 def choose_game(board):
+    """
+    Displays a screen where the user can select game options for a chess game.
+
+    Parameters:
+        board (object): An instance of the board containing game settings and state.
+
+    Returns:
+        tuple: Contains two integers representing the chosen time for white and black players in seconds.
+
+    The function initializes a Pygame window with buttons allowing the user to choose various game options, 
+    including player color, AI difficulty, game type (e.g., standard, Fischer Random, King of the Hill), 
+    and time controls (e.g., Rapid, Classic, Blitz). It handles screen resizing and button interactions 
+    to update the game settings accordingly.
+    """
+    
     global screen_width, screen_height
 
     window = pygame.display.set_mode((screen_width , screen_height), pygame.RESIZABLE)
@@ -94,7 +109,6 @@ def choose_game(board):
             elif event.type == pygame.VIDEORESIZE:
                 # Update the screen size
                 screen_width,screen_height = event.w,event.h
-                print("event.w,", event.w)
                 screen = pygame.display.set_mode((screen_width, screen_height), pygame.RESIZABLE)
                 background_image = pygame.transform.scale(background_image, (screen_width , screen_height))
                  # Redéfinir les boutons avec les nouvelles dimensions
@@ -115,7 +129,7 @@ def choose_game(board):
                     Button("Ferry", button_x + button_width + 40 + button_width / 2 + button_margin, button_y + 2 * (button_height + button_margin), button_width / 2, button_height),
                     Button("Black pieces / AI_hard", button_x, button_y + 5 * button_height + 2 * button_margin, button_width, button_height),
                     Button("White pieces / AI_hard", button_x, button_y + 6 * button_height + 3 * button_margin, button_width, button_height),
-                    Button("King of the Hill",button_x + 2 * button_width, button_y + 4 * button_height, button_width, button_height)
+                    Button("King of the Hill",button_x +  button_width + 20, button_y + 4 * button_height, button_width, button_height)
                 ]
                 print(f"Window resized to {event.w}x{event.h}")
             if event.type == pygame.MOUSEBUTTONDOWN:
