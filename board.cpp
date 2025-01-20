@@ -123,6 +123,7 @@ Board::Board(const Board &other)
     Hashmap = other.Hashmap;
     isMinimaxCalculated = other.isMinimaxCalculated;
     Minimaxscore = other.Minimaxscore;
+    depthMap = other.depthMap;
 
     for (int idx1 = 0; idx1 < 8; idx1++)
     {
@@ -415,7 +416,7 @@ bool Board::movePiece(Point Position1, Point Position2, bool changeCastling)
     setPiece(Position2, piece);
     return winningTheGame;
 }
-bool Board::movePieceoff(Point Position1, Point Position2)
+bool Board::movePieceoff(Point Position1, Point Position2, bool IsPlayer)
 {
     bool winningTheGame = false;
     Piece piece = getPiece(Position1);
@@ -430,6 +431,12 @@ bool Board::movePieceoff(Point Position1, Point Position2)
         winningTheGame = true;
     }
     setPiece(Position2, piece);
+    if (IsPlayer){
+        choosePawnHuman(Position2);
+    } else{
+        choosePawnAi(Position2);
+    }
+    string turn = getTurn();
     changeTurn();
     updateBoard();
     return winningTheGame;
@@ -471,6 +478,25 @@ void Board::updatecastling(Piece piece, Point Position1, Point Position2)
             LeftCastleBlack = false;
         }
         else if (Position1.getX() == 7 && Position1.getY() == 7)
+        {
+            RightCastleBlack = false;
+        }
+    }
+
+    if(getPiece(Position2).getName() == "Rook"){
+        if (Position2.getX() == 7 && Position2.getY() == 0)
+        {
+            RightCastleWhite = false;
+        }
+        else if (Position2.getX() == 0 && Position2.getY() == 0)
+        {
+            LeftCastleWhite = false;
+        }
+        else if (Position2.getX() == 0 && Position2.getY() == 7)
+        {
+            LeftCastleBlack = false;
+        }
+        else if (Position2.getX() == 7 && Position2.getY() == 7)
         {
             RightCastleBlack = false;
         }
@@ -562,10 +588,10 @@ void Board::addCastleMoves(vector<Point> &trueMoves, Point position)
                 if (getPiece(Point(x_castle + 1, y_castle)).getName() == "EmptyPlace" && getPiece(Point(x_castle + 2, y_castle)).getName() == "EmptyPlace")
                 {
                     movePiece(position, Point(x_castle + 1, y_castle));
-                    if (!(isInCheck()))
+                    if (!(isInCheckinternal()))
                     {
                         movePiece(Point(x_castle + 1, y_castle), Point(x_castle + 2, y_castle));
-                        if (!(isInCheck()))
+                        if (!(isInCheckinternal()))
                         {
                             trueMoves.push_back(Point(x_castle + 2, y_castle));
                         }
@@ -582,10 +608,10 @@ void Board::addCastleMoves(vector<Point> &trueMoves, Point position)
                 if (getPiece(Point(x_castle - 1, y_castle)).getName() == "EmptyPlace" && getPiece(Point(x_castle - 2, y_castle)).getName() == "EmptyPlace" && getPiece(Point(x_castle - 3, y_castle)).getName() == "EmptyPlace")
                 {
                     movePiece(position, Point(x_castle - 1, y_castle));
-                    if (!(isInCheck()))
+                    if (!(isInCheckinternal()))
                     {
                         movePiece(Point(x_castle - 1, y_castle), Point(x_castle - 2, y_castle));
-                        if (!(isInCheck()))
+                        if (!(isInCheckinternal()))
                         {
                             trueMoves.push_back(Point(x_castle - 2, y_castle));
                         }
@@ -605,10 +631,10 @@ void Board::addCastleMoves(vector<Point> &trueMoves, Point position)
                 if (getPiece(Point(x_castle + 1, y_castle)).getName() == "EmptyPlace" && getPiece(Point(x_castle + 2, y_castle)).getName() == "EmptyPlace")
                 {
                     movePiece(position, Point(x_castle + 1, y_castle));
-                    if (!(isInCheck()))
+                    if (!(isInCheckinternal()))
                     {
                         movePiece(Point(x_castle + 1, y_castle), Point(x_castle + 2, y_castle));
-                        if (!(isInCheck()))
+                        if (!(isInCheckinternal()))
                         {
                             trueMoves.push_back(Point(x_castle + 2, y_castle));
                         }
@@ -625,10 +651,10 @@ void Board::addCastleMoves(vector<Point> &trueMoves, Point position)
                 if (getPiece(Point(x_castle - 1, y_castle)).getName() == "EmptyPlace" && getPiece(Point(x_castle - 2, y_castle)).getName() == "EmptyPlace" && getPiece(Point(x_castle - 3, y_castle)).getName() == "EmptyPlace")
                 {
                     movePiece(position, Point(x_castle - 1, y_castle));
-                    if (!isInCheck())
+                    if (!isInCheckinternal())
                     {
                         movePiece(Point(x_castle - 1, y_castle), Point(x_castle - 2, y_castle));
-                        if (!isInCheck())
+                        if (!isInCheckinternal())
                         {
                             trueMoves.push_back(Point(x_castle - 2, y_castle));
                         }
@@ -753,6 +779,7 @@ string Board::hashBoard(){
     } else {
         hashedBoard += "F";
     }
+    hashedBoard += to_string(turn == "white");
     hashedBoard += to_string(enPassant.getX());
     hashedBoard += to_string(enPassant.getY());
     return hashedBoard;
@@ -1024,6 +1051,63 @@ int Board::evaluateGameinternal()
                       endGameScore * endGameWeight);
 
     return totalScore;
+}
+
+void Board::choosePawnHuman(Point point){
+    int idx_piece_chosen;
+    if ((getPiece(point).getName() == "Pawn") && (point.getY()==0 || point.getY()==7)){
+            cout << "choose a piece to change your pawn into" << endl;
+            cout << "0: Queen    1: Rook    2: Bishop    3: Knight" << endl;
+            while(true){
+                cin >> idx_piece_chosen;
+                if (idx_piece_chosen>=0 && idx_piece_chosen<4){
+                    break;
+                }
+                cout << "choose a valid index between 0 and 3" << endl;
+            }
+            if (getTurn() == "white"){
+                switch(idx_piece_chosen){
+                    case 0:
+                        setPiece(point,WhiteQueen);
+                        break;
+                    case 1:
+                        setPiece(point,WhiteRook);
+                        break;
+                    case 2:
+                        setPiece(point,WhiteBishop);
+                        break;
+                    case 3:
+                        setPiece(point,WhiteKnight);
+                        break;
+                }
+            }
+            if (getTurn() == "black"){
+                switch(idx_piece_chosen){
+                    case 0:
+                        setPiece(point,BlackQueen);
+                        break;
+                    case 1:
+                        setPiece(point,BlackRook);
+                        break;
+                    case 2:
+                        setPiece(point,BlackBishop);
+                        break;
+                    case 3:
+                        setPiece(point,BlackKnight);
+                        break;
+                }
+            }
+        }
+}
+
+void Board::choosePawnAi(Point point){
+    if ((getPiece(point).getName() == "Pawn") && (point.getY()==0 || point.getY()==7)){
+        if (getTurn() == "white"){
+                setPiece(point,WhiteQueen);
+        } else{
+                setPiece(point,BlackQueen);
+        }
+    }
 }
 
 // lengthwise

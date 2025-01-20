@@ -53,3 +53,13 @@ void choosePawnHuman(Board &gameBoard,Point point){
         }
 }
 
+void choosePawnAi(Board &gameBoard,Point point){
+    if ((gameBoard.getPiece(point).getName() == "Pawn") && (point.getY()==0 || point.getY()==7)){
+        if (gameBoard.getTurn() == "white"){
+                gameBoard.setPiece(point,WhiteQueen);
+        } else{
+                gameBoard.setPiece(point,BlackQueen);
+        }
+    }
+}
+

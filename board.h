@@ -28,6 +28,8 @@ class Board{
         bool isMinimaxCalculated = false;
         int Minimaxscore = 0;
 
+        map<int,int> depthMap;
+
 
         map<string,Board>* Hashmap = nullptr;
         
@@ -86,6 +88,17 @@ class Board{
         string getTurn() const {return turn;}
         void changeTurn();
 
+        bool isMinimaxDepthStored(int depth){
+            if(depthMap.find(depth) == depthMap.end()){
+                return false;
+            }
+            return true;
+        }
+
+        int getMinimaxDepth(int depth){
+            return depthMap[depth];
+        }
+
         string gameOver();
 
         map<Point,vector<Point>> getMoves(){return moves;}
@@ -97,9 +110,12 @@ class Board{
         int evaluateEndGameFeatures(){return 50*isKingActive("white") - 50*isKingActive("Black");}
         int centerControl();
 
+        void choosePawnHuman(Point point);
+        void choosePawnAi(Point point);
+
 
         
-        bool movePieceoff(Point Position1, Point Position2);
+        bool movePieceoff(Point Position1, Point Position2, bool IsPlayer = true);
         void show(); /* temporary */
 
 

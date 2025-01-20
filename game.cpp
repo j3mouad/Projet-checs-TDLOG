@@ -15,13 +15,11 @@ void Game::play(){
         cout << "size of the hashmap is : "<< Hashmap.size() << endl;
         clearWindow();
         fillRect(0,480,480,100,RED);
-        cout << 1 << endl;
         if (!gameBoard.isBoardCalculated()){
             gameBoard.updateBoard();
         }
         MapOfMoves = gameBoard.getMoves();
         gameBoard.show();
-        cout << "choose a piece to find the relevant moves" << endl;
         
         if(gameBoard.gameOver() != "NONE"){
             gameBoard.changeTurn();
@@ -36,7 +34,6 @@ void Game::play(){
         }
         x_chosen = x_chosen/60;
         y_chosen = (480-y_chosen-1)/60;
-        cout << "x : " << x_chosen << " ; y : " << y_chosen << endl; 
         vector<Point> vect = MapOfMoves[Point(x_chosen,y_chosen)];
         cout << "the piece is : " << gameBoard.getPiece(Point(x_chosen,y_chosen)).getName() <<" and its color is :" << gameBoard.getPiece(Point(x_chosen,y_chosen)).getColor()<< endl;
         if(vect.size() == 0){
@@ -48,10 +45,8 @@ void Game::play(){
             graphicalMoves[point] = idx;
         }
         for(int idx = 0; idx < vect.size(); idx++){
-            cout<< vect[idx].getX() << ":" << vect[idx].getY() << endl;
             fillRect(vect[idx].getX()*60,480-(vect[idx].getY()+1)*60,60,60,Color(120,120,120));
         }
-        cout << "choose the piece to move" << endl;
         getMouse(x_chosen_2,y_chosen_2);
         x_chosen_2 = x_chosen_2/60;
         y_chosen_2 = (480-y_chosen_2-1)/60;
@@ -63,7 +58,6 @@ void Game::play(){
             cout << "game over" << endl;
             game_over = true;
         }
-        choosePawnHuman(gameBoard,vect[idx_chosen]);
         cout << "move made" << endl;
         moveNumber++;
         gameBoards[moveNumber] = gameBoard;
@@ -280,6 +274,7 @@ void Game::play_against_ai(){
     int x_chosen_2, y_chosen_2;
     map<Point,vector<Point>> MapOfMoves;
     while (!game_over){
+        cout << gameBoard.isBoardCalculated() << endl;
         cout << "size of hashmap is : " << Hashmap.size() << endl;
         clearWindow();
         fillRect(0,480,480,100,RED);
@@ -316,10 +311,8 @@ void Game::play_against_ai(){
             graphicalMoves[point] = idx;
         }
         for(int idx = 0; idx < vect.size(); idx++){
-            cout<< vect[idx].getX() << ":" << vect[idx].getY() << endl;
             fillRect(vect[idx].getX()*60,480-(vect[idx].getY()+1)*60,60,60,Color(120,120,120));
         }
-        cout << "choose the piece to move" << endl;
         getMouse(x_chosen_2,y_chosen_2);
         x_chosen_2 = x_chosen_2/60;
         y_chosen_2 = (480-y_chosen_2-1)/60;
@@ -331,8 +324,8 @@ void Game::play_against_ai(){
             cout << "game over" << endl;
             game_over = true;
         }
-        choosePawnHuman(gameBoard,vect[idx_chosen]);
         cout << "move made" << endl;
+        cout << gameBoard.isBoardCalculated() << endl;
         moveNumber++;
         gameBoards[moveNumber] = gameBoard;
         cout << gameBoard.getTurn() << endl;
@@ -340,8 +333,8 @@ void Game::play_against_ai(){
             cout << gameBoard.gameOver() << endl;
             break;
         };
-        pair<Point,Point> bestMove = getMinimaxMove(2);
-        gameBoard.movePieceoff(bestMove.first,bestMove.second);
+        pair<Point,Point> bestMove = getMinimaxMove(4);
+        gameBoard.movePieceoff(bestMove.first,bestMove.second,false);
         moveNumber++;
         gameBoards[moveNumber] = gameBoard;
         
@@ -350,10 +343,6 @@ void Game::play_against_ai(){
 
 
 int Game::minimax(int depth, int alpha, int beta){
-    if(gameBoard.isMinimaxCalc()){
-        cout << "1   :::::::   1" << endl;
-        return gameBoard.ScoreMinimax();
-    }
     if (!gameBoard.isBoardCalculated()){
             gameBoard.updateBoard();
     }
@@ -363,16 +352,23 @@ int Game::minimax(int depth, int alpha, int beta){
     if (gameBoard.gameOver() != "NONE"){
         if(gameBoard.gameOver() == "white won"){
             return INT_MAX;
-        } else {return -INT_MAX;}
+        } else if(gameBoard.gameOver() == "black won"){
+            return -INT_MAX;
+        } else {
+            return 0;
+        }
+    }
+    if(gameBoard.isMinimaxDepthStored(depth)){
+        return gameBoard.getMinimaxDepth(depth);
     }
     if(gameBoard.getTurn() == "white"){
         int maxEval = - INT_MAX;
         for(const auto& pair : gameBoard.getMoves()){
             for (const auto& point : pair.second){
-                gameBoard.movePieceoff(pair.first,point);
+                gameBoard.movePieceoff(pair.first,point,false);
                 moveNumber++;
                 gameBoards[moveNumber] = gameBoard;
-                int eval = minimax(depth -1,false);
+                int eval = minimax(depth -1,alpha,beta);
                 undo();
                 maxEval = max(maxEval,eval);
                 alpha = max(alpha,eval);
@@ -385,15 +381,16 @@ int Game::minimax(int depth, int alpha, int beta){
             }
         }
         gameBoard.setMinimaxScore(maxEval);
+        gameBoards[moveNumber].setMinimaxScore(maxEval);
         return maxEval;
     } else {
         int minEval = INT_MAX;
         for(const auto& pair : gameBoard.getMoves()){
             for (const auto& point : pair.second){
-                gameBoard.movePieceoff(pair.first,point);
+                gameBoard.movePieceoff(pair.first,point,false);
                 moveNumber++;
                 gameBoards[moveNumber] = gameBoard;
-                int eval = minimax(depth -1,false);
+                int eval = minimax(depth -1,alpha,beta);
                 undo();
                 minEval = min(minEval,eval);
                 beta = min(beta,eval);
@@ -406,6 +403,7 @@ int Game::minimax(int depth, int alpha, int beta){
             }
         }
         gameBoard.setMinimaxScore(minEval);
+        gameBoards[moveNumber].setMinimaxScore(minEval);
         return minEval;
     }
 }
@@ -428,15 +426,13 @@ pair<Point,Point> Game::getMinimaxMove(int depth){
         for(const auto& pair : moves){
             for (const auto& point : pair.second){
                 move = make_pair(pair.first,point);
-                cout << pair.first << "," << point << endl;
-                gameBoard.movePieceoff(move.first,move.second);
+                gameBoard.movePieceoff(move.first,move.second,false);
                 moveNumber++;
-                cout <<"score :"<<score << endl;
                 score = minimax(depth-1);
                 cout << score << endl;
                 gameBoards[moveNumber] = gameBoard;
                 undo();
-                if (score > bestScore){
+                if (score < bestScore){
                     bestMove = move;
                     bestScore = score;
                 }
@@ -448,13 +444,18 @@ pair<Point,Point> Game::getMinimaxMove(int depth){
             for (const auto& point : pair.second){
                 move = make_pair(pair.first,point);
                 cout << pair.first << "," << point << endl;
-                gameBoard.movePieceoff(move.first,move.second);
+                gameBoard.movePieceoff(move.first,move.second,false);
                 moveNumber++;
-                score = minimax(depth-1);
+                if(gameBoard.isMinimaxCalc()){
+                    cout << "1   :::::::   1" << endl;
+                    score = gameBoard.ScoreMinimax();
+                } else{
+                    score = minimax(depth-1);
+                }
                 cout <<"score :"<<score << endl;
                 gameBoards[moveNumber] = gameBoard;
                 undo();
-                if (score < bestScore){
+                if (score > bestScore){
                     bestMove = move;
                     bestScore = score;
                 }
