@@ -1,4 +1,3 @@
-/home/hassene/Desktop/Projet-echecs-TDLOG/build/CMakeFiles/AI.dir
-/home/hassene/Desktop/Projet-echecs-TDLOG/build/CMakeFiles/Projet-echecs-TDLOG.dir
-/home/hassene/Desktop/Projet-echecs-TDLOG/build/CMakeFiles/edit_cache.dir
-/home/hassene/Desktop/Projet-echecs-TDLOG/build/CMakeFiles/rebuild_cache.dir
+C:/Users/jmoua/OneDrive/Documents/GitHub/Projet-checs-TDLOG/build/CMakeFiles/Projet-echecs-TDLOG.dir
+C:/Users/jmoua/OneDrive/Documents/GitHub/Projet-checs-TDLOG/build/CMakeFiles/edit_cache.dir
+C:/Users/jmoua/OneDrive/Documents/GitHub/Projet-checs-TDLOG/build/CMakeFiles/rebuild_cache.dir

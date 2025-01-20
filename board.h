@@ -1,9 +1,10 @@
+#pragma once
 #include "pieces.h"
 #include <vector>
 
 #include <random>
 #include <chrono>
-#include <map>
+
 
 
 class Board{
@@ -12,39 +13,122 @@ class Board{
         Piece board[8][8];
         // a string that can either be white or black
         string turn;
+
         Point WhiteKingPos = Point(4,0);
         Point BlackKingPos = Point(4,7);
+
         bool LeftCastleWhite = true;
         bool RightCastleWhite = true;
         bool LeftCastleBlack = true;
         bool RightCastleBlack = true;
+
+        bool isBoardDataCalculated = false;
+
+        int boardEvaluation = 0;
+        bool isMinimaxCalculated = false;
+        int Minimaxscore = 0;
+
+        map<int,int> depthMap;
+
+
+        map<string,Board>* Hashmap = nullptr;
+        
+        bool inCheck;
+        map<string,int> scores = initialScores;
+        map<Point,vector<Point>> moves = STDMAP;
+
+        Point enPassant = Point(-1,-1);
+
+        bool isInCheckinternal();
+
+        int evaluateBoard();
+        int evaluatePiece(int x, int y);
+        int evaluateGameinternal(); // a little more advanced than evaluate Board
+
+        bool movePiece(Point Position1, Point Position2, bool changeCastling = false);
+
+        void updatecastling(Piece piece, Point Position, Point Position2);
+        void updateEnPassant(Piece piece, Point Position, Point Position2);
+
+        
+
+        vector<Point> getPossibleAttacks(Point position);
+        vector<Point> getPossibleMoves(Point position);
+        vector<Point> getPossibleMovesComp(Point position); // checks for special moves
+        map<Point,vector<Point>> getAllPossibleMoves();
+        map<Point,vector<Point>> getAllPossibleWhiteMoves();
+        map<Point,vector<Point>> getAllPossibleBlackMoves();
     public:
         Board(Piece* board,string turn);
         Board() = default;
+        // copy constructor, very important for ai;
+        Board(const Board &other);
+
+        void updateBoard();
+        bool isBoardCalculated() const{return isBoardDataCalculated;}
+
+        bool isMinimaxCalc() const{return isMinimaxCalculated;}
+        int  ScoreMinimax() const{return Minimaxscore;}
+        void setMinimaxScore(int score){
+            isMinimaxCalculated = true;
+            Minimaxscore = score;
+        }
+
+        void setGameMap(map<string,Board>* Hash){Hashmap = Hash;}
+
+        string hashBoard();
+
         void transformToFisher();
+
+        int evaluateGame();
+
         // getter functions
         Piece getPiece(Point point);
         void setPiece(Point point, Piece piece);
-        void setWhiteKingPos(Point point){WhiteKingPos = point;}
-        void setBlackkingPos(Point point){BlackKingPos = point;}
-        Point getWhiteKingPos() const {return WhiteKingPos;}
-        Point getBlackKingPos() const {return BlackKingPos;}
         string getTurn() const {return turn;}
-        bool getLCW() const {return LeftCastleWhite;}
-        bool getRCW() const {return RightCastleWhite;}
-        bool getLCB() const {return LeftCastleBlack;}
-        bool getRCB() const {return RightCastleBlack;}
         void changeTurn();
-        /* position will be given in chess notations*/
-        vector<Point> getPossibleMoves(Point position);
-        /* this function does not verify if the move is correct that is verified elsewhere
-        returns true if the king is killed*/
-        vector<Point> getPossibleAttacks(Point position);
-        bool movePiece(Point Position1, Point Position2, bool changeCastling = false);
+
+        bool isMinimaxDepthStored(int depth){
+            if(depthMap.find(depth) == depthMap.end()){
+                return false;
+            }
+            return true;
+        }
+
+        int getMinimaxDepth(int depth){
+            return depthMap[depth];
+        }
+
+        string gameOver();
+
+        map<Point,vector<Point>> getMoves(){return moves;}
+
+        float getGamePhase();
+        bool isInEndGame(){return getGamePhase()>0.7;}
+        int evaluateControlOfKeySquares();
+        bool isKingActive(string color);
+        int evaluateEndGameFeatures(){return 50*isKingActive("white") - 50*isKingActive("Black");}
+        int centerControl();
+
+        void choosePawnHuman(Point point);
+        void choosePawnAi(Point point);
+
+
+        
+        bool movePieceoff(Point Position1, Point Position2, bool IsPlayer = true);
         void show(); /* temporary */
-       
+
+
+        bool isInCheck(); // potential ability for improvement by calculating it only once at the beginning of the sentence
+        
+        void addPawnMoves(vector<Point> &moves, Point position);
+        void addCastleMoves(vector<Point> &moves, Point position);
+
 
 };
+
+
+
 
 extern Board initial_board;
 

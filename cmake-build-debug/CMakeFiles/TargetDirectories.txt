@@ -1,4 +1,0 @@
-/home/hassene/Desktop/Projet-echecs-TDLOG/cmake-build-debug/CMakeFiles/AI.dir
-/home/hassene/Desktop/Projet-echecs-TDLOG/cmake-build-debug/CMakeFiles/Projet-echecs-TDLOG.dir
-/home/hassene/Desktop/Projet-echecs-TDLOG/cmake-build-debug/CMakeFiles/edit_cache.dir
-/home/hassene/Desktop/Projet-echecs-TDLOG/cmake-build-debug/CMakeFiles/rebuild_cache.dir

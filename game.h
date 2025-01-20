@@ -1,30 +1,33 @@
-<<<<<<< HEAD
-
-#include "board.h"
 #include "player.h"
+#include "board.h"
 #include <utility>
 
 
-=======
-#pragma once
-#include "board.h"
-#include "player.h"
-#include "pieces.h"
->>>>>>> Hassen_C++_work
 extern Point* initialHeatMap;
 
 class Game{
     private:
+        map<string,Board> Hashmap;
         Board gameBoard = initial_board;
+        Board* gameBoards;
+        int moveNumber = 0;
         Player player1,player2;
     public:
-        vector<Point> getPossibleMoves(Point position, Point enPassant); // checks for special moves
-        map<pair<int, int>,vector<Point>> getAllPossibleMoves(Point enPassant);
-        map<pair<int, int>,vector<Point>> getAllPossibleWhiteMoves(Point enPassant);
-        map<pair<int, int>,vector<Point>> getAllPossibleBlackMoves(Point enPassant);
+        bool undo(){// true if it did undo, false otherwise
+            if (moveNumber > 0){
+                moveNumber--;
+                gameBoard = gameBoards[moveNumber] ;
+                return true;
+            }
+            return false;
+        }
         void play();
         void play_against_random();
+        void play_against_ai();
         void play_fisher(bool onevone = true);
-        bool isInCheck();
+        int minimax(int depth, int alpha = -INT_MAX, int beta = INT_MAX);
+        pair<Point,Point> getMinimaxMove(int depth);
+
+
 };
 

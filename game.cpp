@@ -1,268 +1,70 @@
 #include "game.h"
 
-vector<Point> Game::getPossibleMoves(Point position, Point enPassant){
-    vector<Point> moves = gameBoard.getPossibleMoves(position);
-    int x = position.getX();
-    int y = position.getY();
-    if(gameBoard.getPiece(position).getName() == "Pawn"){
-        if (gameBoard.getPiece(position).getColor() == "white" && gameBoard.getTurn() == "white"){
-            if(y == 1){
-                if(gameBoard.getPiece(Point(x,y+2)).getName() == "EmptyPlace" && gameBoard.getPiece(Point(x,y+1)).getName() == "EmptyPlace"){
-                    moves.push_back(Point(x,y+2));
-                }
-            } else if(((Point(x+1,y+1) == enPassant) || (Point(x-1,y+1) == enPassant))){
-                    moves.push_back(enPassant);
-                }
-        } else if (gameBoard.getPiece(position).getColor() == "black" && gameBoard.getTurn() == "black"){
-            if(y==6){
-                if(gameBoard.getPiece(Point(x,y-2)).getName() == "EmptyPlace" && gameBoard.getPiece(Point(x,y-1)).getName() == "EmptyPlace"){
-                    moves.push_back(Point(x,y-2));
-                }
-            } else if(((Point(x+1,y-1) == enPassant) || (Point(x-1,y-1) == enPassant))){
-                moves.push_back(enPassant);
-                }
-            }
-    }
-        
-        
-    
-    vector<Point> trueMoves;
-    for (int idx = 0; idx < moves.size(); idx++){
-        Point destination = moves[idx];
-        Piece piece = gameBoard.getPiece(destination);
-        gameBoard.movePiece(position,destination);
-        if (not isInCheck()){
-            trueMoves.push_back(destination);
-        }
-        gameBoard.movePiece(destination,position);
-        gameBoard.setPiece(destination,piece);
-    }
-    if (gameBoard.getPiece(position).getName() == "King" && !(isInCheck())){
-        int x_castle = position.getX();
-        int y_castle = position.getY();
-        if(gameBoard.getPiece(position).getColor() == "white" && gameBoard.getTurn() == "white"){
-            if (gameBoard.getRCW()){
-                if(gameBoard.getPiece(Point(x_castle+1,y_castle)).getName() == "EmptyPlace" && gameBoard.getPiece(Point(x_castle+2,y_castle)).getName() == "EmptyPlace" ){
-                    gameBoard.movePiece(position,Point(x_castle+1,y_castle));
-                    if (!(isInCheck())){
-                        gameBoard.movePiece(Point(x_castle+1,y_castle),Point(x_castle+2,y_castle));
-                        if(!(isInCheck())){
-                            trueMoves.push_back(Point(x_castle+2,y_castle));
-                        }
-                        gameBoard.movePiece(Point(x_castle+2,y_castle),position);
-                    } else {
-                        gameBoard.movePiece(Point(x_castle+1,y_castle),position);
-                    }
-                }
-            } if (gameBoard.getLCW()){
-                if(gameBoard.getPiece(Point(x_castle-1,y_castle)).getName() == "EmptyPlace" && gameBoard.getPiece(Point(x_castle-2,y_castle)).getName() == "EmptyPlace" && gameBoard.getPiece(Point(x_castle-3,y_castle)).getName() == "EmptyPlace" ){
-                    gameBoard.movePiece(position,Point(x_castle-1,y_castle));
-                    if (!(isInCheck())){
-                        gameBoard.movePiece(Point(x_castle-1,y_castle),Point(x_castle-2,y_castle));
-                        if(!(isInCheck())){
-                            trueMoves.push_back(Point(x_castle-2,y_castle));
-                        }
-                        gameBoard.movePiece(Point(x_castle-2,y_castle),position);
-                    } else {
-                        gameBoard.movePiece(Point(x_castle-1,y_castle),position);
-                    }
-                }
-            }
-        } else if (gameBoard.getPiece(position).getColor() == "black" && gameBoard.getTurn() == "black"){
-            if(gameBoard.getRCB()){
-                if(gameBoard.getPiece(Point(x_castle+1,y_castle)).getName() == "EmptyPlace" && gameBoard.getPiece(Point(x_castle+2,y_castle)).getName() == "EmptyPlace" ){
-                    gameBoard.movePiece(position,Point(x_castle+1,y_castle));
-                    if (!(isInCheck())){
-                        gameBoard.movePiece(Point(x_castle+1,y_castle),Point(x_castle+2,y_castle));
-                        if(!(isInCheck())){
-                            trueMoves.push_back(Point(x_castle+2,y_castle));
-                        }
-                        gameBoard.movePiece(Point(x_castle+2,y_castle),position);
-                    } else {
-                        gameBoard.movePiece(Point(x_castle+1,y_castle),position);
-                    }
-                }
-            }if (gameBoard.getLCB()){
-                if(gameBoard.getPiece(Point(x_castle-1,y_castle)).getName() == "EmptyPlace" && gameBoard.getPiece(Point(x_castle-2,y_castle)).getName() == "EmptyPlace" && gameBoard.getPiece(Point(x_castle-3,y_castle)).getName() == "EmptyPlace" ){
-                    gameBoard.movePiece(position,Point(x_castle-1,y_castle));
-                    if (not isInCheck()){
-                        gameBoard.movePiece(Point(x_castle-1,y_castle),Point(x_castle-2,y_castle));
-                        if(not isInCheck()){
-                            trueMoves.push_back(Point(x_castle-2,y_castle));
-                        }
-                        gameBoard.movePiece(Point(x_castle-2,y_castle),position);
-                    } else {
-                        gameBoard.movePiece(Point(x_castle-1,y_castle),position);
-                    }
-                }            
-            }
-        }
-    }
-    return trueMoves;
-}
-
-map<pair<int, int>,vector<Point>> Game::getAllPossibleMoves(Point enPassant){
-    map<pair<int, int>,vector<Point>> possibleMoves;
-    for(int x=0; x<8; x++){
-        for(int y=0; y<8; y++){
-            pair<int, int> pair(x,y);
-            Point point(x,y);
-            vector<Point> moves = getPossibleMoves(point,enPassant);
-            if (moves.size() != 0) possibleMoves[pair] = getPossibleMoves(point,enPassant);
-        }
-    }
-    return possibleMoves;
-}
-
-map<pair<int, int>,vector<Point>> Game::getAllPossibleWhiteMoves(Point enPassant){
-    if(gameBoard.getTurn() == "white"){
-        return getAllPossibleMoves(enPassant);
-    } else {
-        gameBoard.changeTurn();
-        map<pair<int, int>,vector<Point>> possibleMoves = getAllPossibleMoves(enPassant);
-        gameBoard.changeTurn();
-        return possibleMoves;
-    }
-}
-
-map<pair<int, int>,vector<Point>> Game::getAllPossibleBlackMoves(Point enPassant){
-    if(gameBoard.getTurn() == "black"){
-        return getAllPossibleMoves(enPassant);
-    } else {
-        gameBoard.changeTurn();
-        map<pair<int, int>,vector<Point>> possibleMoves = getAllPossibleMoves(enPassant);
-        gameBoard.changeTurn();
-        return possibleMoves;
-    }
-}
-
 void Game::play(){
+    gameBoards = new Board[10000];
+    cout << 1 << endl;
+    gameBoard.setGameMap(&Hashmap);
+    gameBoards[0] = gameBoard;
+    cout << 2 << endl;
     bool game_over = false;
-    Point enPassant = Point(-1,-1); // no enPassant can be done
     int y_enPassant, x_enPassant;
     int x_chosen, y_chosen, idx_chosen, idx_piece_chosen;
     int x_chosen_2, y_chosen_2;
-    map<pair<int, int>,vector<Point>> MapOfMoves;
+    map<Point,vector<Point>> MapOfMoves;
     while (!game_over){
+        cout << "size of the hashmap is : "<< Hashmap.size() << endl;
         clearWindow();
-        MapOfMoves = getAllPossibleMoves(enPassant);
+        fillRect(0,480,480,100,RED);
+        if (!gameBoard.isBoardCalculated()){
+            gameBoard.updateBoard();
+        }
+        MapOfMoves = gameBoard.getMoves();
         gameBoard.show();
-        cout << "choose a piece to find the relevant moves" << endl;
-        //int test;
-        //cin >> test;
-        if(MapOfMoves.size()==0){
-            if (isInCheck()){
-                gameBoard.changeTurn();
-                cout << "the winner is" << gameBoard.getTurn() << endl;
-                break;
-            };
-            cout << "Stalemate" << endl;
+        
+        if(gameBoard.gameOver() != "NONE"){
+            gameBoard.changeTurn();
+            cout << gameBoard.gameOver() << endl;
             break;
         };
         //if (test == 0) break;
         getMouse(x_chosen,y_chosen);
+        if(y_chosen >= 480){
+            undo();
+            continue;
+        }
         x_chosen = x_chosen/60;
         y_chosen = (480-y_chosen-1)/60;
-        cout << "x : " << x_chosen << " ; y : " << y_chosen << endl; 
-        vector<Point> vect = MapOfMoves[pair(x_chosen,y_chosen)];
+        vector<Point> vect = MapOfMoves[Point(x_chosen,y_chosen)];
         cout << "the piece is : " << gameBoard.getPiece(Point(x_chosen,y_chosen)).getName() <<" and its color is :" << gameBoard.getPiece(Point(x_chosen,y_chosen)).getColor()<< endl;
         if(vect.size() == 0){
             continue;
         }
-        map<pair<int,int>,int> graphicalMoves;
+        map<Point,int> graphicalMoves;
         for (int idx = 0; idx < vect.size(); idx++){
             Point point = vect[idx];
-            graphicalMoves[make_pair(point.getX(),point.getY())] = idx;
+            graphicalMoves[point] = idx;
         }
         for(int idx = 0; idx < vect.size(); idx++){
-            cout<< vect[idx].getX() << ":" << vect[idx].getY() << endl;
             fillRect(vect[idx].getX()*60,480-(vect[idx].getY()+1)*60,60,60,Color(120,120,120));
         }
-        cout << "choose the piece to move" << endl;
         getMouse(x_chosen_2,y_chosen_2);
         x_chosen_2 = x_chosen_2/60;
         y_chosen_2 = (480-y_chosen_2-1)/60;
-        if (graphicalMoves.find(make_pair(x_chosen_2, y_chosen_2)) == graphicalMoves.end()) {
+        if (graphicalMoves.find(Point(x_chosen_2, y_chosen_2)) == graphicalMoves.end()) {
             continue;
         }
-        idx_chosen = graphicalMoves[pair(x_chosen_2, y_chosen_2)];
-        if(vect[idx_chosen] == enPassant){
-            if(gameBoard.getTurn() == "white"){
-                gameBoard.setPiece(Point(enPassant.getX(),enPassant.getY()-1),Empty);
-            }
-            else{
-                gameBoard.setPiece(Point(enPassant.getX(),enPassant.getY()+1),Empty);
-            }
-        }
-        enPassant = Point(-1,-1);
-        if(gameBoard.getPiece(Point(x_chosen,y_chosen)).getName()=="Pawn" && ((vect[idx_chosen].getY() - y_chosen) == 2 || (vect[idx_chosen].getY() - y_chosen) == -2 )){
-            y_enPassant = (vect[idx_chosen].getY() + y_chosen)/2;
-            x_enPassant = x_chosen;
-            enPassant = Point(x_enPassant,y_enPassant);
-        }
-        if (gameBoard.getPiece(Point(x_chosen,y_chosen)).getName() == "King"){
-            if (vect[idx_chosen].getX() - x_chosen == 2){
-                gameBoard.movePiece(Point(7,y_chosen),Point(x_chosen+1,y_chosen),true);
-            } else if (vect[idx_chosen].getX() - x_chosen == -2) {
-                gameBoard.movePiece(Point(0,y_chosen),Point(x_chosen-1,y_chosen),true);
-            }
-        }
-        if (gameBoard.movePiece(Point(x_chosen,y_chosen),vect[idx_chosen],true)){
+        idx_chosen = graphicalMoves[Point(x_chosen_2, y_chosen_2)];
+        if (gameBoard.movePieceoff(Point(x_chosen,y_chosen),vect[idx_chosen])){
             cout << "game over" << endl;
             game_over = true;
         }
-        if ((gameBoard.getPiece(vect[idx_chosen]).getName() == "Pawn") && (vect[idx_chosen].getY()==0 || vect[idx_chosen].getY()==7)){
-            cout << "choose a piece to change your pawn into" << endl;
-            cout << "0: Queen    1: Rook    2: Bishop    3: Knight" << endl;
-            while(true){
-                cin >> idx_piece_chosen;
-                if (idx_piece_chosen>=0 && idx_piece_chosen<4){
-                    break;
-                }
-                cout << "choose a valid index between 0 and 3" << endl;
-            }
-            if (gameBoard.getTurn() == "white"){
-                switch(idx_piece_chosen){
-                    case 0:
-                        gameBoard.setPiece(vect[idx_chosen],WhiteQueen);
-                        break;
-                    case 1:
-                        gameBoard.setPiece(vect[idx_chosen],WhiteRook);
-                        break;
-                    case 2:
-                        gameBoard.setPiece(vect[idx_chosen],WhiteBishop);
-                        break;
-                    case 3:
-                        gameBoard.setPiece(vect[idx_chosen],WhiteKnight);
-                        break;
-                }
-            }
-            if (gameBoard.getTurn() == "black"){
-                switch(idx_piece_chosen){
-                    case 0:
-                        gameBoard.setPiece(vect[idx_chosen],BlackQueen);
-                        break;
-                    case 1:
-                        gameBoard.setPiece(vect[idx_chosen],BlackRook);
-                        break;
-                    case 2:
-                        gameBoard.setPiece(vect[idx_chosen],BlackBishop);
-                        break;
-                    case 3:
-                        gameBoard.setPiece(vect[idx_chosen],BlackKnight);
-                        break;
-                }
-            }
-        }
         cout << "move made" << endl;
-        gameBoard.changeTurn();
+        moveNumber++;
+        gameBoards[moveNumber] = gameBoard;
         cout << gameBoard.getTurn() << endl;
-        if (isInCheck()){
-            cout << "check" << endl << endl << endl << endl << "check" << endl;
-        }
     }
 }
-
+/*
 void Game::play_against_random(){
     srand(static_cast<unsigned int>(std::time(nullptr)));
     bool game_over = false;
@@ -270,8 +72,8 @@ void Game::play_against_random(){
     int y_enPassant, x_enPassant;
     int x_chosen, y_chosen, idx_chosen, idx_piece_chosen;
     int x_chosen_2, y_chosen_2;
-    map<pair<int, int>,vector<Point>> MapOfMoves;
-    vector<pair<int,int>> vectorOfChoice;
+    map<Point,vector<Point>> MapOfMoves;
+    vector<Point> vectorOfChoice;
     vector<Point> chosenVector;
     int sizeOfMap;
     int sizeOfVector;
@@ -297,15 +99,15 @@ void Game::play_against_random(){
         x_chosen = x_chosen/60;
         y_chosen = (480-y_chosen-1)/60;
         cout << "x : " << x_chosen << " ; y : " << y_chosen << endl; 
-        vector<Point> vect = MapOfMoves[pair(x_chosen,y_chosen)];
+        vector<Point> vect = MapOfMoves[Point(x_chosen,y_chosen)];
         cout << "the piece is : " << gameBoard.getPiece(Point(x_chosen,y_chosen)).getName() <<" and its color is :" << gameBoard.getPiece(Point(x_chosen,y_chosen)).getColor()<< endl;
         if(vect.size() == 0){
             continue;
         }
-        map<pair<int,int>,int> graphicalMoves;
+        map<Point,int> graphicalMoves;
         for (int idx = 0; idx < vect.size(); idx++){
             Point point = vect[idx];
-            graphicalMoves[make_pair(point.getX(),point.getY())] = idx;
+            graphicalMoves[point] = idx;
         }
         for(int idx = 0; idx < vect.size(); idx++){
             cout<< vect[idx].getX() << ":" << vect[idx].getY() << endl;
@@ -315,32 +117,11 @@ void Game::play_against_random(){
         getMouse(x_chosen_2,y_chosen_2);
         x_chosen_2 = x_chosen_2/60;
         y_chosen_2 = (480-y_chosen_2-1)/60;
-        if (graphicalMoves.find(make_pair(x_chosen_2, y_chosen_2)) == graphicalMoves.end()) {
+        if (graphicalMoves.find(Point(x_chosen_2, y_chosen_2)) == graphicalMoves.end()) {
             continue;
         }
-        idx_chosen = graphicalMoves[pair(x_chosen_2, y_chosen_2)];
-        if(vect[idx_chosen] == enPassant){
-            if(gameBoard.getTurn() == "white"){
-                gameBoard.setPiece(Point(enPassant.getX(),enPassant.getY()-1),Empty);
-            }
-            else{
-                gameBoard.setPiece(Point(enPassant.getX(),enPassant.getY()+1),Empty);
-            }
-        }
-        enPassant = Point(-1,-1);
-        if(gameBoard.getPiece(Point(x_chosen,y_chosen)).getName()=="Pawn" && ((vect[idx_chosen].getY() - y_chosen) == 2 || (vect[idx_chosen].getY() - y_chosen) == -2 )){
-            y_enPassant = (vect[idx_chosen].getY() + y_chosen)/2;
-            x_enPassant = x_chosen;
-            enPassant = Point(x_enPassant,y_enPassant);
-        }
-        if (gameBoard.getPiece(Point(x_chosen,y_chosen)).getName() == "King"){
-            if (vect[idx_chosen].getX() - x_chosen == 2){
-                gameBoard.movePiece(Point(7,y_chosen),Point(x_chosen+1,y_chosen),true);
-            } else if (vect[idx_chosen].getX() - x_chosen == -2) {
-                gameBoard.movePiece(Point(0,y_chosen),Point(x_chosen-1,y_chosen),true);
-            }
-        }
-        if (gameBoard.movePiece(Point(x_chosen,y_chosen),vect[idx_chosen],true)){
+        idx_chosen = graphicalMoves[Point(x_chosen_2, y_chosen_2)];
+        if (gameBoard.movePieceoff(Point(x_chosen,y_chosen),vect[idx_chosen])){
             cout << "game over" << endl;
             game_over = true;
         }
@@ -423,29 +204,7 @@ void Game::play_against_random(){
             ChosenDestination = chosenVector[rand()%(sizeOfVector)];
         }            
         cout << ChosenDestination.getX() << ":" << ChosenDestination.getY() << endl;
-        if(ChosenDestination == enPassant){
-            if(gameBoard.getTurn() == "white"){
-                gameBoard.setPiece(Point(enPassant.getX(),enPassant.getY()-1),Empty);
-            }
-            else{
-                gameBoard.setPiece(Point(enPassant.getX(),enPassant.getY()+1),Empty);
-            }
-        }
-        enPassant = Point(-1,-1);
-        cout << "random point selected" << endl;
-        if(gameBoard.getPiece(ChosenStart).getName()=="Pawn" && ((ChosenDestination.getY() - y_chosen) == 2 || (ChosenDestination.getY() - y_chosen) == -2 )){
-            y_enPassant = (ChosenDestination.getY() + ChosenStart.getY())/2;
-            x_enPassant = ChosenStart.getX();
-            enPassant = Point(x_enPassant,y_enPassant);
-        }
-        if (gameBoard.getPiece(ChosenStart).getName() == "King"){
-            if (ChosenDestination.getX() - ChosenStart.getX() == 2){
-                gameBoard.movePiece(Point(7,ChosenStart.getY()),Point(ChosenStart.getX()+1,ChosenStart.getY()),true);
-            } else if (ChosenDestination.getX() - ChosenStart.getX() == -2) {
-                gameBoard.movePiece(Point(0,ChosenStart.getY()),Point(ChosenStart.getX()-1,ChosenStart.getY()),true);
-            }
-        }
-        if (gameBoard.movePiece(ChosenStart,ChosenDestination,true)){
+        if (gameBoard.movePieceoff(ChosenStart,ChosenDestination)){
             cout << "game over" << endl;
             game_over = true;
         }
@@ -503,92 +262,317 @@ void Game::play_fisher(bool onevone){
         play_against_random();
     }
 }
+*/
 
-bool Game::isInCheck(){
-    vector<Point> test;
-    int x,y;
-    if (gameBoard.getTurn() == "white"){
-        Point kingpos = gameBoard.getWhiteKingPos();
-        x = kingpos.getX();
-        y = kingpos.getY();
-        test = gameBoard.getPossibleAttacks(kingpos);
-        for(int idx = 0; idx < test.size(); idx++){
-            if(gameBoard.getPiece(test[idx]).getName() == "King"){
-                return true; 
-            }
+void Game::play_against_ai(){
+    gameBoards = new Board[10000];
+    gameBoard.setGameMap(&Hashmap);
+    gameBoards[0] = gameBoard;
+    bool game_over = false;
+    int y_enPassant, x_enPassant;
+    int x_chosen, y_chosen, idx_chosen, idx_piece_chosen;
+    int x_chosen_2, y_chosen_2;
+    map<Point,vector<Point>> MapOfMoves;
+    while (!game_over){
+        cout << gameBoard.isBoardCalculated() << endl;
+        cout << "size of hashmap is : " << Hashmap.size() << endl;
+        clearWindow();
+        fillRect(0,480,480,100,RED);
+        if (!gameBoard.isBoardCalculated()){
+            gameBoard.updateBoard();
         }
-        if (gameBoard.getPiece(Point(x+1,y+1)).getName() == "Pawn" && gameBoard.getPiece(Point(x+1,y+1)).getColor() == "black"){
-            return true;
+        MapOfMoves = gameBoard.getMoves();
+        gameBoard.show();
+        cout << "choose a piece to find the relevant moves" << endl;
+        //int test;
+        //cin >> test;
+        if(gameBoard.gameOver() != "NONE"){
+            cout << gameBoard.gameOver() << endl;
+            break;
+        };
+        //if (test == 0) break;
+        getMouse(x_chosen,y_chosen);
+        if(y_chosen >= 480){
+            undo();
+            undo();
+            continue;
         }
-        if (gameBoard.getPiece(Point(x-1,y+1)).getName() == "Pawn" && gameBoard.getPiece(Point(x-1,y+1)).getColor() == "black"){
-            return true;
+        x_chosen = x_chosen/60;
+        y_chosen = (480-y_chosen-1)/60;
+        cout << "x : " << x_chosen << " ; y : " << y_chosen << endl; 
+        vector<Point> vect = MapOfMoves[Point(x_chosen,y_chosen)];
+        cout << "the piece is : " << gameBoard.getPiece(Point(x_chosen,y_chosen)).getName() <<" and its color is :" << gameBoard.getPiece(Point(x_chosen,y_chosen)).getColor()<< endl;
+        if(vect.size() == 0){
+            continue;
         }
-        gameBoard.setPiece(kingpos,WhiteBishop);
-        test = gameBoard.getPossibleAttacks(kingpos);
-        for(int idx = 0; idx < test.size(); idx++){
-            if(gameBoard.getPiece(test[idx]).getName() == "Queen" ||gameBoard.getPiece(test[idx]).getName() == "Bishop"){
-                gameBoard.setPiece(kingpos,WhiteKing);
-                return true; 
-            }
+        map<Point,int> graphicalMoves;
+        for (int idx = 0; idx < vect.size(); idx++){
+            Point point = vect[idx];
+            graphicalMoves[point] = idx;
         }
-        gameBoard.setPiece(kingpos,WhiteRook);
-        test = gameBoard.getPossibleAttacks(kingpos);
-        for(int idx = 0; idx < test.size(); idx++){
-            if(gameBoard.getPiece(test[idx]).getName() == "Queen" ||gameBoard.getPiece(test[idx]).getName() == "Rook"){
-                gameBoard.setPiece(kingpos,WhiteKing);
-                return true; 
-            }
+        for(int idx = 0; idx < vect.size(); idx++){
+            fillRect(vect[idx].getX()*60,480-(vect[idx].getY()+1)*60,60,60,Color(120,120,120));
         }
-        gameBoard.setPiece(kingpos,WhiteKnight);
-        test = gameBoard.getPossibleAttacks(kingpos);
-        for(int idx = 0; idx < test.size(); idx++){
-            if(gameBoard.getPiece(test[idx]).getName() == "Knight"){
-                gameBoard.setPiece(kingpos,WhiteKing);
-                return true; 
-            }
+        getMouse(x_chosen_2,y_chosen_2);
+        x_chosen_2 = x_chosen_2/60;
+        y_chosen_2 = (480-y_chosen_2-1)/60;
+        if (graphicalMoves.find(Point(x_chosen_2, y_chosen_2)) == graphicalMoves.end()) {
+            continue;
         }
-        gameBoard.setPiece(kingpos,WhiteKing);
-    } else {
-        Point kingpos = gameBoard.getBlackKingPos();
-        x = kingpos.getX();
-        y = kingpos.getY();
-        test = gameBoard.getPossibleAttacks(kingpos);
-        for(int idx = 0; idx < test.size(); idx++){
-            if(gameBoard.getPiece(test[idx]).getName() == "King"){
-                return true; 
-            }
+        idx_chosen = graphicalMoves[Point(x_chosen_2, y_chosen_2)];
+        if (gameBoard.movePieceoff(Point(x_chosen,y_chosen),vect[idx_chosen])){
+            cout << "game over" << endl;
+            game_over = true;
         }
-        if (gameBoard.getPiece(Point(x+1,y-1)).getName() == "Pawn" && gameBoard.getPiece(Point(x+1,y-1)).getColor() == "white"){
-            return true;
-        }
-        if (gameBoard.getPiece(Point(x-1,y-1)).getName() == "Pawn" && gameBoard.getPiece(Point(x-1,y-1)).getColor() == "white"){
-            return true;
-        }
-        gameBoard.setPiece(kingpos,BlackBishop);
-        test = gameBoard.getPossibleAttacks(kingpos);
-        for(int idx = 0; idx < test.size(); idx++){
-            if(gameBoard.getPiece(test[idx]).getName() == "Queen" ||gameBoard.getPiece(test[idx]).getName() == "Bishop"){
-                gameBoard.setPiece(kingpos,BlackKing);
-                return true; 
-            }
-        }
-        gameBoard.setPiece(kingpos,BlackRook);
-        test = gameBoard.getPossibleAttacks(kingpos);
-        for(int idx = 0; idx < test.size(); idx++){
-            if(gameBoard.getPiece(test[idx]).getName() == "Queen" ||gameBoard.getPiece(test[idx]).getName() == "Rook"){
-                gameBoard.setPiece(kingpos,BlackKing);
-                return true; 
-            }
-        }
-        gameBoard.setPiece(kingpos,BlackKnight);
-        test = gameBoard.getPossibleAttacks(kingpos);
-        for(int idx = 0; idx < test.size(); idx++){
-            if(gameBoard.getPiece(test[idx]).getName() == "Knight"){
-                gameBoard.setPiece(kingpos,BlackKing);
-                return true; 
-            }
-        }
-        gameBoard.setPiece(kingpos,BlackKing);
+        cout << "move made" << endl;
+        cout << gameBoard.isBoardCalculated() << endl;
+        moveNumber++;
+        gameBoards[moveNumber] = gameBoard;
+        cout << gameBoard.getTurn() << endl;
+        if(gameBoard.gameOver() != "NONE"){
+            cout << gameBoard.gameOver() << endl;
+            break;
+        };
+        pair<Point,Point> bestMove = getMinimaxMove(4);
+        gameBoard.movePieceoff(bestMove.first,bestMove.second,false);
+        moveNumber++;
+        gameBoards[moveNumber] = gameBoard;
+        
     }
-    return false;
 }
+
+
+int Game::minimax(int depth, int alpha, int beta){
+    if (!gameBoard.isBoardCalculated()){
+            gameBoard.updateBoard();
+    }
+    if (depth == 0){
+        return gameBoard.evaluateGame();
+    }
+    if (gameBoard.gameOver() != "NONE"){
+        if(gameBoard.gameOver() == "white won"){
+            return INT_MAX;
+        } else if(gameBoard.gameOver() == "black won"){
+            return -INT_MAX;
+        } else {
+            return 0;
+        }
+    }
+    if(gameBoard.isMinimaxDepthStored(depth)){
+        return gameBoard.getMinimaxDepth(depth);
+    }
+    if(gameBoard.getTurn() == "white"){
+        int maxEval = - INT_MAX;
+        for(const auto& pair : gameBoard.getMoves()){
+            for (const auto& point : pair.second){
+                gameBoard.movePieceoff(pair.first,point,false);
+                moveNumber++;
+                gameBoards[moveNumber] = gameBoard;
+                int eval = minimax(depth -1,alpha,beta);
+                undo();
+                maxEval = max(maxEval,eval);
+                alpha = max(alpha,eval);
+                if (beta <= alpha){
+                    break;
+                }
+            }
+            if (beta <= alpha){
+                break;
+            }
+        }
+        gameBoard.setMinimaxScore(maxEval);
+        gameBoards[moveNumber].setMinimaxScore(maxEval);
+        return maxEval;
+    } else {
+        int minEval = INT_MAX;
+        for(const auto& pair : gameBoard.getMoves()){
+            for (const auto& point : pair.second){
+                gameBoard.movePieceoff(pair.first,point,false);
+                moveNumber++;
+                gameBoards[moveNumber] = gameBoard;
+                int eval = minimax(depth -1,alpha,beta);
+                undo();
+                minEval = min(minEval,eval);
+                beta = min(beta,eval);
+                if (beta <= alpha){
+                    break;
+                }
+            }
+            if (beta <= alpha){
+                break;
+            }
+        }
+        gameBoard.setMinimaxScore(minEval);
+        gameBoards[moveNumber].setMinimaxScore(minEval);
+        return minEval;
+    }
+}
+
+pair<Point,Point> Game::getMinimaxMove(int depth){
+    if (!gameBoard.isBoardCalculated()){
+            gameBoard.updateBoard();
+    }
+    map<Point,vector<Point>> moves = gameBoard.getMoves();
+    auto it = moves.begin();
+    pair<Point,Point> bestMove = make_pair(it->first,(it->second)[0]);
+    pair<Point,Point> move;
+    gameBoard.movePieceoff(bestMove.first,bestMove.second);
+    moveNumber++;
+    gameBoards[moveNumber] = gameBoard;
+    int bestScore = minimax(depth-1);
+    int score;
+    undo();
+    if (gameBoard.getTurn() == "white"){
+        for(const auto& pair : moves){
+            for (const auto& point : pair.second){
+                move = make_pair(pair.first,point);
+                gameBoard.movePieceoff(move.first,move.second,false);
+                moveNumber++;
+                score = minimax(depth-1);
+                cout << score << endl;
+                gameBoards[moveNumber] = gameBoard;
+                undo();
+                if (score < bestScore){
+                    bestMove = move;
+                    bestScore = score;
+                }
+            }
+        }
+        return bestMove;
+    } else {
+        for(const auto& pair : moves){
+            for (const auto& point : pair.second){
+                move = make_pair(pair.first,point);
+                cout << pair.first << "," << point << endl;
+                gameBoard.movePieceoff(move.first,move.second,false);
+                moveNumber++;
+                if(gameBoard.isMinimaxCalc()){
+                    cout << "1   :::::::   1" << endl;
+                    score = gameBoard.ScoreMinimax();
+                } else{
+                    score = minimax(depth-1);
+                }
+                cout <<"score :"<<score << endl;
+                gameBoards[moveNumber] = gameBoard;
+                undo();
+                if (score > bestScore){
+                    bestMove = move;
+                    bestScore = score;
+                }
+            }
+        }
+        cout << " test 5 ::: 5 " << endl;
+        return bestMove;
+    }
+}
+
+/*
+
+
+
+
+
+def hash_game(game):
+    """
+    Hash the current game state. This should return a unique identifier
+    for the current board position and turn.
+    """
+    # For simplicity, you can hash the chessboard and current player
+    board_state = ''.join([str(piece) for row in game.chess_board for piece in row])
+    turn = game.turn  # Assuming 'white' or 'black' for the turn
+    return hash(board_state + turn)
+def minimax(game, depth, transposition_table, alpha=float('-inf'), beta=float('inf')):
+
+    # Get the hash of the current game state
+    game_hash = hash_game(game)
+
+    # Check if the current game state has already been evaluated
+    if game_hash in transposition_table:
+        return transposition_table[game_hash]
+
+    if not game.running:
+        if game.winner == 'Stalemate':
+            return 0
+        return 1e9 if game.winner == 'white' else -1e9
+
+    if depth == 0:
+        eval_score = evaluate(game,transposition_table)
+        transposition_table[game_hash] = eval_score  # Store evaluation result
+        return eval_score
+
+    if game.turn == 'white':  # Maximizing for white
+        max_eval = float('-inf')
+        for start_pos, possible_moves in game.white_moves.items():
+            for end_pos in possible_moves:
+                copy_game = game.copy_game()
+                x, y = end_pos
+                copy_game.move_piece(start_pos, x, y)
+                copy_game.change_player()
+                copy_game.all_moves()
+                eval_score = minimax(copy_game, depth - 1, transposition_table, alpha, beta)
+                max_eval = max(max_eval, eval_score)
+                alpha = max(alpha, eval_score)
+                if beta <= alpha:
+                    break  # Prune outer loop
+            if beta <= alpha:
+                break  # Prune outer loop
+        # Store the evaluation result in the transposition table
+        transposition_table[game_hash] = max_eval
+        return max_eval
+
+    else:  # Minimizing for black
+        min_eval = float('inf')
+        for start_pos, possible_moves in game.black_moves.items():
+            for end_pos in possible_moves:
+                copy_game = game.copy_game()
+                x, y = end_pos
+                copy_game.move_piece(start_pos, x, y)
+                copy_game.change_player()
+                copy_game.all_moves()
+                eval_score = minimax(copy_game, depth - 1, transposition_table, alpha, beta)
+                min_eval = min(min_eval, eval_score)
+                beta = min(beta, eval_score)
+                if beta <= alpha:
+                    break  # Prune outer loop
+            if beta <= alpha:
+                break  # Prune outer loop
+        # Store the evaluation result in the transposition table
+        transposition_table[game_hash] = min_eval
+        return min_eval
+
+transposition_table = {}
+def AI(game, depth=2):
+    """
+    AI for determining the best move using minimax evaluation.
+    Returns the best move as a tuple (start_pos, end_pos).
+    depth must be pair so that it works
+    """
+    moves_scores = []
+    moves = game.white_moves if game.turn == 'white' else game.black_moves
+    total_time = 0
+    for start_pos, possible_moves in moves.items():
+        for end_pos in possible_moves:
+            start_time = time.time()  # Record the start time
+            # Create a copy of the game to simulate the move
+            copy_game = game.copy_game()
+            copy_game.all_moves()
+            x, y = end_pos
+            copy_game.move_piece(start_pos, x, y)
+            copy_game.change_player()
+            score = minimax(copy_game, depth - 1,transposition_table)
+            moves_scores.append((score, (start_pos, end_pos)))
+          #  print(f"Move: {start_pos} -> {end_pos}, Score: {score}")
+            end_time = time.time()
+           # print(end_time-start_time)
+            total_time += end_time - start_time
+    # Sort moves by score (higher is better for white, lower for black)
+    moves_scores.sort(reverse=(game.turn == 'white'), key=lambda x: x[0])
+
+    # Return the move with the best score
+    if moves_scores:
+       # print(f"Best move: {moves_scores[0][1]} with score {moves_scores[0][0]}")
+       # print(total_time)
+        return moves_scores[0][1]
+    #print("No valid moves found")
+    return None
+*/
