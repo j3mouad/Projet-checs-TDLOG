@@ -1,11 +1,19 @@
 # config.py
+"""This file is only used for writing constants we need after that."""
+import os
+
+# Change the current working directory to the specified path
+os.chdir('/home/hassene/Desktop/Projet-echecs-TDLOG/Python/')
+
+# Now the relative paths will be based on this directory
+
 import pygame
 pygame.init()
 # Screen dimensions
-screen_width = 500
-screen_height = 500
-added_screen_width = 400
-square_size = screen_width // 8
+screen_width = 1600
+screen_height = 800
+
+square_size = screen_height // 8
 
 # Colors
 white = (255, 255, 255)

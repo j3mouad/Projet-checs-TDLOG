@@ -20,10 +20,7 @@ from random import randint
 #if we could reach depth 6 then we could say we have an AI
 #if you have questions send them to me on whatsap
 # Set up directory if needed (adjust as necessary)
-new_dir = '/home/hassene/Desktop/Projet-echecs-TDLOG/build'
-os.chdir(new_dir)
-if new_dir not in sys.path:
-    sys.path.append(new_dir)
+
 
 # Positional tables for pieces
 PAWN_TABLE = np.array([
@@ -290,7 +287,7 @@ def minimax(game, depth, transposition_table, alpha=float('-inf'), beta=float('i
             for end_pos in possible_moves:
                 if (i>0) :
                     s = randint(1,100)
-                    if (s<95) :
+                    if (s<1000) :
                         continue 
 
                 i+=1
@@ -318,7 +315,7 @@ def minimax(game, depth, transposition_table, alpha=float('-inf'), beta=float('i
             for end_pos in possible_moves:
                 if (i>0) :
                     s = randint(1,100)
-                    if (s<95) :
+                    if (s<1000) :
                         continue 
                 copy_game = game.copy_game()
                 x, y = end_pos
@@ -336,7 +333,7 @@ def minimax(game, depth, transposition_table, alpha=float('-inf'), beta=float('i
                 break  # Prune outer loop
         return min_eval
 
-def AI(game, depth=4):
+def AI(game, depth=2):
     """
     AI for determining the best move using minimax evaluation.
     Returns the best move as a tuple (start_pos, end_pos).
@@ -414,8 +411,8 @@ def AI_hard(game) :
             score = copy_game.evaluate0()
             moves_scores.append((score, (start_pos, end_pos)))
 
-
-    moves_scores.sort(reverse=game.turn=='white', key=lambda x: x[0])
+    
+    moves_scores.sort(reverse=False, key=lambda x: x[0])
 
     # Return the move with the best score
     print(moves_scores)
