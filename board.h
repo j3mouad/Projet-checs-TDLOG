@@ -64,6 +64,8 @@ class Board{
         // copy constructor, very important for ai;
         Board(const Board &other);
 
+        void print();
+
         void updateBoard();
         bool isBoardCalculated() const{return isBoardDataCalculated;}
 

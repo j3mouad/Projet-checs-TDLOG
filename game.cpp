@@ -333,7 +333,7 @@ void Game::play_against_ai(){
             cout << gameBoard.gameOver() << endl;
             break;
         };
-        pair<Point,Point> bestMove = getMinimaxMove(4);
+        pair<Point,Point> bestMove = getMinimaxMove(2);
         gameBoard.movePieceoff(bestMove.first,bestMove.second,false);
         moveNumber++;
         gameBoards[moveNumber] = gameBoard;
@@ -342,129 +342,7 @@ void Game::play_against_ai(){
 }
 
 
-int Game::minimax(int depth, int alpha, int beta){
-    if (!gameBoard.isBoardCalculated()){
-            gameBoard.updateBoard();
-    }
-    if (depth == 0){
-        return gameBoard.evaluateGame();
-    }
-    if (gameBoard.gameOver() != "NONE"){
-        if(gameBoard.gameOver() == "white won"){
-            return INT_MAX;
-        } else if(gameBoard.gameOver() == "black won"){
-            return -INT_MAX;
-        } else {
-            return 0;
-        }
-    }
-    if(gameBoard.isMinimaxDepthStored(depth)){
-        return gameBoard.getMinimaxDepth(depth);
-    }
-    if(gameBoard.getTurn() == "white"){
-        int maxEval = - INT_MAX;
-        for(const auto& pair : gameBoard.getMoves()){
-            for (const auto& point : pair.second){
-                gameBoard.movePieceoff(pair.first,point,false);
-                moveNumber++;
-                gameBoards[moveNumber] = gameBoard;
-                int eval = minimax(depth -1,alpha,beta);
-                undo();
-                maxEval = max(maxEval,eval);
-                alpha = max(alpha,eval);
-                if (beta <= alpha){
-                    break;
-                }
-            }
-            if (beta <= alpha){
-                break;
-            }
-        }
-        gameBoard.setMinimaxScore(maxEval);
-        gameBoards[moveNumber].setMinimaxScore(maxEval);
-        return maxEval;
-    } else {
-        int minEval = INT_MAX;
-        for(const auto& pair : gameBoard.getMoves()){
-            for (const auto& point : pair.second){
-                gameBoard.movePieceoff(pair.first,point,false);
-                moveNumber++;
-                gameBoards[moveNumber] = gameBoard;
-                int eval = minimax(depth -1,alpha,beta);
-                undo();
-                minEval = min(minEval,eval);
-                beta = min(beta,eval);
-                if (beta <= alpha){
-                    break;
-                }
-            }
-            if (beta <= alpha){
-                break;
-            }
-        }
-        gameBoard.setMinimaxScore(minEval);
-        gameBoards[moveNumber].setMinimaxScore(minEval);
-        return minEval;
-    }
-}
-
-pair<Point,Point> Game::getMinimaxMove(int depth){
-    if (!gameBoard.isBoardCalculated()){
-            gameBoard.updateBoard();
-    }
-    map<Point,vector<Point>> moves = gameBoard.getMoves();
-    auto it = moves.begin();
-    pair<Point,Point> bestMove = make_pair(it->first,(it->second)[0]);
-    pair<Point,Point> move;
-    gameBoard.movePieceoff(bestMove.first,bestMove.second);
-    moveNumber++;
-    gameBoards[moveNumber] = gameBoard;
-    int bestScore = minimax(depth-1);
-    int score;
-    undo();
-    if (gameBoard.getTurn() == "white"){
-        for(const auto& pair : moves){
-            for (const auto& point : pair.second){
-                move = make_pair(pair.first,point);
-                gameBoard.movePieceoff(move.first,move.second,false);
-                moveNumber++;
-                score = minimax(depth-1);
-                cout << score << endl;
-                gameBoards[moveNumber] = gameBoard;
-                undo();
-                if (score < bestScore){
-                    bestMove = move;
-                    bestScore = score;
-                }
-            }
-        }
-        return bestMove;
-    } else {
-        for(const auto& pair : moves){
-            for (const auto& point : pair.second){
-                move = make_pair(pair.first,point);
-                cout << pair.first << "," << point << endl;
-                gameBoard.movePieceoff(move.first,move.second,false);
-                moveNumber++;
-                if(gameBoard.isMinimaxCalc()){
-                    cout << "1   :::::::   1" << endl;
-                    score = gameBoard.ScoreMinimax();
-                } else{
-                    score = minimax(depth-1);
-                }
-                cout <<"score :"<<score << endl;
-                gameBoards[moveNumber] = gameBoard;
-                undo();
-                if (score > bestScore){
-                    bestMove = move;
-                    bestScore = score;
-                }
-            }
-        }
-        cout << " test 5 ::: 5 " << endl;
-        return bestMove;
-    }
-}
+c
 
 /*
 
