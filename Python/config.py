@@ -10,8 +10,8 @@ os.chdir('/home/hassene/Desktop/Projet-echecs-TDLOG/Python/')
 import pygame
 pygame.init()
 # Screen dimensions
-screen_width = 1000
-screen_height = 500
+screen_width = 1600
+screen_height = 800
 
 square_size = screen_height // 8
 

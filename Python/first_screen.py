@@ -1,10 +1,8 @@
 import pygame
 from Button import Button  # Assuming the Button class is in a separate module
 from config import *
-from config import screen_width
+from config import screen_width,screen_height
 from random import shuffle,seed,sample,choice
-screen_width = 1000
-screen_height = 500
 
 def shuffle_fischer_row():
     # Start with empty row
@@ -54,7 +52,7 @@ def choose_game(board):
     """
     
     global screen_width, screen_height
-
+    
     window = pygame.display.set_mode((screen_width , screen_height), pygame.RESIZABLE)
     pygame.display.set_caption("Let's play Chess!")
 
@@ -208,4 +206,4 @@ def choose_game(board):
 
     board.game.list_of_boards[0] = [board.game.chess_board]
     board.game.len_list_of_boards += 1
-    return white_time, black_time
+    return white_time, black_time,screen_width,screen_height

@@ -1,6 +1,5 @@
 import pygame
 from copy import deepcopy
-from random import shuffle
 import chess
 import chess.engine
 from utils import *
@@ -9,7 +8,6 @@ import copy
 import os
 from config import *
 from promotion import Promotion_screen
-
 new_dir = ('/home/hassene/Desktop/Projet-echecs-TDLOG/Python')
 os.chdir(new_dir)
 pygame.init()

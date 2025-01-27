@@ -20,11 +20,12 @@ def Promotion_screen(game,color) :
     promotion_screen = pygame.display.set_mode((width,height))
     pygame.display.set_caption("Choose a Piece")
     # Create buttons
+    text_color = red
     buttons = [
-        Button("Queen", 50, 50, 100, 100, color+"_queen.png"),
-        Button("Bishop", 50, 350, 100, 100,color+"_bishop.png"),
-        Button("Knight", 750, 50, 100, 100, color+"_knight.png"),
-        Button("Rook", 750, 350, 100, 100, color+"_rook.png"),
+        Button("Queen", 50, 50, 150, 150, color+"_queen.png"),
+        Button("Bishop", 50, 350, 150, 150,color+"_bishop.png"),
+        Button("Knight", 750, 50, 150, 150, color+"_knight.png"),
+        Button("Rook", 750, 350, 150, 150, color+"_rook.png"),
     ]
 
     # Main loop
@@ -44,7 +45,7 @@ def Promotion_screen(game,color) :
 
         # Draw buttons
         for button in buttons:
-            button.draw(promotion_screen)
+            button.draw(promotion_screen,color = text_color)
 
         pygame.display.flip()
 

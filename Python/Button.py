@@ -19,7 +19,7 @@ class Button:
         else :
             self.image = None
 
-    def draw(self, screen,size = 20):
+    def draw(self, screen,size = 20,color = black):
         """Draw the button on the screen with optional text and image."""
         mouse_pos = pygame.mouse.get_pos()
         if self.rect.collidepoint(mouse_pos):
@@ -34,7 +34,7 @@ class Button:
 
         # Optional: Draw the text (comment this if you want just the image)
         FONT0 = pygame.font.Font(None, size)  # `None` uses the default system font
-        text_surface = FONT0.render(self.text, True, black)
+        text_surface = FONT0.render(self.text, True, color)
         text_rect = text_surface.get_rect(center=self.rect.center)
         screen.blit(text_surface, text_rect)
 

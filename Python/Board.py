@@ -233,7 +233,7 @@ class Board:
         )
 
         # Draw the button
-        self.back_button.draw(self.screen)
+        self.back_button.draw(self.screen, size = int(self.x_square_size)//4)
 
         # Handle button click
        
@@ -391,7 +391,7 @@ class Board:
         )
 
         # Draw the button
-        self.score_button.draw(self.screen)
+        self.score_button.draw(self.screen, size = int(self.x_square_size)//4)
 
     def update_score(self) :
         """Updates the score by evaluating the current state of the game.
@@ -448,10 +448,11 @@ class Board:
                 self.game.running = False
             elif event.type == pygame.VIDEORESIZE:
                 # Mettre à jour la taille de l'écran
-                self.screen_width, self.screen_height = event.w-event.w%16, event.h-event.h%8
+                 # Update screen size to the event's size directly
+                self.screen_width, self.screen_height = max(event.w, 100), max(event.h, 100)  # Minimum size
                 self.screen = pygame.display.set_mode((self.screen_width, self.screen_height), pygame.RESIZABLE)
                 self.x_square_size = int(self.screen_width / 16)
-                self.y_square_size = int(self.screen_height/8)
+                self.y_square_size = int(self.screen_height / 8)
 
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if pygame.mouse.get_pressed()[0]:  # Left click check

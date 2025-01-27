@@ -1,7 +1,7 @@
 import pygame
 from Board import Board
 from utils import *
-from config import screen_width, screen_height, square_size, white, grey, red, orange, brown, light_brown, highlight_color, black, button_color, button_hover_color
+from config import screen_width, screen_height, white
 from chess_game import ChessGame
 from first_screen import choose_game
 from rematch import Rematch_screen
@@ -11,19 +11,28 @@ pygame.init()
 # Main game loop
 def run() :
     """Main game loop to initialize and run the chess game."""
+    screen_width = 1600
+    screen_height = 800
     screen = pygame.display.set_mode((screen_width, screen_height), pygame.RESIZABLE)
     pygame.display.set_caption("Chess")
     # Draw and update the chessboard
     game = ChessGame(screen)
     board = Board(game,screen)
 
-    white_time,black_time = choose_game(board)
+    white_time,black_time,screen_width,screen_height = choose_game(board)
+    print('screen width', screen_width)
+    board.screen_width = screen_width
+    board.screen_height = screen_height
+    board.screen = pygame.display.set_mode((screen_width, screen_height), pygame.RESIZABLE)
+
     screen.fill(white)
     board.game.time_reg(white_time, black_time)
     board.game.list_of_boards.append(game.chess_board)
     board.game.list_of_times.append((game.white_time, game.black_time))
     k = 0
     while board.game.running:
+        print('screen_width',screen_width)
+        print('screen height', screen_height)
         board.draw_timer()
         #board.handle_add_time_button()
         board.draw_move_back_button()
