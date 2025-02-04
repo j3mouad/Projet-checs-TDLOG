@@ -414,29 +414,14 @@ class Board:
             None
         """
         self.game.screen= self.screen
-    def handle_resize(self,event):
-        """
-        Handles resizing of the window.
-
-        This method is called when the window is resized. It updates the window's 
-        dimensions while ensuring the minimum size is 100x100 pixels. It then 
-        adjusts the chessboard square sizes based on the new window dimensions.
-
-        Parameters:
-        event (pygame.event): The event object containing the new window width and height.
-
-        Updates:
-        - self.screen_width: The new width of the screen.
-        - self.screen_height: The new height of the screen.
-        - self.screen: The display surface is updated with the new dimensions.
-        - self.x_square_size: The new size of the chessboard squares along the x-axis.
-        - self.y_square_size: The new size of the chessboard squares along the y-axis.
-        """
-
+    def handle_reisze(self,event) :
+        # Mettre à jour la taille de l'écran
+        # Update screen size to the event's size directly
         self.screen_width, self.screen_height = max(event.w, 100), max(event.h, 100)  # Minimum size
         self.screen = pygame.display.set_mode((self.screen_width, self.screen_height), pygame.RESIZABLE)
         self.x_square_size = int(self.screen_width / 16)
         self.y_square_size = int(self.screen_height / 8)
+
     def run(self):
         """
         Main game loop. Handles player input, updates the game state, 
@@ -444,18 +429,47 @@ class Board:
         Returns:
             None
         """
+
         self.game.white_king_position = find_king_position(self.game.chess_board,'white')
         self.game.black_king_position = find_king_position(self.game.chess_board,'black')
         
         for event in pygame.event.get():
             self.handle_add_time_button(event)
             self.handle_back_button_click( event)
+            if (self.game.player) :
+                if (self.game.white and self.game.turn == 'black') :
+                            self.game.all_moves()
+                            if (self.game.hard) :
+                                start,end = AI_hard(self.game)
+                            else :
+                                start,end = AI(self.game)
+                            x,y = start 
+                            mx,my = end 
+                            self.game.move_piece(start,end[0],end[1])
+                            self.game.last_move = [start,end]
+                            self.draw_last_move()
+                            self.update_timers()
+                            self.game.change_player()
+                            self.game.all_moves()
+                if (self.game.black and self.game.turn=='white') :
+                            self.game.all_moves()
+                            if (self.game.hard) :
+                                start,end = AI_hard(self.game)
+                            else :
+                                start,end = AI(self.game)
+                            x,y = start 
+                            mx,my = end 
+                            self.game.move_piece(start,mx,my)
+                            self.game.last_move = [start,end]
+                            self.draw_last_move()
+                            self.update_timers()
+                            self.game.change_player()
+                            self.game.all_moves()
+
             if event.type == pygame.QUIT:
                 self.game.running = False
             elif event.type == pygame.VIDEORESIZE:
-                # Mettre à jour la taille de l'écran
-                 # Update screen size to the event's size directly
-                self.handle_resize(event)
+                self.handle_reisze(event)
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if pygame.mouse.get_pressed()[0]:  # Left click check
                     x, y = event.pos
@@ -468,17 +482,25 @@ class Board:
                             self.game.selected_piece = None
                             self.game.possible_moves = []
                         if self.game.selected_piece and (x_square, y_square) in self.game.possible_moves:
+                            #self.game.all_moves()
+                            #self.game.is_king_in_check()
                             self.game.move_piece(self.game.selected_piece, x_square, y_square)
                             click_sound_chess.play()
+                            # Update last move
                             self.game.last_move = [[self.game.selected_piece[0], self.game.selected_piece[1]], [x_square, y_square]]
-                            self.game.update_list_of_boards()                            
+                            # Check if the move results in a check
+                            self.game.update_list_of_boards()
+                            
                             self.game.change_player()
                             self.update_moves()
                             self.game.selected_piece, self.game.possible_moves = None, []  # Reset selected piece and possible moves
                         
                         elif self.game.chess_board[y_square][x_square][0] == self.game.turn[0]:
-                            self.game.selected_piece = (x_square, y_square)
 
+                            # Select a piece if it belongs to the current player
+                            self.game.selected_piece = (x_square, y_square)
+                           # self.game.castling()
+                           # self.game.all_moves()
                             self.game.is_king_in_check()
                             if self.game.turn == 'white':
                                 self.game.possible_moves = deepcopy(self.game.white_moves[(x_square, y_square)])
