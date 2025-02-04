@@ -1,6 +1,6 @@
 import pygame
 from config import *
-from Button import Button
+from button import Button
 
 def Rematch_screen(winner):
     if winner is None :

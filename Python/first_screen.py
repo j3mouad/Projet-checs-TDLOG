@@ -1,40 +1,8 @@
 import pygame
-from Button import Button  # Assuming the Button class is in a separate module
+from button import Button  # Assuming the Button class is in a separate module
 from config import *
 from config import screen_width,screen_height
-from random import shuffle,seed,sample,choice
-
-def shuffle_fischer_row():
-    # Start with empty row
-    row = [''] * 8
-
-    # Place the bishops on opposite-colored squares
-    bishop_positions = sample([0, 2, 4, 6], 1) + sample([1, 3, 5, 7], 1)
-    row[bishop_positions[0]] = 'B'
-    row[bishop_positions[1]] = 'B'
-
-    # Place the king between two rooks
-    open_positions = [i for i in range(8) if row[i] == '']
-    king_position = choice(open_positions[1:-1])
-    row[king_position] = 'K'
-
-    # Rooks on either side of the king
-    left_rook_position =choice([pos for pos in open_positions if pos < king_position])
-    row[left_rook_position] = 'R'
-    right_rook_position =choice([pos for pos in open_positions if pos > king_position])
-    row[right_rook_position] = 'R'
-
-    # Fill remaining positions with queen and knights
-    remaining_positions = [i for i in range(8) if row[i] == '']
-    pieces = ['Q', 'N', 'N']
-    shuffle(pieces)
-    for pos, piece in zip(remaining_positions, pieces):
-        row[pos] = piece
-
-    return row
-
-# Shuffle both rows in the same way for a Fischer Random Chess game
-fischer_row = shuffle_fischer_row()
+from fisher import shuffle_fischer_row
 def choose_game(board):
     """
     Displays a screen where the user can select game options for a chess game.
@@ -57,7 +25,7 @@ def choose_game(board):
     pygame.display.set_caption("Let's play Chess!")
 
     # Load the background image
-    background_image = pygame.image.load("background_image.jpg")  # Update with your image path
+    background_image = pygame.image.load("./images/background_image.jpg")  # Update with your image path
     background_image = pygame.transform.scale(background_image, (screen_width , screen_height))
 
     font = pygame.font.Font(None, int(screen_width/25))
@@ -99,7 +67,7 @@ def choose_game(board):
 
         for button in buttons:
             button.draw(window,size= int(screen_width/50))
-
+        ai = False
         pygame.display.flip()
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
