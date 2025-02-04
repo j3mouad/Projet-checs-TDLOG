@@ -34,7 +34,7 @@ def run():
     # Initialize game components
     game = ChessGame(screen)
     board = Board(game, screen)
-    white_time, black_time, screen_width, screen_height,ai = choose_game(board)
+    white_time, black_time, screen_width, screen_height = choose_game(board)
     board.screen_width = screen_width
     board.screen_height = screen_height
     board.screen = pygame.display.set_mode((screen_width, screen_height), pygame.RESIZABLE)
