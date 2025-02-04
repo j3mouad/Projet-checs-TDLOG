@@ -74,9 +74,9 @@ int Board::evaluatePiece(int x, int y)
     {
         return 0;
     }
-    int factor = -1 + 2*(piece.getColor() == "white");
+    int factor = -1 + 2*(piece.getColor() == getTurn());
     int value = scores[piece.getName()];
-    //value += piece.getScore(x, (8 - 2 * y) * (piece.getColor() == "white") + y);
+    value += piece.getScore(x, (8 - 2 * y) * (piece.getColor() == "black") + y);
     value *= factor;
     return value;
 }
@@ -549,19 +549,6 @@ void Board::show()
         {
             putGreyImage(60 * idxX, 480 - (60 * (idxY + 1)), getPiece(Point(idxX, idxY)).getImage(), 60, 60);
         }
-    }
-}
-
-void Board::print()
-{
-
-    for (int idxY = 7; idxY >= 0; idxY--)
-    {
-        for (int idxX = 0; idxX < 8; idxX++)
-        {
-            cout << getPiece(Point(idxX,idxY)).getName();
-        }
-        cout << endl;
     }
 }
 
@@ -1044,7 +1031,6 @@ int Board::centerControl()
 int Board::evaluateGameinternal()
 {
     int materialScore = evaluateBoard();
-    /*
     int centerScore = centerControl();
     // Pawn structure
 
@@ -1063,8 +1049,8 @@ int Board::evaluateGameinternal()
                       pieceCoordinationScore * 0.6 +
                       controlScore * (0.6 * openingWeight + 0.3 * endGameWeight) +
                       endGameScore * endGameWeight);
-    */
-    return materialScore;
+
+    return totalScore;
 }
 
 void Board::choosePawnHuman(Point point){
