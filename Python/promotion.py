@@ -1,6 +1,5 @@
 from button import Button
 import pygame
-import sys
 from config import *
 
 def Promotion_screen(game,color) :

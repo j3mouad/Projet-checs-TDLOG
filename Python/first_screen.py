@@ -67,7 +67,7 @@ def choose_game(board):
 
         for button in buttons:
             button.draw(window,size= int(screen_width/50))
-
+        ai = False
         pygame.display.flip()
         for event in pygame.event.get():
             if event.type == pygame.QUIT:

@@ -5,13 +5,28 @@ import chess.engine
 from utils import *
 import numpy as np
 import copy
-import os
 from config import *
 from promotion import Promotion_screen
-new_dir = ('/home/hassene/Desktop/Projet-echecs-TDLOG/Python')
-os.chdir(new_dir)
+
 pygame.init()
 
+def find_king_position(chess_board, color):
+
+    """ Args:
+            chess_board (list of list of str): A 2D list representing the chess board.
+            color (str): The color of the king to find ('white' or 'black').
+
+        Returns:
+            tuple: A tuple (x, y) representing the position of the king on the board.
+                   Returns None if the king is not found.
+    """
+
+    for x in range(8):
+        for y in range(8):
+            piece = chess_board[y][x]
+            if piece == f'{color[0]}K':  # Check for white or black king
+                return (x, y)
+    return None
 
 
 class ChessGame:
@@ -125,24 +140,6 @@ class ChessGame:
         self.white_time=white_time
         self.black_time=black_time
     #########################################From here functions will manage logic of the game############################################
-
-    def find_king_position(self, color):
-        """Find the position of the king on the chess board.
-
-        Args:
-            color (str): The color of the king to find ('white' or 'black').
-
-        Returns:
-            tuple: A tuple (x, y) representing the position of the king on the board,
-                   or None if the king is not found.
-        """
-
-        for x in range(8):
-            for y in range(8):
-                piece = self.chess_board[y][x]
-                if piece == f'{color[0]}K':  # Check for white or black king
-                    return (x, y)
-        return None
 
     def flip_board(self):
         """
@@ -508,7 +505,7 @@ class ChessGame:
             bool: True if the king is in check or has been captured, False otherwise.
         """
         color=self.turn[0]
-        king_position = self.get_king_position()
+        king_position = find_king_position(self.chess_board,color)
         if not king_position:
             # King not found, possibly captured
             self.running=False
@@ -572,31 +569,6 @@ class ChessGame:
         self.possible_moves = self.get_possible_moves(x_square, y_square)
         valid_moves = [move for move in self.possible_moves if self.simulate_move_and_check((x_square, y_square), move)]
         return valid_moves
-
-    
-    def get_king_position(self):
-        """
-    Finds and returns the position of the current player's king on the chessboard.
-
-    Returns:
-        tuple: A tuple (x, y) representing the x-coordinate (column index) and y-coordinate (row index)
-               of the current player's king. Returns None if the king is not found on the board.
-
-    The function determines the color of the current player's pieces based on the `self.turn` attribute,
-    which indicates whose turn it is ('w' for white or 'b' for black). It then constructs the identifier
-    for the king of that color ('wK' for the white king or 'bK' for the black king). The function iterates
-    through the chessboard, which is represented as an 8x8 list, to find the square containing the king.
-    Once the king is located, its coordinates are returned as a tuple (x, y). If the king is not found,
-    the function returns None.
-    """
-        color = self.turn[0]
-        king = color + 'K'
-        for y in range(8):
-            for x in range(8):
-                if self.chess_board[y][x] == king:
-                    return (x, y)
-        return None
-    
     
     def check(self, x_square, y_square):
         """
@@ -724,8 +696,8 @@ class ChessGame:
             pygame.time.delay(1000)
             return 0  # Stalemate
         if (self.king_of_the_hill) :
-            x_w,y_w = self.find_king_position('w')
-            x_b,y_b = self.find_king_position('b')
+            x_w,y_w = find_king_position(self.chess_board,'w')
+            x_b,y_b = find_king_position(self.chess_board,'b')
             if (x_w in [3,4] and y_w in [3,4] and self.turn == 'black') :
                 return 1
             if (x_b in [3,4] and y_b in [3,4] and self.turn == 'white'):
