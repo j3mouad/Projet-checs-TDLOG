@@ -1,4 +1,4 @@
-from Button import Button
+from button import Button
 import pygame
 import sys
 from config import *

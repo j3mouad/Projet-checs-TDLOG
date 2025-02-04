@@ -4,15 +4,12 @@ import time
 from random import shuffle
 import os
 from utils import *
-from Button import Button,squares
-from AI import AI,AI_hard,evaluate
+from button import Button
+from ai import AI,AI_hard,evaluate
 # Set the new directory and change the working directory
-new_dir = ('/home/hassene/Desktop/Projet-echecs-TDLOG/Python')
-os.chdir(new_dir)
 from config import *
 # Initialize Pygame
 pygame.init()
-from numba import njit
 
 def find_king_position(chess_board, color):
 

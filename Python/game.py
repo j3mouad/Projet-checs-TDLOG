@@ -1,5 +1,5 @@
 import pygame
-from Board import Board
+from board import Board
 from utils import *
 from config import screen_width, screen_height, white
 from chess_game import ChessGame
@@ -20,7 +20,6 @@ def run() :
     board = Board(game,screen)
 
     white_time,black_time,screen_width,screen_height = choose_game(board)
-    print('screen width', screen_width)
     board.screen_width = screen_width
     board.screen_height = screen_height
     board.screen = pygame.display.set_mode((screen_width, screen_height), pygame.RESIZABLE)
@@ -31,8 +30,6 @@ def run() :
     board.game.list_of_times.append((game.white_time, game.black_time))
     k = 0
     while board.game.running:
-        print('screen_width',screen_width)
-        print('screen height', screen_height)
         board.draw_timer()
         #board.handle_add_time_button()
         board.draw_move_back_button()
