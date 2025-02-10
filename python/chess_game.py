@@ -1,7 +1,7 @@
 import pygame
 from copy import deepcopy
-import chess
-import chess.engine
+#import chess
+#import chess.engine
 from utils import *
 import numpy as np
 import copy
@@ -1014,16 +1014,23 @@ class ChessGame:
             if (x_b in [3,4] and y_b in [3,4] and self.turn == 'white'):
                 return -1
         return None  # Game continues
-
-
+    def update_moves(self) :
+        """updates all moves"""
+        self.castling()
+        self.all_moves()
+        self.change_player()
+        self.castling()
+        self.all_moves()
+        self.change_player()
+"""
 
     def convert_to_chess_board(self):
     
-        """Converts the internal chess board representation to a `chess.Board` object.
+        Converts the internal chess board representation to a `chess.Board` object.
 
         Returns:
         chess.Board: A `chess.Board` object representing the current board state.
-        """
+        
         game = self.copy_game()
         board = chess.Board()
         if (game.turn=='black') :
@@ -1038,13 +1045,13 @@ class ChessGame:
                     square = chess.square(col, 7 - row)
                     board.set_piece_at(square, chess.Piece(piece_type, color))
         return board
-    def evaluate_hard(self):
-        """Evaluates the current chess position using the Stockfish engine.
+    #def evaluate_hard(self):
+        Evaluates the current chess position using the Stockfish engine.
 
         Returns:
         float: The evaluation score for the position, positive for white advantage,
             negative for black advantage. Returns a large number if the engine crashes.
-        """
+        
         stockfish_path = "/usr/games/stockfish"  # Replace with the correct path
         with chess.engine.SimpleEngine.popen_uci(stockfish_path) as engine:
             board = self.convert_to_chess_board()
@@ -1069,9 +1076,4 @@ class ChessGame:
                 evaluation = score.black().score(mate_score=-1e6) if score.is_mate() else score.black().score()
 
             print(f"Turn: {board.turn}, Evaluation: {evaluation}")
-            return evaluation
-
-
-
-
-
+            return evaluation"""

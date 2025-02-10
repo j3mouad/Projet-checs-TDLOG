@@ -7,6 +7,7 @@ from ai import AI,AI_hard,evaluate
 from config import *
 from chess_game import find_king_position
 import subprocess # Path to your compiled C++ executable
+import socket
 
 # Initialize Pygame
 pygame.init()
@@ -443,7 +444,7 @@ class Board:
         self.x_square_size = int(self.screen_width / 16)
         self.y_square_size = int(self.screen_height / 8)
 
-    def run(self):
+    def run(self,conn=None):
         """
         Main game loop.
 
@@ -461,10 +462,10 @@ class Board:
             self.handle_back_button_click(event)
         
             # Process AI moves if applicable.
-            self.handle_ai_moves()
+            self.handle_ai_moves(conn)
         
             # Process system and user events.
-            self.process_event(event)
+            self.process_event(event,conn)
         
             # Update the display.
             pygame.display.flip()
@@ -489,7 +490,7 @@ class Board:
 
 
 
-    def handle_ai_moves(self):
+    def handle_ai_moves(self,conn):
         """
         Process an AI move if the game is in player mode and it is the AI's turn.
 
@@ -503,10 +504,10 @@ class Board:
             (self.game.white and self.game.turn == 'black') or
             (self.game.black and self.game.turn == 'white')
         ):
-            self.process_ai_move()
+            self.process_ai_move(conn)
 
 
-    def process_ai_move(self):
+    def process_ai_move(self,conn):
         """
         Execute an AI move.
 
@@ -521,10 +522,10 @@ class Board:
         if self.game.hard:
             start, end = AI_hard(self.game)
         else:
-            cpp_executable = "path/to/your_program.exe" # Use "./your_program" on Linux/Mac # Run the C++ program subprocess.run(cpp_executable)
-            start, end = AI(self.game,self.game.last_move[0],self.game.last_move[1])
+            start, end = AI(self.game,self.game.last_move[0],self.game.last_move[1],conn)
     
         # Execute the move.
+        print('in board ',start,'  ',end)
         self.game.move_piece(start, end[0], end[1])
         self.game.last_move = [start, end]
     
@@ -535,7 +536,7 @@ class Board:
         self.game.all_moves()
 
 
-    def process_event(self, event):
+    def process_event(self, event,conn):
         """
         Process system events such as quitting, window resizing, and mouse button clicks.
 

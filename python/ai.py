@@ -1,6 +1,8 @@
 import numpy as np
 import socket
 from random import randint
+import subprocess 
+
 def string_to_tuples(input_string):
     # Remove the parentheses and split the string by the commas
     input_string = input_string.strip('()')
@@ -205,7 +207,7 @@ def center_control(game) :
                 score-=1
     return score
 
-def evaluate(game,transposition_table):
+def evaluate(game,transporation_table):
     """Calculates the total evaluation score for the game based on various factors."""
     # Control of key squares
     material_score = evaluate_material(game)
@@ -231,34 +233,27 @@ def evaluate(game,transposition_table):
 
 
 
-def AI(game, start_pos, end_pos):
-    HOST = '127.0.0.1'  # Localhost
-    PORT = 8080         # Port to listen on
-    game.move_piece(start_pos, end_pos[0], end_pos[1])
-    game.change_player()
-    game.update_moves()
-    response = f"{start_pos[0]},{start_pos[1]} {end_pos[0]},{end_pos[1]}"
-    conn.sendall(response.encode())
-    # Create a TCP socket
-    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-        s.bind((HOST, PORT))
-        s.listen()
-        print("Server is listening for connections...")
+def AI(game, start_pos, end_pos,conn):
 
-        conn, addr = s.accept()
-        with conn:
-            print(f"Connected by {addr}")
-            while True:
+    while True:
+                response = "("+str(start_pos[0])+","+str(7-start_pos[1])+"),("+ str(end_pos[0])+"," + str(7-end_pos[1])+ ")"
+                print(response)
+                print(conn)
+                conn.sendall(response.encode())
                 # Receive data from C++ client
                 data = conn.recv(1024)
+                print('data is None ',data is None)
+                print(data)
+                print(data.decode())
+                print('new line')
                 if not data:
                     break
                 print("Received from client:", data.decode())
                 start_pos_0,end_pos_0 = string_to_tuples(data.decode())
-                # Format response with start_pos and end_pos
-                game.move_piece(start_pos_0, end_pos_0[0], end_pos_0[1])
-                game.change_player()
-                game.update_moves()
+                print('star pos is ',start_pos_0)
+                print('end pos is ',end_pos_0)
+                return start_pos_0,end_pos_0
+            
 def AI_hard(game) :
     game.all_moves()
     game.change_player()

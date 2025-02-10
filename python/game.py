@@ -6,7 +6,7 @@ from chess_game import ChessGame
 from first_screen import choose_game
 from rematch import Rematch_screen
 pygame.init()
-def run():
+def run(conn):
     """
     Initializes and runs the main chess game loop.
 
@@ -55,7 +55,7 @@ def run():
         board.draw_king_in_check()
         board.draw_selected_piece()
         board.draw_pieces()
-        board.run()
+        board.run(conn)
         board.update_score()
         board.draw_move()
         board.update_moves()

@@ -307,51 +307,88 @@ void Game::play_against_ai(){
     int x_chosen, y_chosen, idx_chosen, idx_piece_chosen;
     int x_chosen_2, y_chosen_2;
     map<Point,vector<Point>> MapOfMoves;
-    string message = "Hello from C++ client!";
-    send(sock, message.c_str(), message.size(), 0);
-    cout << "Message sent: " << message << std::endl;
-
     // Receive response from the server
-    int valread = recv(sock, buffer, 1024, 0);
-    if (valread > 0) {
-        cout << "Received from server: " << buffer << std::endl;
-        memset(buffer, 0, sizeof(buffer));
-    }
-    while (!game_over){
-        int valread = recv(sock, buffer, 1024, 0);
-        while(valread <= 0){
-            valread = recv(sock,buffer,1024,0);
-            Imagine::milliSleep(200);
+    int valread;
+    while (!game_over) {
+        std::cout << "Waiting for server response..." << std::endl;
+
+        // Receive data from the server
+        int totalRead = 0;
+        while (totalRead < 11) { // Wait for 12 characters (fixed message size)
+            int valread = recv(sock, buffer + totalRead, 11 - totalRead, 0);
+            if (valread > 0) {
+                totalRead += valread;
+            } else if (valread == 0) {
+                std::cerr << "Connection closed by server\n";
+                closesocket(sock);
+                WSACleanup();
+                return;
+            } else {
+                std::cerr << "recv failed: " << WSAGetLastError() << "\n";
+                closesocket(sock);
+                WSACleanup();
+                return;
+            }
         }
-        memset(buffer, 0, sizeof(buffer));
 
-        Point iniMove = Point(stoi(string(1,buffer[1])),stoi(string(1,buffer[3])));
-        Point finMove = Point(stoi(string(1,buffer[7])),stoi(string(1,buffer[9])));
+        buffer[12] = '\0'; // Null-terminate the received data
+        std::string receivedData(buffer);
+        std::cout << "Received command: " << receivedData << std::endl;
 
-        if (!gameBoard.isBoardCalculated()){
+        // Parse the received data
+        Point iniMove = Point(receivedData[1] - '0', receivedData[3] - '0'); // Initial move position
+        Point finMove = Point(receivedData[7] - '0', receivedData[9] - '0'); // Final move position
+
+        std::cout << "Initial Move: " << iniMove << std::endl;
+        std::cout << "Final Move: " << finMove << std::endl;
+
+        // Update the game board and check for game over
+        if (!gameBoard.isBoardCalculated()) {
             gameBoard.updateBoard();
         }
-        MapOfMoves = gameBoard.getMoves();
-        if(gameBoard.gameOver() != "NONE"){
-            cout << gameBoard.gameOver() << endl;
+
+        auto MapOfMoves = gameBoard.getMoves();
+        if (gameBoard.gameOver() != "NONE") {
+            std::cout << "Game Over: " << gameBoard.gameOver() << std::endl;
             break;
-        };
-        gameBoard.movePieceoff(iniMove,finMove);
+        }
+
+        // Execute the move received from the server
+        gameBoard.movePieceoff(iniMove, finMove);
         moveNumber++;
         gameBoards[moveNumber] = gameBoard;
-        if(gameBoard.gameOver() != "NONE"){
-            cout << gameBoard.gameOver() << endl;
+
+        // Check if the game is over after the move
+        if (gameBoard.gameOver() != "NONE") {
+            std::cout << "Game Over: " << gameBoard.gameOver() << std::endl;
             break;
-        };
-        pair<Point,Point> bestMove = getMinimaxMove(2);
-        gameBoard.movePieceoff(bestMove.first,bestMove.second,false);
+        }
+
+        // Get the AI's best move using Minimax
+        auto bestMove = getMinimaxMove(2); // Assuming getMinimaxMove returns a pair of Points
+        gameBoard.movePieceoff(bestMove.first, bestMove.second, false); // Execute AI's move
         moveNumber++;
         gameBoards[moveNumber] = gameBoard;
-        string message = "("+to_string(bestMove.first.getX())+","+to_string(bestMove.first.getY())+"),("+to_string(bestMove.second.getX()) +","+to_string(bestMove.second.getY())+")";
-        send(sock, message.c_str(), message.size(), 0);
-        
+
+        // Send the AI's move back to the server
+        std::string message = "(" + std::to_string(bestMove.first.getX()) + "," + std::to_string(7 - bestMove.first.getY()) + "),(" +
+                              std::to_string(bestMove.second.getX()) + "," + std::to_string(7 - bestMove.second.getY()) + ")";
+        if (send(sock, message.c_str(), message.size(), 0) == SOCKET_ERROR) {
+            std::cerr << "Send failed: " << WSAGetLastError() << "\n";
+            closesocket(sock);
+            WSACleanup();
+            return;
+        }
+
+        std::cout << "Sent AI move: " << message << std::endl;
     }
-}
+
+    // Clean up
+    delete[] gameBoards; // Free dynamically allocated memory
+    closesocket(sock); // Close the socket
+    WSACleanup(); // Clean up Winsock
+}    
+
 
 int Game::minimax(int depth, int alpha, int beta) {
     if (!gameBoard.isBoardCalculated()) {
