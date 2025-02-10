@@ -27,7 +27,7 @@ def Rematch_screen(winner):
 
     running = True
     while running:
-        screen.fill(white)  # Fill the screen with white
+        screen.fill(WHITE)  # Fill the screen with white
 
         # Display the winner message
         screen.blit(winner_surface, winner_rect)

@@ -1,7 +1,7 @@
 import pygame
 from board import Board
 from utils import *
-from config import  white
+from config import WHITE
 from chess_game import ChessGame
 from first_screen import choose_game
 from rematch import Rematch_screen
@@ -38,7 +38,7 @@ def run():
     board.screen_width = screen_width
     board.screen_height = screen_height
     board.screen = pygame.display.set_mode((screen_width, screen_height), pygame.RESIZABLE)
-    screen.fill(white)
+    screen.fill(WHITE)
 
     board.game.time_reg(white_time, black_time)
     board.game.list_of_boards.append(game.chess_board)
@@ -78,7 +78,7 @@ def run():
             game = ChessGame(screen)
             board = Board(game, screen)
             white_time, black_time = choose_game(board)
-            screen.fill(white)
+            screen.fill(WHITE)
             board.game.time_reg(white_time, black_time)
             board.game.list_of_boards.append(game.chess_board)
             board.game.list_of_times.append((game.white_time, game.black_time))
