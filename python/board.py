@@ -6,8 +6,6 @@ from button import Button
 from ai import AI,AI_hard,evaluate
 from config import *
 from chess_game import find_king_position
-import subprocess # Path to your compiled C++ executable
-
 # Initialize Pygame
 pygame.init()
 class Board:
@@ -250,8 +248,7 @@ class Board:
         self.screen_width, self.screen_height = event.w, event.h
         self.screen = pygame.display.set_mode((self.screen_width, self.screen_height), pygame.RESIZABLE)
         self.x_square_size = int(self.screen_width / 16)
-        self.y_square_size = int(self.screen_height / 8)
-
+        self.y_square_size = int(self.screen_height / 8)                
 
 
     def handle_back_button_click(self, event):
@@ -521,8 +518,7 @@ class Board:
         if self.game.hard:
             start, end = AI_hard(self.game)
         else:
-            cpp_executable = "path/to/your_program.exe" # Use "./your_program" on Linux/Mac # Run the C++ program subprocess.run(cpp_executable)
-            start, end = AI(self.game,self.game.last_move[0],self.game.last_move[1])
+            start, end = AI(self.game)
     
         # Execute the move.
         self.game.move_piece(start, end[0], end[1])
