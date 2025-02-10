@@ -1,23 +1,12 @@
-/*
+
 #include <iostream> 
 using namespace std;
 #include "game.h"
-
-int main(){
-    openWindow(480,580);
-    Game game;
-    game.play_against_ai();
-    endGraphics();
-    return 0;
-}
-*/
-#include <iostream>
+#pragma comment(lib, "Ws2_32.lib")
 #include <winsock2.h>
 #include <ws2tcpip.h>
-
-#pragma comment(lib, "Ws2_32.lib")
-
 #define PORT 8080
+
 
 int main() {
     WSADATA wsaData;
@@ -72,4 +61,3 @@ int main() {
     WSACleanup();
     return 0;
 }
-

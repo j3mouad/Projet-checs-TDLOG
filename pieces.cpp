@@ -77,19 +77,21 @@ string Piece::hashPiece() const{
     }
 }
 
+
+
 // Define the paths 
-const char* pathPawnWhite = srcPath("Python/white_pawn.png");
-const char* pathPawnBlack = srcPath("Python/black_pawn.png");
-const char* pathKingWhite = srcPath("Python/white_king.png");
-const char* pathKingBlack = srcPath("Python/black_king.png");
-const char* pathKnightWhite = srcPath("Python/white_knight.png");
-const char* pathKnightBlack = srcPath("Python/black_knight.png");
-const char* pathRookWhite = srcPath("Python/white_rook.png");
-const char* pathRookBlack = srcPath("Python/black_rook.png");
-const char* pathBishopWhite = srcPath("Python/white_bishop.png");
-const char* pathBishopBlack = srcPath("Python/black_bishop.png");
-const char* pathQueenWhite = srcPath("Python/white_queen.png");
-const char* pathQueenBlack = srcPath("Python/black_queen.png");
+const char* pathPawnWhite = srcPath("python/images/white_pawn.png");
+const char* pathPawnBlack = srcPath("python/images/black_pawn.png");
+const char* pathKingWhite = srcPath("python/images/white_king.png");
+const char* pathKingBlack = srcPath("python/images/black_king.png");
+const char* pathKnightWhite = srcPath("python/images/white_knight.png");
+const char* pathKnightBlack = srcPath("python/images/black_knight.png");
+const char* pathRookWhite = srcPath("python/images/white_rook.png");
+const char* pathRookBlack = srcPath("python/images/black_rook.png");
+const char* pathBishopWhite = srcPath("python/images/white_bishop.png");
+const char* pathBishopBlack = srcPath("python/images/black_bishop.png");
+const char* pathQueenWhite = srcPath("python/images/white_queen.png");
+const char* pathQueenBlack = srcPath("python/images/black_queen.png");
 const char* pathEmpty = srcPath("");
 
 // Define move sets as const arrays
