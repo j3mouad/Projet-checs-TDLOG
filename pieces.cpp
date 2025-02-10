@@ -4,7 +4,7 @@
 // Constructors
 Piece::Piece(string names, string colors, bool infiniteMovess, const Point* elemMoveSets, int numOfMovess, const char* path, const int* Scores){
     int width,height;
-    loadGreyImage(path,image,width,height);
+    Imagine::loadGreyImage(path,image,width,height);
     if(height != 60 || width != 60) cout << "something's not right" << endl;
     name = names;
     color = colors;
@@ -16,7 +16,7 @@ Piece::Piece(string names, string colors, bool infiniteMovess, const Point* elem
 
 Piece::Piece(string names, string colors, bool infiniteMovess, const Point* elemMoveSets, const Point* attackMoveSets, int numOfMovess, int numOfAttackMovess, const char* path, const int* Scores){
     int width,height;
-    loadGreyImage(path,image,width,height);
+    Imagine::loadGreyImage(path,image,width,height);
     if(height != 60 || width != 60) cout << "something's not right" << endl;
     name = names;
     color = colors;

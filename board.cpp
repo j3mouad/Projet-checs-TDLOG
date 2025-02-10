@@ -425,7 +425,7 @@ void Board::updateEnPassant(Piece* piece, Point Position1, Point Position2) {
 void Board::show() {
     for (int idxY = 7; idxY >= 0; idxY--) {
         for (int idxX = 0; idxX < 8; idxX++) {
-            putGreyImage(60 * idxX, 480 - (60 * (idxY + 1)), getPiece(Point(idxX, idxY))->getImage(), 60, 60);
+            Imagine::putGreyImage(60 * idxX, 480 - (60 * (idxY + 1)), getPiece(Point(idxX, idxY))->getImage(), 60, 60);
         }
     }
 }

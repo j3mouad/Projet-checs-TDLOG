@@ -20,8 +20,8 @@ void Game::play(){
     map<Point,vector<Point>> MapOfMoves;
     while (!game_over){
         cout << "size of the hashmap is : "<< Hashmap.size() << endl;
-        clearWindow();
-        fillRect(0,480,480,100,RED);
+        Imagine::clearWindow();
+        Imagine::fillRect(0,480,480,100,Imagine::RED);
         if (!gameBoard.isBoardCalculated()){
             gameBoard.updateBoard();
         }
@@ -34,7 +34,7 @@ void Game::play(){
             break;
         };
         //if (test == 0) break;
-        getMouse(x_chosen,y_chosen);
+        Imagine::getMouse(x_chosen,y_chosen);
         if(y_chosen >= 480){
             undo();
             continue;
@@ -52,9 +52,9 @@ void Game::play(){
             graphicalMoves[point] = idx;
         }
         for(int idx = 0; idx < vect.size(); idx++){
-            fillRect(vect[idx].getX()*60,480-(vect[idx].getY()+1)*60,60,60,Color(120,120,120));
+            Imagine::fillRect(vect[idx].getX()*60,480-(vect[idx].getY()+1)*60,60,60,Imagine::Color(120,120,120));
         }
-        getMouse(x_chosen_2,y_chosen_2);
+        Imagine::getMouse(x_chosen_2,y_chosen_2);
         x_chosen_2 = x_chosen_2/60;
         y_chosen_2 = (480-y_chosen_2-1)/60;
         if (graphicalMoves.find(Point(x_chosen_2, y_chosen_2)) == graphicalMoves.end()) {
@@ -321,6 +321,7 @@ void Game::play_against_ai(){
         int valread = recv(sock, buffer, 1024, 0);
         while(valread <= 0){
             valread = recv(sock,buffer,1024,0);
+            Imagine::milliSleep(200);
         }
         memset(buffer, 0, sizeof(buffer));
 
