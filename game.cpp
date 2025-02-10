@@ -333,7 +333,7 @@ void Game::play_against_ai(){
             cout << gameBoard.gameOver() << endl;
             break;
         };
-        pair<Point,Point> bestMove = getMinimaxMove(4);
+        pair<Point,Point> bestMove = getMinimaxMove(2);
         gameBoard.movePieceoff(bestMove.first,bestMove.second,false);
         moveNumber++;
         gameBoards[moveNumber] = gameBoard;
@@ -342,64 +342,79 @@ void Game::play_against_ai(){
 }
 
 
-int Game::minimax(int depth, int alpha, int beta){
-    if (!gameBoard.isBoardCalculated()){
-            gameBoard.updateBoard();
+int Game::minimax(int depth, int alpha, int beta) {
+    if (!gameBoard.isBoardCalculated()) {
+        gameBoard.updateBoard();
     }
-    if (depth == 0){
+    // Terminal condition: reached maximum search depth.
+    if (depth == 0) {
         return gameBoard.evaluateGame();
     }
-    if (gameBoard.gameOver() != "NONE"){
-        if(gameBoard.gameOver() == "white won"){
+    // Check for game over.
+    if (gameBoard.gameOver() != "NONE") {
+        if (gameBoard.gameOver() == "white won") {
             return INT_MAX;
-        } else if(gameBoard.gameOver() == "black won"){
+        } else if (gameBoard.gameOver() == "black won") {
             return -INT_MAX;
         } else {
             return 0;
         }
     }
-    if(gameBoard.isMinimaxDepthStored(depth)){
+    // (Optional) Look up cached minimax results if you have implemented that.
+    if (gameBoard.isMinimaxDepthStored(depth)) {
         return gameBoard.getMinimaxDepth(depth);
     }
-    if(gameBoard.getTurn() == "white"){
-        int maxEval = - INT_MAX;
-        for(const auto& pair : gameBoard.getMoves()){
-            for (const auto& point : pair.second){
-                gameBoard.movePieceoff(pair.first,point,false);
+
+    // Get all legal moves.
+    auto moves = gameBoard.getMoves();
+
+    // Save the current turn.
+    string currentTurn = gameBoard.getTurn();
+    
+    if (currentTurn == "white") {
+        int maxEval = -INT_MAX;
+        for (const auto& movePair : moves) {
+            for (const auto& dest : movePair.second) {
+                // Make the move.
+                gameBoard.movePieceoff(movePair.first, dest, false);
                 moveNumber++;
                 gameBoards[moveNumber] = gameBoard;
-                int eval = minimax(depth -1,alpha,beta);
+                // Recursively evaluate.
+                int eval = minimax(depth - 1, alpha, beta);
+                Hashmap[gameBoard.hashBoard()].setMinimaxDepth(depth-1,eval);
+                // Undo the move.
                 undo();
-                maxEval = max(maxEval,eval);
-                alpha = max(alpha,eval);
-                if (beta <= alpha){
-                    break;
+                maxEval = max(maxEval, eval);
+                alpha = max(alpha, eval);
+                if (beta <= alpha) {
+                    break; // Beta cutoff.
                 }
             }
-            if (beta <= alpha){
-                break;
+            if (beta <= alpha) {
+                break; // Beta cutoff.
             }
         }
+        // (Optional) Cache the computed minimax score here.
         gameBoard.setMinimaxScore(maxEval);
         gameBoards[moveNumber].setMinimaxScore(maxEval);
         return maxEval;
-    } else {
+    } else { // currentTurn == "black"
         int minEval = INT_MAX;
-        for(const auto& pair : gameBoard.getMoves()){
-            for (const auto& point : pair.second){
-                gameBoard.movePieceoff(pair.first,point,false);
+        for (const auto& movePair : moves) {
+            for (const auto& dest : movePair.second) {
+                gameBoard.movePieceoff(movePair.first, dest, false);
                 moveNumber++;
                 gameBoards[moveNumber] = gameBoard;
-                int eval = minimax(depth -1,alpha,beta);
+                int eval = minimax(depth - 1, alpha, beta);
                 undo();
-                minEval = min(minEval,eval);
-                beta = min(beta,eval);
-                if (beta <= alpha){
-                    break;
+                minEval = min(minEval, eval);
+                beta = min(beta, eval);
+                if (beta <= alpha) {
+                    break; // Alpha cutoff.
                 }
             }
-            if (beta <= alpha){
-                break;
+            if (beta <= alpha) {
+                break; // Alpha cutoff.
             }
         }
         gameBoard.setMinimaxScore(minEval);
@@ -408,62 +423,53 @@ int Game::minimax(int depth, int alpha, int beta){
     }
 }
 
-pair<Point,Point> Game::getMinimaxMove(int depth){
-    if (!gameBoard.isBoardCalculated()){
-            gameBoard.updateBoard();
+pair<Point, Point> Game::getMinimaxMove(int depth) {
+    if (!gameBoard.isBoardCalculated()) {
+        gameBoard.updateBoard();
     }
-    map<Point,vector<Point>> moves = gameBoard.getMoves();
-    auto it = moves.begin();
-    pair<Point,Point> bestMove = make_pair(it->first,(it->second)[0]);
-    pair<Point,Point> move;
-    gameBoard.movePieceoff(bestMove.first,bestMove.second);
-    moveNumber++;
-    gameBoards[moveNumber] = gameBoard;
-    int bestScore = minimax(depth-1);
-    int score;
-    undo();
-    if (gameBoard.getTurn() == "white"){
-        for(const auto& pair : moves){
-            for (const auto& point : pair.second){
-                move = make_pair(pair.first,point);
-                gameBoard.movePieceoff(move.first,move.second,false);
-                moveNumber++;
-                score = minimax(depth-1);
-                cout << score << endl;
-                gameBoards[moveNumber] = gameBoard;
-                undo();
-                if (score < bestScore){
-                    bestMove = move;
+    // Retrieve all legal moves.
+    auto moves = gameBoard.getMoves();
+    if (moves.empty()) {
+        // No legal moves—return an invalid move.
+        return make_pair(Point(-1, -1), Point(-1, -1));
+    }
+    // Save the AI's color (the player whose turn it is before making any move).
+    string aiColor = gameBoard.getTurn();
+    
+    pair<Point, Point> bestMove;
+    int bestScore = 0;
+    bool firstMove = true;
+    
+    // Loop through every legal move.
+    for (const auto& movePair : moves) {
+        for (const auto& dest : movePair.second) {
+            pair<Point, Point> move = make_pair(movePair.first, dest);
+            // Make the move (without changing castling, etc.).
+            gameBoard.movePieceoff(move.first, move.second, false);
+            moveNumber++;
+            gameBoards[moveNumber] = gameBoard;
+            // Use alpha-beta with the full window.
+            int score = minimax(depth - 1, -INT_MAX, INT_MAX);
+            // Undo the move to restore the board.
+            undo();
+            // For the very first move, initialize bestScore.
+            if (firstMove) {
+                bestScore = score;
+                bestMove = move;
+                firstMove = false;
+            } else {
+                // For white, we want to maximize; for black, minimize.
+                if (aiColor == "white" && score > bestScore) {
                     bestScore = score;
+                    bestMove = move;
+                } else if (aiColor == "black" && score < bestScore) {
+                    bestScore = score;
+                    bestMove = move;
                 }
             }
         }
-        return bestMove;
-    } else {
-        for(const auto& pair : moves){
-            for (const auto& point : pair.second){
-                move = make_pair(pair.first,point);
-                cout << pair.first << "," << point << endl;
-                gameBoard.movePieceoff(move.first,move.second,false);
-                moveNumber++;
-                if(gameBoard.isMinimaxCalc()){
-                    cout << "1   :::::::   1" << endl;
-                    score = gameBoard.ScoreMinimax();
-                } else{
-                    score = minimax(depth-1);
-                }
-                cout <<"score :"<<score << endl;
-                gameBoards[moveNumber] = gameBoard;
-                undo();
-                if (score > bestScore){
-                    bestMove = move;
-                    bestScore = score;
-                }
-            }
-        }
-        cout << " test 5 ::: 5 " << endl;
-        return bestMove;
     }
+    return bestMove;
 }
 
 /*

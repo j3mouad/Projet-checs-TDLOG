@@ -20,4 +20,8 @@ add_executable(Projet-echecs-TDLOG
     pieces.cpp
 )
 
+if (WIN32)
+    target_link_libraries(Projet-echecs-TDLOG Ws2_32)
+endif()
 target_link_libraries(Projet-echecs-TDLOG Imagine::Graphics)
+
