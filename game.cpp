@@ -1,4 +1,11 @@
 #include "game.h"
+#pragma comment(lib, "Ws2_32.lib")
+#include <winsock2.h>
+#include <ws2tcpip.h>
+#define PORT 8080
+#include <iostream>
+using namespace std;
+
 
 void Game::play(){
     gameBoards = new Board[10000];
@@ -13,8 +20,8 @@ void Game::play(){
     map<Point,vector<Point>> MapOfMoves;
     while (!game_over){
         cout << "size of the hashmap is : "<< Hashmap.size() << endl;
-        clearWindow();
-        fillRect(0,480,480,100,RED);
+        Imagine::clearWindow();
+        Imagine::fillRect(0,480,480,100,Imagine::RED);
         if (!gameBoard.isBoardCalculated()){
             gameBoard.updateBoard();
         }
@@ -27,7 +34,7 @@ void Game::play(){
             break;
         };
         //if (test == 0) break;
-        getMouse(x_chosen,y_chosen);
+        Imagine::getMouse(x_chosen,y_chosen);
         if(y_chosen >= 480){
             undo();
             continue;
@@ -35,7 +42,7 @@ void Game::play(){
         x_chosen = x_chosen/60;
         y_chosen = (480-y_chosen-1)/60;
         vector<Point> vect = MapOfMoves[Point(x_chosen,y_chosen)];
-        cout << "the piece is : " << gameBoard.getPiece(Point(x_chosen,y_chosen)).getName() <<" and its color is :" << gameBoard.getPiece(Point(x_chosen,y_chosen)).getColor()<< endl;
+        cout << "the piece is : " << (gameBoard.getPiece(Point(x_chosen,y_chosen)))->getName() <<" and its color is :" << (gameBoard.getPiece(Point(x_chosen,y_chosen)))->getColor()<< endl;
         if(vect.size() == 0){
             continue;
         }
@@ -45,9 +52,9 @@ void Game::play(){
             graphicalMoves[point] = idx;
         }
         for(int idx = 0; idx < vect.size(); idx++){
-            fillRect(vect[idx].getX()*60,480-(vect[idx].getY()+1)*60,60,60,Color(120,120,120));
+            Imagine::fillRect(vect[idx].getX()*60,480-(vect[idx].getY()+1)*60,60,60,Imagine::Color(120,120,120));
         }
-        getMouse(x_chosen_2,y_chosen_2);
+        Imagine::getMouse(x_chosen_2,y_chosen_2);
         x_chosen_2 = x_chosen_2/60;
         y_chosen_2 = (480-y_chosen_2-1)/60;
         if (graphicalMoves.find(Point(x_chosen_2, y_chosen_2)) == graphicalMoves.end()) {
@@ -265,6 +272,33 @@ void Game::play_fisher(bool onevone){
 */
 
 void Game::play_against_ai(){
+    WSADATA wsaData;
+    SOCKET sock = INVALID_SOCKET;
+    struct sockaddr_in server_addr;
+    char buffer[1024] = {0};
+
+    // Initialize Winsock
+    if (WSAStartup(MAKEWORD(2, 2), &wsaData) != 0) {
+        std::cerr << "WSAStartup failed\n";
+    }
+
+    // Create socket
+    if ((sock = socket(AF_INET, SOCK_STREAM, 0)) == INVALID_SOCKET) {
+        std::cerr << "Socket creation failed: " << WSAGetLastError() << "\n";
+        WSACleanup();
+    }
+
+    server_addr.sin_family = AF_INET;
+    server_addr.sin_port = htons(PORT);
+    server_addr.sin_addr.s_addr = inet_addr("127.0.0.1");
+
+    // Connect to the Python server
+    if (connect(sock, (struct sockaddr*)&server_addr, sizeof(server_addr)) == SOCKET_ERROR) {
+        std::cerr << "Connection failed: " << WSAGetLastError() << "\n";
+        closesocket(sock);
+        WSACleanup();
+    }
+
     gameBoards = new Board[10000];
     gameBoard.setGameMap(&Hashmap);
     gameBoards[0] = gameBoard;
@@ -273,62 +307,38 @@ void Game::play_against_ai(){
     int x_chosen, y_chosen, idx_chosen, idx_piece_chosen;
     int x_chosen_2, y_chosen_2;
     map<Point,vector<Point>> MapOfMoves;
+    string message = "Hello from C++ client!";
+    send(sock, message.c_str(), message.size(), 0);
+    cout << "Message sent: " << message << std::endl;
+
+    // Receive response from the server
+    int valread = recv(sock, buffer, 1024, 0);
+    if (valread > 0) {
+        cout << "Received from server: " << buffer << std::endl;
+        memset(buffer, 0, sizeof(buffer));
+    }
     while (!game_over){
-        cout << gameBoard.isBoardCalculated() << endl;
-        cout << "size of hashmap is : " << Hashmap.size() << endl;
-        clearWindow();
-        fillRect(0,480,480,100,RED);
+        int valread = recv(sock, buffer, 1024, 0);
+        while(valread <= 0){
+            valread = recv(sock,buffer,1024,0);
+            Imagine::milliSleep(200);
+        }
+        memset(buffer, 0, sizeof(buffer));
+
+        Point iniMove = Point(stoi(string(1,buffer[1])),stoi(string(1,buffer[3])));
+        Point finMove = Point(stoi(string(1,buffer[7])),stoi(string(1,buffer[9])));
+
         if (!gameBoard.isBoardCalculated()){
             gameBoard.updateBoard();
         }
         MapOfMoves = gameBoard.getMoves();
-        gameBoard.show();
-        cout << "choose a piece to find the relevant moves" << endl;
-        //int test;
-        //cin >> test;
         if(gameBoard.gameOver() != "NONE"){
             cout << gameBoard.gameOver() << endl;
             break;
         };
-        //if (test == 0) break;
-        getMouse(x_chosen,y_chosen);
-        if(y_chosen >= 480){
-            undo();
-            undo();
-            continue;
-        }
-        x_chosen = x_chosen/60;
-        y_chosen = (480-y_chosen-1)/60;
-        cout << "x : " << x_chosen << " ; y : " << y_chosen << endl; 
-        vector<Point> vect = MapOfMoves[Point(x_chosen,y_chosen)];
-        cout << "the piece is : " << gameBoard.getPiece(Point(x_chosen,y_chosen)).getName() <<" and its color is :" << gameBoard.getPiece(Point(x_chosen,y_chosen)).getColor()<< endl;
-        if(vect.size() == 0){
-            continue;
-        }
-        map<Point,int> graphicalMoves;
-        for (int idx = 0; idx < vect.size(); idx++){
-            Point point = vect[idx];
-            graphicalMoves[point] = idx;
-        }
-        for(int idx = 0; idx < vect.size(); idx++){
-            fillRect(vect[idx].getX()*60,480-(vect[idx].getY()+1)*60,60,60,Color(120,120,120));
-        }
-        getMouse(x_chosen_2,y_chosen_2);
-        x_chosen_2 = x_chosen_2/60;
-        y_chosen_2 = (480-y_chosen_2-1)/60;
-        if (graphicalMoves.find(Point(x_chosen_2, y_chosen_2)) == graphicalMoves.end()) {
-            continue;
-        }
-        idx_chosen = graphicalMoves[Point(x_chosen_2, y_chosen_2)];
-        if (gameBoard.movePieceoff(Point(x_chosen,y_chosen),vect[idx_chosen])){
-            cout << "game over" << endl;
-            game_over = true;
-        }
-        cout << "move made" << endl;
-        cout << gameBoard.isBoardCalculated() << endl;
+        gameBoard.movePieceoff(iniMove,finMove);
         moveNumber++;
         gameBoards[moveNumber] = gameBoard;
-        cout << gameBoard.getTurn() << endl;
         if(gameBoard.gameOver() != "NONE"){
             cout << gameBoard.gameOver() << endl;
             break;
@@ -337,12 +347,141 @@ void Game::play_against_ai(){
         gameBoard.movePieceoff(bestMove.first,bestMove.second,false);
         moveNumber++;
         gameBoards[moveNumber] = gameBoard;
+        string message = "("+to_string(bestMove.first.getX())+","+to_string(bestMove.first.getY())+"),("+to_string(bestMove.second.getX()) +","+to_string(bestMove.second.getY())+")";
+        send(sock, message.c_str(), message.size(), 0);
         
     }
 }
 
+int Game::minimax(int depth, int alpha, int beta) {
+    if (!gameBoard.isBoardCalculated()) {
+        gameBoard.updateBoard();
+    }
+    // Terminal condition: reached maximum search depth.
+    if (depth == 0) {
+        return gameBoard.evaluateGame();
+    }
+    // Check for game over.
+    if (gameBoard.gameOver() != "NONE") {
+        if (gameBoard.gameOver() == "white won") {
+            return INT_MAX;
+        } else if (gameBoard.gameOver() == "black won") {
+            return -INT_MAX;
+        } else {
+            return 0;
+        }
+    }
+    // (Optional) Look up cached minimax results if you have implemented that.
+    if (gameBoard.isMinimaxDepthStored(depth)) {
+        return gameBoard.getMinimaxDepth(depth);
+    }
 
-c
+    // Get all legal moves.
+    auto moves = gameBoard.getMoves();
+
+    // Save the current turn.
+    string currentTurn = gameBoard.getTurn();
+    
+    if (currentTurn == "white") {
+        int maxEval = -INT_MAX;
+        for (const auto& movePair : moves) {
+            for (const auto& dest : movePair.second) {
+                // Make the move.
+                gameBoard.movePieceoff(movePair.first, dest, false);
+                moveNumber++;
+                gameBoards[moveNumber] = gameBoard;
+                // Recursively evaluate.
+                int eval = minimax(depth - 1, alpha, beta);
+                // Undo the move.
+                undo();
+                maxEval = max(maxEval, eval);
+                alpha = max(alpha, eval);
+                if (beta <= alpha) {
+                    break; // Beta cutoff.
+                }
+            }
+            if (beta <= alpha) {
+                break; // Beta cutoff.
+            }
+        }
+        // (Optional) Cache the computed minimax score here.
+        gameBoard.setMinimaxScore(maxEval);
+        gameBoards[moveNumber].setMinimaxScore(maxEval);
+        return maxEval;
+    } else { // currentTurn == "black"
+        int minEval = INT_MAX;
+        for (const auto& movePair : moves) {
+            for (const auto& dest : movePair.second) {
+                gameBoard.movePieceoff(movePair.first, dest, false);
+                moveNumber++;
+                gameBoards[moveNumber] = gameBoard;
+                int eval = minimax(depth - 1, alpha, beta);
+                undo();
+                minEval = min(minEval, eval);
+                beta = min(beta, eval);
+                if (beta <= alpha) {
+                    break; // Alpha cutoff.
+                }
+            }
+            if (beta <= alpha) {
+                break; // Alpha cutoff.
+            }
+        }
+        gameBoard.setMinimaxScore(minEval);
+        gameBoards[moveNumber].setMinimaxScore(minEval);
+        return minEval;
+    }
+}
+
+pair<Point, Point> Game::getMinimaxMove(int depth) {
+    if (!gameBoard.isBoardCalculated()) {
+        gameBoard.updateBoard();
+    }
+    // Retrieve all legal moves.
+    auto moves = gameBoard.getMoves();
+    if (moves.empty()) {
+        // No legal moves—return an invalid move.
+        return make_pair(Point(-1, -1), Point(-1, -1));
+    }
+    // Save the AI's color (the player whose turn it is before making any move).
+    string aiColor = gameBoard.getTurn();
+    
+    pair<Point, Point> bestMove;
+    int bestScore = 0;
+    bool firstMove = true;
+    
+    // Loop through every legal move.
+    for (const auto& movePair : moves) {
+        for (const auto& dest : movePair.second) {
+            pair<Point, Point> move = make_pair(movePair.first, dest);
+            // Make the move (without changing castling, etc.).
+            gameBoard.movePieceoff(move.first, move.second, false);
+            moveNumber++;
+            gameBoards[moveNumber] = gameBoard;
+            // Use alpha-beta with the full window.
+            int score = minimax(depth - 1, -INT_MAX, INT_MAX);
+            // Undo the move to restore the board.
+            undo();
+            // For the very first move, initialize bestScore.
+            if (firstMove) {
+                bestScore = score;
+                bestMove = move;
+                firstMove = false;
+            } else {
+                // For white, we want to maximize; for black, minimize.
+                if (aiColor == "white" && score > bestScore) {
+                    bestScore = score;
+                    bestMove = move;
+                } else if (aiColor == "black" && score < bestScore) {
+                    bestScore = score;
+                    bestMove = move;
+                }
+            }
+        }
+    }
+    return bestMove;
+}
+
 
 /*
 

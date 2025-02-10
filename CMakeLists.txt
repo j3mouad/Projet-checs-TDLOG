@@ -21,3 +21,6 @@ add_executable(Projet-echecs-TDLOG
 )
 
 target_link_libraries(Projet-echecs-TDLOG Imagine::Graphics)
+if (WIN32)
+    target_link_libraries(Projet-echecs-TDLOG Ws2_32)
+endif()
