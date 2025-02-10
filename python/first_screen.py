@@ -21,12 +21,12 @@ def choose_game(board):
     pygame.display.set_caption("Let's play Chess!")
 
     # Load the background image
-    background_image = pygame.image.load("./images/background_image.jpg")
+    background_image = pygame.image.load("./python/images/background_image.jpg")
     background_image = pygame.transform.scale(background_image, (screen_width, screen_height))
 
     # Font for text
     font = pygame.font.Font(None, int(screen_width / 25))
-    text = font.render("Choose color and time", True, black)
+    text = font.render("Choose color and time", True, BLACK)
 
     # Button sizes and positions
     button_width = screen_width // 4

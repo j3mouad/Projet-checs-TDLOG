@@ -6,7 +6,7 @@ from config import *
 pygame.init()
 
 class Button:
-    def __init__(self, text, x, y, width, height, image_path=None,color = grey):
+    def __init__(self, text, x, y, width, height, image_path=None,color = GREY):
         """Initialize the Button with text, position, size, optional image, and color."""
 
         self.text = text
@@ -19,7 +19,7 @@ class Button:
         else :
             self.image = None
 
-    def draw(self, screen,size = 20,color = black):
+    def draw(self, screen,size = 20,color = BLACK):
         """Draw the button on the screen with optional text and image."""
         mouse_pos = pygame.mouse.get_pos()
         if self.rect.collidepoint(mouse_pos):
@@ -47,6 +47,6 @@ squares = [[None for _ in range(8)] for _ in range(8)]
 def draw(squares,x_square_size,y_square_size):
     for row in range(8):
                 for col in range(8):
-                    color = light_brown if (row + col) % 2 == 0 else brown
+                    color = LIGHT_BROWN if (row + col) % 2 == 0 else BROWN
                     square = Button("",col*x_square_size,row*y_square_size,square_size,square_size,image_path = None,color = color)
                     squares[col][row] = square
