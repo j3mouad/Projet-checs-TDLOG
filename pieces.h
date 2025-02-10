@@ -18,10 +18,10 @@ private:
     bool infiniteMoves;
     bool moveSetisAttackMoveSet = true ;
     /* the MoveSet of a given piece given as a two letter string
-       the left one is the movement on the y axis and the right 
+       the left one is the movement on the y axis and the right
        one is on the x axis */
     const Point* attackMoveSet;
-    const Point* elemMoveSet; 
+    const Point* elemMoveSet;
     int numOfMoves;
     int numOfAttackMoves;
     byte* image;
@@ -37,11 +37,11 @@ public:
     // Getter functions
     int testing_scores() {
         const int (*scoreTable)[8] = reinterpret_cast<const int(*)[8]>(scores);
-        return scoreTable[4][4]; 
+        return scoreTable[4][4];
     }
     int getScore(int x, int y){
         const int (*scoreTable)[8] = reinterpret_cast<const int(*)[8]>(scores);
-        return scoreTable[y][x]; 
+        return scoreTable[y][x];
     }
     string hashPiece() const;
     string getName() const {return name;}
