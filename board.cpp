@@ -1,5 +1,4 @@
 #include "board.h"
-#include "board.h"
 
 vector<pair<int, string>> generateRandomBackRank() {
     unsigned seed = chrono::system_clock::now().time_since_epoch().count();
@@ -334,7 +333,6 @@ bool Board::movePiece(Point Position1, Point Position2, bool changeCastling) {
     return winningTheGame;
 }
 
-
 bool Board::movePieceoff(Point Position1, Point Position2, bool IsPlayer) {
     bool winningTheGame = false;
     Piece* piece = getPiece(Position1);
@@ -427,7 +425,7 @@ void Board::updateEnPassant(Piece* piece, Point Position1, Point Position2) {
 void Board::show() {
     for (int idxY = 7; idxY >= 0; idxY--) {
         for (int idxX = 0; idxX < 8; idxX++) {
-            putGreyImage(60 * idxX, 480 - (60 * (idxY + 1)), getPiece(Point(idxX, idxY))->getImage(), 60, 60);
+            Imagine::putGreyImage(60 * idxX, 480 - (60 * (idxY + 1)), getPiece(Point(idxX, idxY))->getImage(), 60, 60);
         }
     }
 }
@@ -716,6 +714,7 @@ string Board::gameOver() {
         updateBoard();
     }
     if (moves.size() == 0) {
+        changeTurn();
         if (isInCheck()) {
             return getTurn() + " won";
         } else {
@@ -726,26 +725,19 @@ string Board::gameOver() {
     }
 }
 
-float Board::getGamePhase()
-{
+float Board::getGamePhase() {
     int whitePieces = 0;
     int blackPieces = 0;
     int val;
     float total, phase;
-    for (int y = 0; y < 8; y++)
-    {
-        for (int x = 0; x < 8; x++)
-        {
-            Piece piece = getPiece(Point(x, y));
-            if (piece.getName() != "EmptyPlace")
-            {
-                int val = initialScores[piece.getName()];
-                if (piece.getColor() == "white")
-                {
+    for (int y = 0; y < 8; y++) {
+        for (int x = 0; x < 8; x++) {
+            Piece* piece = getPiece(Point(x, y));
+            if (piece->getName() != "EmptyPlace") {
+                int val = initialScores[piece->getName()];
+                if (piece->getColor() == "white") {
                     whitePieces += val;
-                }
-                else
-                {
+                } else {
                     blackPieces += val;
                 }
             }
@@ -756,64 +748,48 @@ float Board::getGamePhase()
     return phase;
 }
 
-int Board::evaluateControlOfKeySquares()
-{
+int Board::evaluateControlOfKeySquares() {
     Point centerSquares[4] = {Point(3, 3), Point(3, 4), Point(4, 3), Point(4, 4)};
     int score = 0;
-    for (int idx = 0; idx < 4; idx++)
-    {
-        Piece piece = getPiece(centerSquares[idx]);
-        if (piece.getColor() == "white")
-        {
+    for (int idx = 0; idx < 4; idx++) {
+        Piece* piece = getPiece(centerSquares[idx]);
+        if (piece->getColor() == "white") {
             score += 20;
-        }
-        else if (piece.getColor() == "black")
-        {
+        } else if (piece->getColor() == "black") {
             score -= 20;
         }
     }
     return score;
 }
 
-bool Board::isKingActive(string color)
-{
-    if (color == "white")
-    {
+bool Board::isKingActive(string color) {
+    if (color == "white") {
         int x = WhiteKingPos.getX();
         int y = WhiteKingPos.getY();
         return (2 < x && x < 5) && (2 < y && y < 5);
-    }
-    else
-    {
+    } else {
         int x = BlackKingPos.getX();
         int y = BlackKingPos.getY();
         return (2 < x && x < 5) && (2 < y && y < 5);
     }
 }
 
-int Board::centerControl()
-{
+int Board::centerControl() {
     int score = 0;
-    for (const auto &pair : getAllPossibleWhiteMoves())
-    {
-        for (const auto &point : pair.second)
-        {
+    for (const auto &pair : getAllPossibleWhiteMoves()) {
+        for (const auto &point : pair.second) {
             int x = point.getX();
             int y = point.getY();
-            if (x > 2 && x < 5 && y > 2 && y < 5)
-            {
+            if (x > 2 && x < 5 && y > 2 && y < 5) {
                 score += 1;
             }
         }
     }
-    for (const auto &pair : getAllPossibleBlackMoves())
-    {
-        for (const auto &point : pair.second)
-        {
+    for (const auto &pair : getAllPossibleBlackMoves()) {
+        for (const auto &point : pair.second) {
             int x = point.getX();
             int y = point.getY();
-            if (x > 2 && x < 5 && y > 2 && y < 5)
-            {
+            if (x > 2 && x < 5 && y > 2 && y < 5) {
                 score -= 1;
             }
         }
@@ -821,8 +797,7 @@ int Board::centerControl()
     return score;
 }
 
-int Board::evaluateGameinternal()
-{
+int Board::evaluateGameinternal() {
     int materialScore = evaluateBoard();
     int centerScore = centerControl();
     // Pawn structure
@@ -843,76 +818,76 @@ int Board::evaluateGameinternal()
                       controlScore * (0.6 * openingWeight + 0.3 * endGameWeight) +
                       endGameScore * endGameWeight);
 
-
     return totalScore;
 }
 
-void Board::choosePawnHuman(Point point){
+void Board::choosePawnHuman(Point point) {
     int idx_piece_chosen;
-    if ((getPiece(point).getName() == "Pawn") && (point.getY()==0 || point.getY()==7)){
-            cout << "choose a piece to change your pawn into" << endl;
-            cout << "0: Queen    1: Rook    2: Bishop    3: Knight" << endl;
-            while(true){
-                cin >> idx_piece_chosen;
-                if (idx_piece_chosen>=0 && idx_piece_chosen<4){
+    if ((getPiece(point)->getName() == "Pawn") && (point.getY() == 0 || point.getY() == 7)) {
+        cout << "choose a piece to change your pawn into" << endl;
+        cout << "0: Queen    1: Rook    2: Bishop    3: Knight" << endl;
+        while (true) {
+            cin >> idx_piece_chosen;
+            if (idx_piece_chosen >= 0 && idx_piece_chosen < 4) {
+                break;
+            }
+            cout << "choose a valid index between 0 and 3" << endl;
+        }
+        if (getTurn() == "white") {
+            switch (idx_piece_chosen) {
+                case 0:
+                    setPiece(point, &WhiteQueen);
                     break;
-                }
-                cout << "choose a valid index between 0 and 3" << endl;
-            }
-            if (getTurn() == "white"){
-                switch(idx_piece_chosen){
-                    case 0:
-                        setPiece(point,WhiteQueen);
-                        break;
-                    case 1:
-                        setPiece(point,WhiteRook);
-                        break;
-                    case 2:
-                        setPiece(point,WhiteBishop);
-                        break;
-                    case 3:
-                        setPiece(point,WhiteKnight);
-                        break;
-                }
-            }
-            if (getTurn() == "black"){
-                switch(idx_piece_chosen){
-                    case 0:
-                        setPiece(point,BlackQueen);
-                        break;
-                    case 1:
-                        setPiece(point,BlackRook);
-                        break;
-                    case 2:
-                        setPiece(point,BlackBishop);
-                        break;
-                    case 3:
-                        setPiece(point,BlackKnight);
-                        break;
-                }
+                case 1:
+                    setPiece(point, &WhiteRook);
+                    break;
+                case 2:
+                    setPiece(point, &WhiteBishop);
+                    break;
+                case 3:
+                    setPiece(point, &WhiteKnight);
+                    break;
             }
         }
+        if (getTurn() == "black") {
+            switch (idx_piece_chosen) {
+                case 0:
+                    setPiece(point, &BlackQueen);
+                    break;
+                case 1:
+                    setPiece(point, &BlackRook);
+                    break;
+                case 2:
+                    setPiece(point, &BlackBishop);
+                    break;
+                case 3:
+                    setPiece(point, &BlackKnight);
+                    break;
+            }
+        }
+    }
 }
 
-void Board::choosePawnAi(Point point){
-    if ((getPiece(point).getName() == "Pawn") && (point.getY()==0 || point.getY()==7)){
-        if (getTurn() == "white"){
-                setPiece(point,WhiteQueen);
-        } else{
-                setPiece(point,BlackQueen);
+void Board::choosePawnAi(Point point) {
+    if ((getPiece(point)->getName() == "Pawn") && (point.getY() == 0 || point.getY() == 7)) {
+        if (getTurn() == "white") {
+            setPiece(point, &WhiteQueen);
+        } else {
+            setPiece(point, &BlackQueen);
         }
     }
 }
 
 // lengthwise
-Piece* initialBoard[64] = {
-    &WhiteRook, &WhiteKnight, &WhiteBishop, &WhiteQueen, &WhiteKing, &WhiteBishop, &WhiteKnight, &WhiteRook,
-    &WhitePawn, &WhitePawn, &WhitePawn, &WhitePawn, &WhitePawn, &WhitePawn, &WhitePawn, &WhitePawn,
-    &Empty, &Empty, &Empty, &Empty, &Empty, &Empty, &Empty, &Empty,
-    &Empty, &Empty, &Empty, &Empty, &Empty, &Empty, &Empty, &Empty,
-    &Empty, &Empty, &Empty, &Empty, &Empty, &Empty, &Empty, &Empty,
-    &Empty, &Empty, &Empty, &Empty, &Empty, &Empty, &Empty, &Empty,
-    &BlackPawn, &BlackPawn, &BlackPawn, &BlackPawn, &BlackPawn, &BlackPawn, &BlackPawn, &BlackPawn,
-    &BlackRook, &BlackKnight, &BlackBishop, &BlackQueen, &BlackKing, &BlackBishop, &BlackKnight, &BlackRook};
+Piece* initialBoard[8][8] = {
+    {&WhiteRook, &WhiteKnight, &WhiteBishop, &WhiteQueen, &WhiteKing, &WhiteBishop, &WhiteKnight, &WhiteRook},
+    {&WhitePawn, &WhitePawn, &WhitePawn, &WhitePawn, &WhitePawn, &WhitePawn, &WhitePawn, &WhitePawn},
+    {&Empty, &Empty, &Empty, &Empty, &Empty, &Empty, &Empty, &Empty},
+    {&Empty, &Empty, &Empty, &Empty, &Empty, &Empty, &Empty, &Empty},
+    {&Empty, &Empty, &Empty, &Empty, &Empty, &Empty, &Empty, &Empty},
+    {&Empty, &Empty, &Empty, &Empty, &Empty, &Empty, &Empty, &Empty},
+    {&BlackPawn, &BlackPawn, &BlackPawn, &BlackPawn, &BlackPawn, &BlackPawn, &BlackPawn, &BlackPawn},
+    {&BlackRook, &BlackKnight, &BlackBishop, &BlackQueen, &BlackKing, &BlackBishop, &BlackKnight, &BlackRook}
+};
 
 Board initial_board(initialBoard, "white");

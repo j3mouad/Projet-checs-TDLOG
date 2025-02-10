@@ -24,4 +24,6 @@ if (WIN32)
     target_link_libraries(Projet-echecs-TDLOG Ws2_32)
 endif()
 target_link_libraries(Projet-echecs-TDLOG Imagine::Graphics)
-
+if (WIN32)
+    target_link_libraries(Projet-echecs-TDLOG Ws2_32)
+endif()

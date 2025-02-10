@@ -1,22 +1,27 @@
 [
 {
   "directory": "C:/Users/jmoua/OneDrive/Documents/GitHub/Projet-checs-TDLOG/build",
-  "command": "C:\\ENPC\\Tools\\mingw810_64\\bin\\g++.exe   -g -o CMakeFiles\\Projet-echecs-TDLOG.dir\\main.cpp.obj -c C:\\Users\\jmoua\\OneDrive\\Documents\\GitHub\\Projet-checs-TDLOG\\main.cpp",
+  "command": "C:\\ENPC\\Tools\\mingw810_64\\bin\\g++.exe -DQT_CORE_LIB -DQT_GUI_LIB -DQT_WIDGETS_LIB -DSRCDIR=C:/Users/jmoua/OneDrive/Documents/GitHub/Projet-checs-TDLOG @CMakeFiles/Projet-echecs-TDLOG.dir/includes_CXX.rsp -g -std=gnu++17 -o CMakeFiles\\Projet-echecs-TDLOG.dir\\main.cpp.obj -c C:\\Users\\jmoua\\OneDrive\\Documents\\GitHub\\Projet-checs-TDLOG\\main.cpp",
   "file": "C:/Users/jmoua/OneDrive/Documents/GitHub/Projet-checs-TDLOG/main.cpp"
 },
 {
   "directory": "C:/Users/jmoua/OneDrive/Documents/GitHub/Projet-checs-TDLOG/build",
-  "command": "C:\\ENPC\\Tools\\mingw810_64\\bin\\g++.exe   -g -o CMakeFiles\\Projet-echecs-TDLOG.dir\\game.cpp.obj -c C:\\Users\\jmoua\\OneDrive\\Documents\\GitHub\\Projet-checs-TDLOG\\game.cpp",
+  "command": "C:\\ENPC\\Tools\\mingw810_64\\bin\\g++.exe -DQT_CORE_LIB -DQT_GUI_LIB -DQT_WIDGETS_LIB -DSRCDIR=C:/Users/jmoua/OneDrive/Documents/GitHub/Projet-checs-TDLOG @CMakeFiles/Projet-echecs-TDLOG.dir/includes_CXX.rsp -g -std=gnu++17 -o CMakeFiles\\Projet-echecs-TDLOG.dir\\game.cpp.obj -c C:\\Users\\jmoua\\OneDrive\\Documents\\GitHub\\Projet-checs-TDLOG\\game.cpp",
   "file": "C:/Users/jmoua/OneDrive/Documents/GitHub/Projet-checs-TDLOG/game.cpp"
 },
 {
   "directory": "C:/Users/jmoua/OneDrive/Documents/GitHub/Projet-checs-TDLOG/build",
-  "command": "C:\\ENPC\\Tools\\mingw810_64\\bin\\g++.exe   -g -o CMakeFiles\\Projet-echecs-TDLOG.dir\\board.cpp.obj -c C:\\Users\\jmoua\\OneDrive\\Documents\\GitHub\\Projet-checs-TDLOG\\board.cpp",
+  "command": "C:\\ENPC\\Tools\\mingw810_64\\bin\\g++.exe -DQT_CORE_LIB -DQT_GUI_LIB -DQT_WIDGETS_LIB -DSRCDIR=C:/Users/jmoua/OneDrive/Documents/GitHub/Projet-checs-TDLOG @CMakeFiles/Projet-echecs-TDLOG.dir/includes_CXX.rsp -g -std=gnu++17 -o CMakeFiles\\Projet-echecs-TDLOG.dir\\board.cpp.obj -c C:\\Users\\jmoua\\OneDrive\\Documents\\GitHub\\Projet-checs-TDLOG\\board.cpp",
   "file": "C:/Users/jmoua/OneDrive/Documents/GitHub/Projet-checs-TDLOG/board.cpp"
 },
 {
   "directory": "C:/Users/jmoua/OneDrive/Documents/GitHub/Projet-checs-TDLOG/build",
-  "command": "C:\\ENPC\\Tools\\mingw810_64\\bin\\g++.exe   -g -o CMakeFiles\\Projet-echecs-TDLOG.dir\\pieces.cpp.obj -c C:\\Users\\jmoua\\OneDrive\\Documents\\GitHub\\Projet-checs-TDLOG\\pieces.cpp",
+  "command": "C:\\ENPC\\Tools\\mingw810_64\\bin\\g++.exe -DQT_CORE_LIB -DQT_GUI_LIB -DQT_WIDGETS_LIB -DSRCDIR=C:/Users/jmoua/OneDrive/Documents/GitHub/Projet-checs-TDLOG @CMakeFiles/Projet-echecs-TDLOG.dir/includes_CXX.rsp -g -std=gnu++17 -o CMakeFiles\\Projet-echecs-TDLOG.dir\\player.cpp.obj -c C:\\Users\\jmoua\\OneDrive\\Documents\\GitHub\\Projet-checs-TDLOG\\player.cpp",
+  "file": "C:/Users/jmoua/OneDrive/Documents/GitHub/Projet-checs-TDLOG/player.cpp"
+},
+{
+  "directory": "C:/Users/jmoua/OneDrive/Documents/GitHub/Projet-checs-TDLOG/build",
+  "command": "C:\\ENPC\\Tools\\mingw810_64\\bin\\g++.exe -DQT_CORE_LIB -DQT_GUI_LIB -DQT_WIDGETS_LIB -DSRCDIR=C:/Users/jmoua/OneDrive/Documents/GitHub/Projet-checs-TDLOG @CMakeFiles/Projet-echecs-TDLOG.dir/includes_CXX.rsp -g -std=gnu++17 -o CMakeFiles\\Projet-echecs-TDLOG.dir\\pieces.cpp.obj -c C:\\Users\\jmoua\\OneDrive\\Documents\\GitHub\\Projet-checs-TDLOG\\pieces.cpp",
   "file": "C:/Users/jmoua/OneDrive/Documents/GitHub/Projet-checs-TDLOG/pieces.cpp"
 }
 ]

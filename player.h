@@ -14,8 +14,4 @@ class Player{
         string getType() const {return type;}      
 };
 
-void choosePieceHuman(int &x1, int &y1);
-void chooseMoveHuman(int &x2, int &y2);
-void choosePawnHuman(Board &gameBoard, Point point);
-void choosePawnAi(Board &gameBoard, Point point);
 
