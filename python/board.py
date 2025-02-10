@@ -6,6 +6,8 @@ from button import Button
 from ai import AI,AI_hard,evaluate
 from config import *
 from chess_game import find_king_position
+import subprocess # Path to your compiled C++ executable
+
 # Initialize Pygame
 pygame.init()
 class Board:
@@ -122,7 +124,7 @@ class Board:
             If a piece is located at the mouse position (mx, my), it will not be drawn.
             The pieces are resized to fit the square size of the board.
         """
-        font = pygame.font.Font(None, 12)
+        font = pygame.font.Font(None, self.x_square_size//4)
         for row in range(8):
             for col in range(8):
                 text = font.render(self.game.chess_board_squares[col][row], True, (0, 0, 255)) 
@@ -189,7 +191,7 @@ class Board:
             None
         """
         self.screen.fill(WHITE)
-        font = pygame.font.Font(None, 36)
+        font = pygame.font.Font(None, self.x_square_size//3)
         white_timer_surface = font.render(f'White: {self.game.white_time // 60}:{self.game.white_time % 60:02}', True, BLACK)
         black_timer_surface = font.render(f'Black: {self.game.black_time // 60}:{self.game.black_time % 60:02}', True, BLACK)
         if self.game.white_time <= 5:
@@ -231,6 +233,26 @@ class Board:
 
         # Handle button click
        
+    def handle_resize(self, event):
+        """
+        Handles the logic when the game window is resized.
+
+        This method updates the screen size, square size, and redraws the game board and pieces
+        to fit the new window dimensions.
+
+        Parameters:
+        event (pygame.event): The event triggered by the window resize.
+
+        Returns:
+        None
+        """
+        # Update screen size to the event's size directly
+        self.screen_width, self.screen_height = event.w, event.h
+        self.screen = pygame.display.set_mode((self.screen_width, self.screen_height), pygame.RESIZABLE)
+        self.x_square_size = int(self.screen_width / 16)
+        self.y_square_size = int(self.screen_height / 8)
+
+
 
     def handle_back_button_click(self, event):
         """
@@ -451,12 +473,20 @@ class Board:
     def update_king_positions(self):
         """
         Update the positions of both kings on the board using the helper function 'find_king_position'.
-    
+
         Returns:
             None
         """
-        self.game.white_king_position = find_king_position(self.game.chess_board, 'white')
-        self.game.black_king_position = find_king_position(self.game.chess_board, 'black')
+        try:
+            self.game.white_king_position = find_king_position(self.game.chess_board, 'white')
+            self.game.black_king_position = find_king_position(self.game.chess_board, 'black')
+        except AttributeError as e:
+            print(f"AttributeError in update_king_positions: {e}")
+        except TypeError as e:
+            print(f"TypeError in update_king_positions: {e}")
+        except Exception as e:
+            print(f"Unexpected error in update_king_positions: {e}")
+
 
 
     def handle_ai_moves(self):
@@ -491,7 +521,8 @@ class Board:
         if self.game.hard:
             start, end = AI_hard(self.game)
         else:
-            start, end = AI(self.game)
+            cpp_executable = "path/to/your_program.exe" # Use "./your_program" on Linux/Mac # Run the C++ program subprocess.run(cpp_executable)
+            start, end = AI(self.game,self.game.last_move[0],self.game.last_move[1])
     
         # Execute the move.
         self.game.move_piece(start, end[0], end[1])
@@ -507,19 +538,24 @@ class Board:
     def process_event(self, event):
         """
         Process system events such as quitting, window resizing, and mouse button clicks.
-    
+
         Args:
             event (pygame.event): The current event to process.
-    
+
         Returns:
             None
         """
-        if event.type == pygame.QUIT:
-            self.game.running = False
-        elif event.type == pygame.VIDEORESIZE:
-            self.handle_reisze(event)
-        elif event.type == pygame.MOUSEBUTTONDOWN:
-            self.handle_mouse_click(event)
+        try:
+            if event.type == pygame.QUIT:
+                self.game.running = False
+            elif event.type == pygame.VIDEORESIZE:
+                self.handle_resize(event)  # Fixed typo from "handle_reisze"
+            elif event.type == pygame.MOUSEBUTTONDOWN:
+                self.handle_mouse_click(event)
+        except AttributeError as e:
+            print(f"AttributeError in process_event: {e}")
+        except Exception as e:
+            print(f"Unexpected error in process_event: {e}")
 
 
     def handle_mouse_click(self, event):

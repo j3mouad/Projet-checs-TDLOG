@@ -1,28 +1,7 @@
-import sys
 import numpy as np
-import os
-import sys
-import time
+import socket
 from random import randint
-#Code explanation for Mouad
 
-#The first part is implementing the heuristics(evaluation function and how it works)
-#You should not really in depth how it works you could just copy past everything 
-#The second part includes minimax and AI    
-#it uses hashing to improve speed and avoid recalculations
-#Here is some explanation of how functions work,
-#game.all_moves() generate legal moves of a player 
-#you should also see my copy constructor
-#good luck for implementation
-#I used depth 2 for testing which is really bad 
-# note : depth should always be even (really important )
-#tell me how much depth can you reach in c++
-#if we could reach depth 6 then we could say we have an AI
-#if you have questions send them to me on whatsap
-# Set up directory if needed (adjust as necessary)
-
-
-# Positional tables for pieces
 PAWN_TABLE = np.array([
     [  0,   0,   0,   0,   0,   0,   0,   0],
     [ 10,  10,  10, 10, 10,  10,  10,  10],
@@ -261,137 +240,31 @@ def hash_game(game):
     board_state = ''.join([str(piece) for row in game.chess_board for piece in row])
     turn = game.turn  # Assuming 'white' or 'black' for the turn
     return hash(board_state + turn)
-def minimax(game, depth, transposition_table, alpha=float('-inf'), beta=float('inf')):
 
-    # Get the hash of the current game state
-    game_hash = hash_game(game)
+def AI(game, start_pos, end_pos):
+    HOST = '127.0.0.1'  # Localhost
+    PORT = 8080         # Port to listen on
 
-    # Check if the current game state has already been evaluated
-    if game_hash in transposition_table:
-        return transposition_table[game_hash]
+    # Create a TCP socket
+    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+        s.bind((HOST, PORT))
+        s.listen()
+        print("Server is listening for connections...")
 
-    if not game.running:
-        if game.winner == 'Stalemate':
-            return 0
-        return 1e9 if game.winner == 'white' else -1e9
+        conn, addr = s.accept()
+        with conn:
+            print(f"Connected by {addr}")
+            while True:
+                # Receive data from C++ client
+                data = conn.recv(1024)
+                if not data:
+                    break
+                print("Received from client:", data.decode())
 
-    if depth == 0:
-        eval_score = evaluate(game,transposition_table)
-        transposition_table[game_hash] = eval_score  # Store evaluation result
-        return eval_score
-    
-    if game.turn == 'white':  # Maximizing for white
-        max_eval = float('-inf')
-        for start_pos, possible_moves in game.white_moves.items():
-            i = 0
-            for end_pos in possible_moves:
-                if (i>0) :
-                    s = randint(1,100)
-                    if (s<1000) :
-                        continue 
+                # Format response with start_pos and end_pos
+                response = f"{start_pos[0]},{start_pos[1]} {end_pos[0]},{end_pos[1]}"
+                conn.sendall(response.encode())
 
-                i+=1
-                copy_game = game.copy_game()
-                x, y = end_pos
-                copy_game.move_piece(start_pos, x, y)
-                copy_game.change_player()
-                copy_game.all_moves()
-                eval_score = minimax(copy_game, depth - 1, transposition_table, alpha, beta)
-                game_hash = hash_game(game)
-                transposition_table[game_hash] = eval_score
-                max_eval = max(max_eval, eval_score)
-                alpha = max(alpha, eval_score)
-                if beta <= alpha:
-                    break  # Prune outer loop
-            if beta <= alpha:
-                break  # Prune outer loop
-        # Store the evaluation result in the transposition table
-        return max_eval
-
-    else:  # Minimizing for black
-        min_eval = float('inf')
-        for start_pos, possible_moves in game.black_moves.items():
-            i = 0
-            for end_pos in possible_moves:
-                if (i>0) :
-                    s = randint(1,100)
-                    if (s<1000) :
-                        continue 
-                copy_game = game.copy_game()
-                x, y = end_pos
-                copy_game.move_piece(start_pos, x, y)
-                copy_game.change_player()
-                copy_game.all_moves()
-                eval_score = minimax(copy_game, depth - 1, transposition_table, alpha, beta)
-                min_eval = min(min_eval, eval_score)
-                game_hash = hash_game(game)
-                transposition_table[game_hash] = eval_score
-                beta = min(beta, eval_score)
-                if beta <= alpha:
-                    break  # Prune outer loop
-            if beta <= alpha:
-                break  # Prune outer loop
-        return min_eval
-
-def AI(game, depth=2):
-    """
-    AI for determining the best move using minimax evaluation.
-    Returns the best move as a tuple (start_pos, end_pos).
-    depth must be pair so that it works
-    """
-    transposition_table={}
-    game.all_moves()
-    game.change_player()
-    game.all_moves()        
-    game.change_player()
-    moves_scores = []
-    s = 0 
-    i = 0
-    eval_score = evaluate(game,{})
-    print(game.evaluate0())
-    print(eval_score)
-    moves = game.white_moves if game.turn == 'white' else game.black_moves
-    total_time = 0
-
-    for start_pos, possible_moves in moves.items():
-        for end_pos in possible_moves:
-            i+=1
-            start_time = time.time()  # Record the start time
-            # Create a copy of the game to simulate the move
-            copy_game = game.copy_game()
-            copy_game.all_moves()
-            x, y = end_pos
-            copy_game.move_piece(start_pos, x, y)
-            copy_game.change_player()
-            score = (minimax(copy_game,1,{}))
-            print(score)
-            if (game.black and score<=eval_score) :
-                print('continue black')
-                s+=1
-                print(s,'  ',i)
-                #continue
-            if (game.white and score>=eval_score) :
-                print('continue white')
-                s+=1
-                print(s,' ',i)
-                #continue
-
-            score = minimax(copy_game, depth - 1,transposition_table)
-            moves_scores.append((score, (start_pos, end_pos)))
-            print(f"Move: {start_pos} -> {end_pos}, Score: {score}")
-            end_time = time.time()
-            print(end_time-start_time)
-            total_time += end_time - start_time
-    # Sort moves by score (higher is better for white, lower for black)
-    moves_scores.sort(reverse=(game.turn == 'white'), key=lambda x: x[0])
-
-    # Return the move with the best score
-    if moves_scores:
-        print(f"Best move: {moves_scores[0][1]} with score {moves_scores[0][0]}")
-        print(total_time)
-        return moves_scores[0][1]
-    print("No valid moves found")
-    return None
 
 def AI_hard(game) :
     game.all_moves()
@@ -408,7 +281,7 @@ def AI_hard(game) :
             x, y = end_pos
             copy_game.move_piece(start_pos, x, y)
             copy_game.change_player()
-            score = copy_game.evaluate0()
+            score = copy_game.evaluate_hard()
             moves_scores.append((score, (start_pos, end_pos)))
 
     

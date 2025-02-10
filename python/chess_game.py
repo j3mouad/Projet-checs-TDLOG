@@ -12,24 +12,6 @@ from piece import PieceType
 
 pygame.init()
 
-def find_king_position(chess_board, color):
-
-    """ Args:
-            chess_board (list of list of str): A 2D list representing the chess board.
-            color (str): The color of the king to find ('white' or 'black').
-
-        Returns:
-            tuple: A tuple (x, y) representing the position of the king on the board.
-                   Returns None if the king is not found.
-    """
-
-    for x in range(8):
-        for y in range(8):
-            piece = chess_board[y][x]
-            if piece == f'{color[0]}K':  # Check for white or black king
-                return (x, y)
-    return None
-
 
 class ChessGame:
     def __init__(self,screen):
@@ -91,15 +73,15 @@ class ChessGame:
     ["a1", "b1", "c1", "d1", "e1", "f1", "g1", "h1"]
     ])
         
-        self.list_of_boards=[self.chess_board for _ in range(1000)]
+        self.list_of_boards=[self.chess_board for _ in range(5000)]
         self.len_list_of_boards=0 
-        self.list_of_times=[[0,0] for _ in range(1000)]
-        self.list_of_last_moves = [[(0,0),(0,0)] for _ in range(1000)]
-        self.list_of_king_check  = [(False,False) for _ in range(1000)]
-        self.list_of_rooks = [[0,0,0,0] for _ in range(1000)]
-        self.list_of_castles = [[0,0,0,0] for _ in range(1000)]
-        self.list_of_king_moves = [(False,False) for _ in range(1000)]
-        self.list_of_passant = [False for _ in range(1000)]
+        self.list_of_times=[[0,0] for _ in range(5000)]
+        self.list_of_last_moves = [[(0,0),(0,0)] for _ in range(5000)]
+        self.list_of_king_check  = [(False,False) for _ in range(5000)]
+        self.list_of_rooks = [[0,0,0,0] for _ in range(5000)]
+        self.list_of_castles = [[0,0,0,0] for _ in range(5000)]
+        self.list_of_king_moves = [(False,False) for _ in range(5000)]
+        self.list_of_passant = [False for _ in range(5000)]
         self.turn = 'white'
         self.player= False
         self.white = False
@@ -141,7 +123,6 @@ class ChessGame:
     def time_reg(self,white_time,black_time):
         self.white_time=white_time
         self.black_time=black_time
-    #########################################From here functions will manage logic of the game############################################
 
     def flip_board(self):
         """

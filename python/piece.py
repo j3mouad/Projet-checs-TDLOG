@@ -17,6 +17,7 @@ class PieceType(Enum):
       - BISHOP: Represents a Bishop, denoted by 'B'.
       - KING: Represents a King, denoted by 'K'.
       - QUEEN: Represents a Queen, denoted by 'Q'.
+      check this link for more information: https://en.wikipedia.org/wiki/Fairy_chess_piece
     """
 
     PAWN = 'P'
