@@ -1,6 +1,16 @@
 import numpy as np
 import socket
 from random import randint
+def string_to_tuples(input_string):
+    # Remove the parentheses and split the string by the commas
+    input_string = input_string.strip('()')
+    points = input_string.split('),(')
+    
+    # Convert each part into a tuple of integers
+    tuple1 = tuple(map(int, points[0].split(',')))
+    tuple2 = tuple(map(int, points[1].split(',')))
+    
+    return tuple1, tuple2
 
 PAWN_TABLE = np.array([
     [  0,   0,   0,   0,   0,   0,   0,   0],
@@ -126,9 +136,7 @@ def get_game_phase(game):
                         black_material += val
 
     total_material = white_material + black_material
-    # Assuming starting total ~ (2*R=1000 + 2*N=600 + 2*B=600 + Q=1800 + pawns=1600) ~ 5600
-    # Adjust these numbers as needed based on actual piece values
-    # Let's say if total_material < 2000 -> endgame, else opening.
+
     phase = max(0, min(1, (5600 - total_material) / 3600))
     return phase
 
@@ -199,16 +207,8 @@ def center_control(game) :
 
 def evaluate(game,transposition_table):
     """Calculates the total evaluation score for the game based on various factors."""
-    # Base material and position evaluation
-    hash = hash_game(game)
-    if (hash in transposition_table) :
-        return transposition_table[hash] 
-    material_score = evaluate_material(game)
-
-    # Mobility
-
-
     # Control of key squares
+    material_score = evaluate_material(game)
     control_score = evaluate_control_of_key_squares(game)
 
     # Endgame features
@@ -229,22 +229,16 @@ def evaluate(game,transposition_table):
 
     return total_score
 
-#-------------------------------------------------------------------------#
-#This is second part 
-def hash_game(game):
-    """
-    Hash the current game state. This should return a unique identifier
-    for the current board position and turn.
-    """
-    # For simplicity, you can hash the chessboard and current player
-    board_state = ''.join([str(piece) for row in game.chess_board for piece in row])
-    turn = game.turn  # Assuming 'white' or 'black' for the turn
-    return hash(board_state + turn)
+
 
 def AI(game, start_pos, end_pos):
     HOST = '127.0.0.1'  # Localhost
     PORT = 8080         # Port to listen on
-
+    game.move_piece(start_pos, end_pos[0], end_pos[1])
+    game.change_player()
+    game.update_moves()
+    response = f"{start_pos[0]},{start_pos[1]} {end_pos[0]},{end_pos[1]}"
+    conn.sendall(response.encode())
     # Create a TCP socket
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
         s.bind((HOST, PORT))
@@ -260,12 +254,11 @@ def AI(game, start_pos, end_pos):
                 if not data:
                     break
                 print("Received from client:", data.decode())
-
+                start_pos_0,end_pos_0 = string_to_tuples(data.decode())
                 # Format response with start_pos and end_pos
-                response = f"{start_pos[0]},{start_pos[1]} {end_pos[0]},{end_pos[1]}"
-                conn.sendall(response.encode())
-
-
+                game.move_piece(start_pos_0, end_pos_0[0], end_pos_0[1])
+                game.change_player()
+                game.update_moves()
 def AI_hard(game) :
     game.all_moves()
     game.change_player()
