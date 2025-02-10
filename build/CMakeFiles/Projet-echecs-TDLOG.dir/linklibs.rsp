@@ -1,1 +1,1 @@
- -lkernel32 -luser32 -lgdi32 -lwinspool -lshell32 -lole32 -loleaut32 -luuid -lcomdlg32 -ladvapi32 
+ "C:/ENPC/Imagine++-5.0.0/lib/libImagineGraphics.a" C:/ENPC/5.15.2/mingw81_64/lib/libQt5Widgets.a C:/ENPC/5.15.2/mingw81_64/lib/libQt5Gui.a C:/ENPC/5.15.2/mingw81_64/lib/libQt5Core.a -lopengl32 -lkernel32 -luser32 -lgdi32 -lwinspool -lshell32 -lole32 -loleaut32 -luuid -lcomdlg32 -ladvapi32 
