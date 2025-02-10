@@ -35,7 +35,7 @@ void Game::play(){
         x_chosen = x_chosen/60;
         y_chosen = (480-y_chosen-1)/60;
         vector<Point> vect = MapOfMoves[Point(x_chosen,y_chosen)];
-        cout << "the piece is : " << gameBoard.getPiece(Point(x_chosen,y_chosen)).getName() <<" and its color is :" << gameBoard.getPiece(Point(x_chosen,y_chosen)).getColor()<< endl;
+        cout << "the piece is : " << (gameBoard.getPiece(Point(x_chosen,y_chosen)))->getName() <<" and its color is :" << (gameBoard.getPiece(Point(x_chosen,y_chosen)))->getColor()<< endl;
         if(vect.size() == 0){
             continue;
         }
@@ -301,7 +301,7 @@ void Game::play_against_ai(){
         y_chosen = (480-y_chosen-1)/60;
         cout << "x : " << x_chosen << " ; y : " << y_chosen << endl; 
         vector<Point> vect = MapOfMoves[Point(x_chosen,y_chosen)];
-        cout << "the piece is : " << gameBoard.getPiece(Point(x_chosen,y_chosen)).getName() <<" and its color is :" << gameBoard.getPiece(Point(x_chosen,y_chosen)).getColor()<< endl;
+        cout << "the piece is : " << gameBoard.getPiece(Point(x_chosen,y_chosen))->getName() <<" and its color is :" << gameBoard.getPiece(Point(x_chosen,y_chosen))->getColor()<< endl;
         if(vect.size() == 0){
             continue;
         }
@@ -341,8 +341,135 @@ void Game::play_against_ai(){
     }
 }
 
+int Game::minimax(int depth, int alpha, int beta) {
+    if (!gameBoard.isBoardCalculated()) {
+        gameBoard.updateBoard();
+    }
+    // Terminal condition: reached maximum search depth.
+    if (depth == 0) {
+        return gameBoard.evaluateGame();
+    }
+    // Check for game over.
+    if (gameBoard.gameOver() != "NONE") {
+        if (gameBoard.gameOver() == "white won") {
+            return INT_MAX;
+        } else if (gameBoard.gameOver() == "black won") {
+            return -INT_MAX;
+        } else {
+            return 0;
+        }
+    }
+    // (Optional) Look up cached minimax results if you have implemented that.
+    if (gameBoard.isMinimaxDepthStored(depth)) {
+        return gameBoard.getMinimaxDepth(depth);
+    }
 
-c
+    // Get all legal moves.
+    auto moves = gameBoard.getMoves();
+
+    // Save the current turn.
+    string currentTurn = gameBoard.getTurn();
+    
+    if (currentTurn == "white") {
+        int maxEval = -INT_MAX;
+        for (const auto& movePair : moves) {
+            for (const auto& dest : movePair.second) {
+                // Make the move.
+                gameBoard.movePieceoff(movePair.first, dest, false);
+                moveNumber++;
+                gameBoards[moveNumber] = gameBoard;
+                // Recursively evaluate.
+                int eval = minimax(depth - 1, alpha, beta);
+                // Undo the move.
+                undo();
+                maxEval = max(maxEval, eval);
+                alpha = max(alpha, eval);
+                if (beta <= alpha) {
+                    break; // Beta cutoff.
+                }
+            }
+            if (beta <= alpha) {
+                break; // Beta cutoff.
+            }
+        }
+        // (Optional) Cache the computed minimax score here.
+        gameBoard.setMinimaxScore(maxEval);
+        gameBoards[moveNumber].setMinimaxScore(maxEval);
+        return maxEval;
+    } else { // currentTurn == "black"
+        int minEval = INT_MAX;
+        for (const auto& movePair : moves) {
+            for (const auto& dest : movePair.second) {
+                gameBoard.movePieceoff(movePair.first, dest, false);
+                moveNumber++;
+                gameBoards[moveNumber] = gameBoard;
+                int eval = minimax(depth - 1, alpha, beta);
+                undo();
+                minEval = min(minEval, eval);
+                beta = min(beta, eval);
+                if (beta <= alpha) {
+                    break; // Alpha cutoff.
+                }
+            }
+            if (beta <= alpha) {
+                break; // Alpha cutoff.
+            }
+        }
+        gameBoard.setMinimaxScore(minEval);
+        gameBoards[moveNumber].setMinimaxScore(minEval);
+        return minEval;
+    }
+}
+
+pair<Point, Point> Game::getMinimaxMove(int depth) {
+    if (!gameBoard.isBoardCalculated()) {
+        gameBoard.updateBoard();
+    }
+    // Retrieve all legal moves.
+    auto moves = gameBoard.getMoves();
+    if (moves.empty()) {
+        // No legal moves—return an invalid move.
+        return make_pair(Point(-1, -1), Point(-1, -1));
+    }
+    // Save the AI's color (the player whose turn it is before making any move).
+    string aiColor = gameBoard.getTurn();
+    
+    pair<Point, Point> bestMove;
+    int bestScore = 0;
+    bool firstMove = true;
+    
+    // Loop through every legal move.
+    for (const auto& movePair : moves) {
+        for (const auto& dest : movePair.second) {
+            pair<Point, Point> move = make_pair(movePair.first, dest);
+            // Make the move (without changing castling, etc.).
+            gameBoard.movePieceoff(move.first, move.second, false);
+            moveNumber++;
+            gameBoards[moveNumber] = gameBoard;
+            // Use alpha-beta with the full window.
+            int score = minimax(depth - 1, -INT_MAX, INT_MAX);
+            // Undo the move to restore the board.
+            undo();
+            // For the very first move, initialize bestScore.
+            if (firstMove) {
+                bestScore = score;
+                bestMove = move;
+                firstMove = false;
+            } else {
+                // For white, we want to maximize; for black, minimize.
+                if (aiColor == "white" && score > bestScore) {
+                    bestScore = score;
+                    bestMove = move;
+                } else if (aiColor == "black" && score < bestScore) {
+                    bestScore = score;
+                    bestMove = move;
+                }
+            }
+        }
+    }
+    return bestMove;
+}
+
 
 /*
 
