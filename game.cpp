@@ -6,7 +6,13 @@
 #include <iostream>
 using namespace std;
 
-
+/**
+ * @brief Runs the main game loop for playing the game.
+ *
+ * This function initializes the game boards, updates the board state,
+ * handles user input for moves (including undo actions), and checks for
+ * game over conditions.
+ */
 void Game::play(){
     gameBoards = new Board[10000];
     cout << 1 << endl;
@@ -27,7 +33,7 @@ void Game::play(){
         }
         MapOfMoves = gameBoard.getMoves();
         gameBoard.show();
-        
+
         if(gameBoard.gameOver() != "NONE"){
             gameBoard.changeTurn();
             cout << gameBoard.gameOver() << endl;
@@ -105,7 +111,7 @@ void Game::play_against_random(){
         getMouse(x_chosen,y_chosen);
         x_chosen = x_chosen/60;
         y_chosen = (480-y_chosen-1)/60;
-        cout << "x : " << x_chosen << " ; y : " << y_chosen << endl; 
+        cout << "x : " << x_chosen << " ; y : " << y_chosen << endl;
         vector<Point> vect = MapOfMoves[Point(x_chosen,y_chosen)];
         cout << "the piece is : " << gameBoard.getPiece(Point(x_chosen,y_chosen)).getName() <<" and its color is :" << gameBoard.getPiece(Point(x_chosen,y_chosen)).getColor()<< endl;
         if(vect.size() == 0){
@@ -203,13 +209,13 @@ void Game::play_against_random(){
             ChosenStart = Point(vectorOfChoice[rand()%(sizeOfMap)]);
             chosenVector = MapOfMoves[make_pair(ChosenStart.getX(),ChosenStart.getY())];
         }
-        sizeOfVector = chosenVector.size();       
+        sizeOfVector = chosenVector.size();
         cout << ChosenStart.getX() << ":" << ChosenStart.getY() << endl;
         if (sizeOfVector == 1){
             ChosenDestination = chosenVector[0];
         } else {
             ChosenDestination = chosenVector[rand()%(sizeOfVector)];
-        }            
+        }
         cout << ChosenDestination.getX() << ":" << ChosenDestination.getY() << endl;
         if (gameBoard.movePieceoff(ChosenStart,ChosenDestination)){
             cout << "game over" << endl;
@@ -271,6 +277,13 @@ void Game::play_fisher(bool onevone){
 }
 */
 
+/**
+ * @brief Plays a game against an AI opponent.
+ *
+ * This function establishes a connection with a Python server using Winsock,
+ * exchanges moves with the server, and updates the game state accordingly.
+ * It sends the AI's move to the server and receives the opponent's move.
+ */
 void Game::play_against_ai(){
     WSADATA wsaData;
     SOCKET sock = INVALID_SOCKET;
@@ -349,10 +362,20 @@ void Game::play_against_ai(){
         gameBoards[moveNumber] = gameBoard;
         string message = "("+to_string(bestMove.first.getX())+","+to_string(bestMove.first.getY())+"),("+to_string(bestMove.second.getX()) +","+to_string(bestMove.second.getY())+")";
         send(sock, message.c_str(), message.size(), 0);
-        
+
     }
 }
 
+/**
+ * @brief Minimax algorithm with alpha-beta pruning.
+ *
+ * Recursively evaluates the board state using the minimax algorithm with alpha-beta pruning.
+ *
+ * @param depth The maximum depth to search.
+ * @param alpha The current alpha value for pruning.
+ * @param beta The current beta value for pruning.
+ * @return The evaluation score for the board state.
+ */
 int Game::minimax(int depth, int alpha, int beta) {
     if (!gameBoard.isBoardCalculated()) {
         gameBoard.updateBoard();
@@ -381,7 +404,7 @@ int Game::minimax(int depth, int alpha, int beta) {
 
     // Save the current turn.
     string currentTurn = gameBoard.getTurn();
-    
+
     if (currentTurn == "white") {
         int maxEval = -INT_MAX;
         for (const auto& movePair : moves) {
@@ -434,6 +457,14 @@ int Game::minimax(int depth, int alpha, int beta) {
     }
 }
 
+/**
+ * @brief Determines the best move using the minimax algorithm.
+ *
+ * Evaluates all legal moves and returns the move with the best minimax score.
+ *
+ * @param depth The depth to search for the minimax algorithm.
+ * @return A pair of Points representing the starting and ending positions of the best move.
+ */
 pair<Point, Point> Game::getMinimaxMove(int depth) {
     if (!gameBoard.isBoardCalculated()) {
         gameBoard.updateBoard();
@@ -446,11 +477,11 @@ pair<Point, Point> Game::getMinimaxMove(int depth) {
     }
     // Save the AI's color (the player whose turn it is before making any move).
     string aiColor = gameBoard.getTurn();
-    
+
     pair<Point, Point> bestMove;
     int bestScore = 0;
     bool firstMove = true;
-    
+
     // Loop through every legal move.
     for (const auto& movePair : moves) {
         for (const auto& dest : movePair.second) {
@@ -484,10 +515,6 @@ pair<Point, Point> Game::getMinimaxMove(int depth) {
 }
 
 /*
-
-
-
-
 
 def hash_game(game):
     """
@@ -582,7 +609,7 @@ def AI(game, depth=2):
             end_time = time.time()
            # print(end_time-start_time)
             total_time += end_time - start_time
-    # Sort moves by score (higher is better for white, lower for black)
+    # Sort moves by score (higher is better for white, lower is better for black)
     moves_scores.sort(reverse=(game.turn == 'white'), key=lambda x: x[0])
 
     # Return the move with the best score
